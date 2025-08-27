@@ -1,0 +1,24 @@
+# Este es un comentario, las líneas que empiezan con # son ignoradas.
+
+# ASP.NET Core
+# Ignora las carpetas que contienen el código compilado (binarios y objetos)
+bin/
+obj/
+
+# Ignora los archivos específicos de Visual Studio que no se deben compartir
+.vs/
+*.suo
+*.user
+*.userprefs
+
+# Angular
+# Ignora la carpeta node_modules, que contiene las dependencias. Se pueden
+# reinstalar con el comando "npm install".
+node_modules/
+
+# Ignora la carpeta 'dist' que se crea al compilar la aplicación para producción.
+# Estos son archivos estáticos que se generan automáticamente.
+dist/
+
+# Ignora archivos de caché de Angular
+.angular/
