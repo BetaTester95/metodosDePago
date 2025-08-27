@@ -11,14 +11,15 @@ import { UsuarioServicio } from 'src/app/servicios/usuario-servicio';
 })
 export class Formulario {
 
-
   constructor(private UsuarioServicio: UsuarioServicio){}
 
   nombre?: string = "";
   apellido: string = "";
   dni?: number;
-  mail: string = "";
-  tipoBilletera: string = "";
+  email: string = "";
+  password: string="";
+  confirmPassword: string="";
+  tipo_usuario: string = "";
   errorNombre: boolean = false;
   errorApellido: boolean = false;
   errorDni: boolean = false;
@@ -26,7 +27,6 @@ export class Formulario {
   erroSalida:boolean = false;
 
   enviar() {
-    
     if (this.nombre == "" || this.nombre == undefined) {
        this.errorNombre = true;
     }
@@ -36,13 +36,17 @@ export class Formulario {
      if (this.dni == undefined || this.dni == null) {
        this.errorDni = true;
     }
-     if (this.mail == "" || this.mail == undefined) {
+     if (this.email == "" || this.email == undefined) {
        this.errorMail = true;
     }
+
     const usuario = {
       nombre: this.nombre,
       apellido: this.apellido,
-      dni: this.dni
+      email: this.email,
+      password_hash: this.password,
+      dni: this.dni,
+      tipo_usuario: this.tipo_usuario
     };
     this.UsuarioServicio.crearUsuario(usuario).subscribe({
       next: respuesta => console.log('Usuario creado', respuesta),

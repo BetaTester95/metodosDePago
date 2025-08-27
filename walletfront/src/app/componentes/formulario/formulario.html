@@ -14,27 +14,43 @@
   </div>
 
   <div>
+    <label>Ingresa tu correo:</label>
+    <input type="text" [(ngModel)]="email" name="mail" placeholder="Ingresa tu mail" />
+    <p *ngIf="errorMail" style="color:red">Error al completar el corre electronico</p>
+  </div>
+
+  <div>
+  <label for="password">Ingresa tu contraseña:</label>
+  <input type="password" [(ngModel)]="password" name="password" placeholder="Ingresa tu contraseña" />
+</div>
+
+<!-- Segundo input: confirmación de contraseña -->
+<div *ngIf="password!.length > 0">
+  <label for="confirmPassword">Confirma tu contraseña:</label>
+  <input type="text" [(ngModel)]="confirmPassword" name="confirmPassword" placeholder="Confirma tu contraseña" />
+</div>
+
+<!-- Mensaje de validación -->
+<div *ngIf="confirmPassword && password !== confirmPassword">
+  Las contraseñas no coinciden.
+</div>
+
+  <div>
     <label>Dni:</label>
     <input type="number" [(ngModel)]="dni" name="dni" placeholder="Ingresa tu dni" />
     <p *ngIf="errorDni" style="color:red">Error al completar campo dni</p>
   </div>
 
-  <div>
-    <label>Ingresa tu correo:</label>
-    <input type="text" [(ngModel)]="mail" name="mail" placeholder="Ingresa tu mail" />
-    <p *ngIf="errorMail" style="color:red">Error al completar el corre electronico</p>
-  </div>
+
 
   <div>
-    <label for="metodo-pago">Seleccione un método de pago:</label>
-    <select id="metodo-pago" name="metodo-pago" [(ngModel)]="tipoBilletera">
+    <label for="tipo-cliente">Seleccione su rol:</label>
+    <select id="tipo-cliente" name="tipo-cliente" [(ngModel)]="tipo_usuario">
       <option value="">-- Seleccionar --</option>
       <option value="cobrador">Cobrador</option>
-      <option value="cuenta-dni">Cuenta DNI</option>
-      <option value="mercado-pago">Mercado Pago</option>
-      <option value="paypal">PayPal</option>
+      <option value="cliente">Cliente</option>
     </select>
-    <p>Método de pago seleccionado: {{ tipoBilletera }}</p>
+    <p>Rol seleccionado: {{ tipo_usuario }}</p>
   </div>
 
   <button type="submit">Registrar</button>
