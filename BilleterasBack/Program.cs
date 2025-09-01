@@ -1,11 +1,10 @@
-using Microsoft.EntityFrameworkCore;
+using BilleterasBack.Wallets.Shared;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
-
-// Add services to the container.
 
 var key = Encoding.ASCII.GetBytes("estaEsUnaClaveSuperSecreta123333!!");
 
@@ -17,6 +16,13 @@ builder.Services.AddControllers();
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"))
 );
+
+builder.Services.AddScoped<ContextoPago>(serviceProvider =>
+{
+    // Define un tipo por defecto o lee de configuración
+    var tipoDefault = TipoMetodoPago.MercadoPago; // o desde config
+    return new ContextoPago(tipoDefault);
+});
 
 builder.Services.AddAuthentication(options =>
 {
@@ -34,8 +40,6 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
-// Swagger/OpenAPI si lo usas
-builder.Services.AddOpenApi();
 
 var app = builder.Build();
 
@@ -53,5 +57,4 @@ app.UseCors(options =>
 app.UseHttpsRedirection();
 app.UseAuthorization();
 app.MapControllers();
-
 app.Run();

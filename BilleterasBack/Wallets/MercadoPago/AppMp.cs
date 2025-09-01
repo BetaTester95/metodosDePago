@@ -1,14 +1,14 @@
-﻿using EjercicioInterfaces;
+﻿using BilleterasBack.Wallets.Cards;
 using System;
+
 
 public class AppMp
 {
-
-    public string nombre;
-    public string apellido;
-    public int dni;
-    public string cvuMp;
-    public decimal saldoCuentaMercadoPago = 0.00m;
+    public string nombre { get; set; }
+    public string apellido { get; set; }
+    public int dni { get ; set; }
+    public string cvu_mp { get; set; }
+    public decimal saldo_cuenta_mercado_pago { get; set; } = 0.00m;
     public Tarjeta? tarjeta;
 
     public AppMp(string nombre, string apellido, int dni)
@@ -16,7 +16,8 @@ public class AppMp
         this.nombre = nombre;
         this.apellido = apellido;
         this.dni = dni;
-        cvuMp = GenerarNumeroCbu();
+        this.saldo_cuenta_mercado_pago = 0.0m;
+        this.cvu_mp = GenerarNumeroCbu();
     }
     public bool agregarDineroCuentaMp(decimal dinero)
     {
@@ -34,7 +35,7 @@ public class AppMp
 
         decimal saldoTarjetaCredito = tarjeta.SaldoLimite();
         saldoTarjetaCredito -= dinero;
-        saldoCuentaMercadoPago += saldoTarjetaCredito;
+        saldo_cuenta_mercado_pago += saldoTarjetaCredito;
         return true;
     }
 
@@ -59,7 +60,7 @@ public class AppMp
             return false;
         }
 
-        if (montoTransferencia > saldoCuentaMercadoPago)
+        if (montoTransferencia > saldo_cuenta_mercado_pago)
         {
             Console.WriteLine($"Saldo insuficiente para realizar esta operación. ");
             return false;

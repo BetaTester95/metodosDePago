@@ -1,11 +1,14 @@
-﻿using EjercicioInterfaces.Pagos;
+﻿using BilleterasBack.Wallets.Cards;
+using BilleterasBack.Wallets.Collector.Cobrador;
+using BilleterasBack.Wallets.Shared.Interfaces;
+using EjercicioInterfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace EjercicioInterfaces.Estrategias.ppEstrategias
+namespace BilleterasBack.Wallets.Shared.Strategies.Pp
 {
     public class paypPagoConTarjetaCredito : IpagoCardCred
     {

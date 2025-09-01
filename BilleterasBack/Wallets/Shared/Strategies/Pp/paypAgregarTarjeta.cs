@@ -1,4 +1,5 @@
-﻿using EjercicioInterfaces.Pagos;
+﻿using BilleterasBack.Wallets.Cards;
+using BilleterasBack.Wallets.Shared.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;

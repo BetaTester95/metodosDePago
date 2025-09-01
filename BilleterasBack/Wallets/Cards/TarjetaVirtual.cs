@@ -13,8 +13,6 @@ namespace EjercicioInterfaces
         public int dniTitular;
         public string numeroTarjetaVirtual;
         public decimal limiteSaldo = 10000m;
-
-
         public TarjetaVirtual(string nombre, string apellido, int dni, string numTarjetaVirtual)
         {
             nombreTitular = nombre;

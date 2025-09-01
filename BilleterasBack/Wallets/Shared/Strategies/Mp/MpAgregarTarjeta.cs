@@ -1,72 +1,92 @@
-﻿using EjercicioInterfaces.Pagos;
+﻿using BilleterasBack.Wallets.Models;
+using BilleterasBack.Wallets.Cards;
+using BilleterasBack.Wallets.Shared.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using EjercicioInterfaces;
 
-namespace EjercicioInterfaces.Estrategias.MercadoPago
+
+namespace BilleterasBack.Wallets.Shared.Strategies.Mp
 {
     public class MpAgregarTarjeta : IAgregarCard
     {
-        public Tarjeta? tarjetaVariable {get;set;}
-        public Cobrador cobrador;
-        public AppMp mp { get; set; }
+        private readonly AppDbContext _context;
 
-        public MpAgregarTarjeta(AppMp cuenta, Cobrador cobrador)
+        public MpAgregarTarjeta(AppDbContext context)
         {
-            this.mp = cuenta;
-            this.cobrador = cobrador;
+            _context = context;
         }
 
         public bool AgregarTarjeta(string numTarjeta, string nombre, string apellido, int dni, DateTime fechaVenc, int cod)
         {
             DateTime ahora = DateTime.Now;
 
-            if (numTarjeta.Length > 16 || numTarjeta.Length < 16)
+            // Validaciones
+            //if (numTarjeta.Length != 16)
+            //{
+            //    Console.WriteLine($"Error: el número de tarjeta {numTarjeta} debe tener 16 dígitos.");
+            //    return false;
+            //}
+
+            //if (string.IsNullOrEmpty(nombre) || string.IsNullOrEmpty(apellido))
+            //{
+            //    Console.WriteLine("Error: nombre o apellido inválidos.");
+            //    return false;
+            //}
+
+            //if (dni.ToString().Length < 8)
+            //{
+            //    Console.WriteLine("Error: el DNI debe tener al menos 8 dígitos.");
+            //    return false;
+            //}
+
+            //if (fechaVenc < ahora)
+            //{
+            //    Console.WriteLine("Error: la fecha de vencimiento no puede ser menor a hoy.");
+            //    return false;
+            //}
+
+            //if (cod < 100 || cod > 999)
+            //{
+            //    Console.WriteLine($"Error: el código de seguridad {cod} no es válido.");
+            //    return false;
+            //}
+
+            // Crear entidad
+
+            var cuentaMP = _context.Mp.FirstOrDefault(mp => mp.dni == dni);
+            string tipoCuenta = cuentaMP != null ? "MercadoPago" : "Desconocido";
+
+            var tarjeta = new TarjetaEntity
             {
-                Console.WriteLine($"error con el numero de la tarjeta {numTarjeta} debe tener 16 digitos. ");
+                numeroTarjeta = numTarjeta,
+                nombreTitular = nombre,
+                apellidoTitular = apellido,
+                dniTitular = dni,
+                fechaVencimiento = fechaVenc,
+                cod = cod,
+                tipo_cuenta = tipoCuenta
+            };
+
+            try
+            {
+                _context.Tarjetas.Add(tarjeta);
+                _context.SaveChanges();
+
+                Console.WriteLine("========== TARJETA AGREGADA CORRECTAMENTE ==========");
+                Console.WriteLine($"Nombre: {tarjeta.nombreTitular} Apellido: {tarjeta.apellidoTitular}");
+                Console.WriteLine($"Tarjeta N°: {tarjeta.numeroTarjeta}");
+                Console.WriteLine("===================================================");
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error al guardar la tarjeta en la base de datos: {ex.Message}");
                 return false;
             }
-
-            if (string.IsNullOrEmpty(nombre) || string.IsNullOrEmpty(apellido))
-            {
-                Console.WriteLine("el nombre o apellido son invalidos");
-                return false;
-            }
-
-            if (dni < 8)
-            {
-                Console.WriteLine($"EL dni es menor a 8 digitos");
-                return false;
-            }
-
-            if (fechaVenc < ahora)
-            {
-                Console.WriteLine("Error con la fecha");
-                return false;
-            }
-
-            if (cod > 999 || cod < 000 || cod <= 99)
-            {
-                Console.WriteLine($"Error con el codigo de seguridad {cod}.");
-                return false;
-            }
-
-            tarjetaVariable = new Tarjeta(numTarjeta, nombre, apellido, dni, fechaVenc, cod);
-            mp.tarjeta = tarjetaVariable;
-
-
-            Console.WriteLine($"==========TARJETA AGREGADA CORRECTAMENTE==========");
-            Console.WriteLine($"\n");
-            Console.WriteLine($"Nombre: {tarjetaVariable.nombreTitular} Apellido: {tarjetaVariable.apellidoTitular}");
-            Console.WriteLine($"Tarjeta N°: {tarjetaVariable.devolverTarjeta()}");
-            Console.WriteLine($"\n");
-            Console.WriteLine($"==========TARJETA AGREGADA CORRECTAMENTE==========");
-            return true;
-
         }
-
     }
+
 }

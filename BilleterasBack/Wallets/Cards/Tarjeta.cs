@@ -5,17 +5,25 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
-namespace EjercicioInterfaces
+namespace BilleterasBack.Wallets.Cards
 {
     public class Tarjeta
     {
-        public string nombreTitular;
-        public string apellidoTitular;
-        public string numeroTarjeta;
-        public int dniTitular;
-        public DateTime fechaVencimiento;
-        public int codigoSeguridad;
-        public decimal limiteSaldo = 10000.00m;
+        public int id_tarjeta { get; set; }  // PK
+        public int? id_usuario { get; set; } // FK
+
+        public string nombreTitular { get; set; }
+        public string apellidoTitular { get; set; }
+        public string numeroTarjeta { get; set; }
+        public int dniTitular { get; set; }
+        public DateTime fechaVencimiento { get; set; }
+        public int cod { get; set; }
+        public decimal limiteSaldo { get; set; } = 10000.00m;
+
+        public bool activo { get; set; } = true;
+        public DateTime fecha_creacion { get; set; } = DateTime.Now;
+
+        public Tarjeta() { }
 
         public Tarjeta(string numTarjeta, string nombre, string apellido, int dni, DateTime fechaVenc, int cod)
         {
@@ -24,7 +32,7 @@ namespace EjercicioInterfaces
             apellidoTitular = apellido;
             dniTitular = dni;
             fechaVencimiento = fechaVenc;
-            codigoSeguridad = cod;
+            this.cod = cod;
         }
 
         public static bool validarTarjeta(string numTarjeta)
@@ -52,6 +60,6 @@ namespace EjercicioInterfaces
         {
             return numeroTarjeta;
         }
-
+    
     }
 }

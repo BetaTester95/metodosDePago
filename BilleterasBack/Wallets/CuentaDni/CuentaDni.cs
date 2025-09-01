@@ -1,5 +1,5 @@
-﻿using EjercicioInterfaces.Estrategias.ctdEstrategias;
-using EjercicioInterfaces.Pagos;
+﻿using BilleterasBack.Wallets.Cards;
+using BilleterasBack.Wallets.Collector.Cobrador;
 using System;
 using System.Collections.Generic;
 using System.Globalization;

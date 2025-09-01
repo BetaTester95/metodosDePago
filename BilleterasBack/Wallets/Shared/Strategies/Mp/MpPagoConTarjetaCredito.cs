@@ -1,36 +1,37 @@
-﻿using System;
+﻿using BilleterasBack.Wallets.Collector.Cobrador;
+using BilleterasBack.Wallets.Shared.Interfaces;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using EjercicioInterfaces.Pagos;
-namespace EjercicioInterfaces.Estrategias.MercadoPago
+namespace BilleterasBack.Wallets.Shared.Strategies.Mp
 {
 
     public class MpPagoConTarjetaCredito : IpagoCardCred
     {
-        public Cobrador cobrador;
+        //public Cobrador cobrador;
         public AppMp cuenta;
-        public MpPagoConTarjetaCredito(Cobrador collector, AppMp mp)
+        public Cobrador cobrador;
+        public MpPagoConTarjetaCredito( AppMp mp)
         {
-            cobrador = collector;
             cuenta = mp;
         }
 
         public bool PagoConTarjetaCredito(decimal montoPagar, int cantCuotas)
         {
-            if (cuenta.tarjeta!.numeroTarjeta == null)
-            {
-                Console.WriteLine($"No tenes una tarjeta asociada .");
-                return false;
-            }
-            if (cobrador == null || cobrador.cbu == null)
-            {
-                Console.WriteLine("No hay un cobrador asociado a ese CBU.");
-                return false;
-            }
+            //if (cuenta.tarjeta! == null)
+            //{
+            //    Console.WriteLine($"No tenes una tarjeta asociada .");
+            //    return false;
+            //}
+            //if (cobrador == null || cobrador.cbu == null)
+            //{
+            //    Console.WriteLine("No hay un cobrador asociado a ese CBU.");
+            //    return false;
+            //}
 
-            decimal saldoTarjetaCredito = cuenta.tarjeta.SaldoLimite();
+            decimal saldoTarjetaCredito = 0; //CHECK
             decimal resultado;
 
             if (montoPagar <= 0)

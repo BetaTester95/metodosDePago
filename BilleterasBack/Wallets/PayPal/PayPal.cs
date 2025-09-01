@@ -1,5 +1,6 @@
-﻿using EjercicioInterfaces.Estrategias.ppEstrategias;
-using EjercicioInterfaces.Pagos;
+﻿
+using BilleterasBack.Wallets.Cards;
+using BilleterasBack.Wallets.Collector.Cobrador;
 using System.Text.RegularExpressions;
 namespace EjercicioInterfaces
 {
