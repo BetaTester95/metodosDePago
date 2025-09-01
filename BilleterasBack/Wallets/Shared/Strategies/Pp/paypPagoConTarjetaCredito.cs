@@ -1,5 +1,4 @@
-﻿using BilleterasBack.Wallets.Cards;
-using BilleterasBack.Wallets.Collector.Cobrador;
+﻿using BilleterasBack.Wallets.Collector.Cobrador;
 using BilleterasBack.Wallets.Shared.Interfaces;
 using EjercicioInterfaces;
 using System;
@@ -12,7 +11,6 @@ namespace BilleterasBack.Wallets.Shared.Strategies.Pp
 {
     public class paypPagoConTarjetaCredito : IpagoCardCred
     {
-        public Tarjeta? tarjeta;
         public Cobrador cobrador;
         public PayPal paypal;
 
@@ -20,43 +18,42 @@ namespace BilleterasBack.Wallets.Shared.Strategies.Pp
         {
             paypal = ppal;
             cobrador = collector;
-            tarjeta = ppal.tarjeta; // Agregar esta línea
         }
 
         public bool PagoConTarjetaCredito(decimal montoPagar, int cantCuotas)
         {
-            decimal saldoTarjetaCredito = paypal.tarjeta!.limiteSaldo;
-            if (paypal.tarjeta.numeroTarjeta == null || paypal.tarjeta.numeroTarjeta == "")
-            {
-                Console.WriteLine($"\n");
-                Console.WriteLine("No hay tarjetas asociadas a esta cuenta PayPal");
-                Console.WriteLine("Debe agregar una tarjeta para realizar esta operación. ");
-                return false;
-            }
+            //decimal saldoTarjetaCredito = paypal.tarjeta!.limiteSaldo;
+            //if (paypal.tarjeta.numeroTarjeta == null || paypal.tarjeta.numeroTarjeta == "")
+            //{
+            //    Console.WriteLine($"\n");
+            //    Console.WriteLine("No hay tarjetas asociadas a esta cuenta PayPal");
+            //    Console.WriteLine("Debe agregar una tarjeta para realizar esta operación. ");
+            //    return false;
+            //}
 
-            if (string.IsNullOrEmpty(cobrador.cbu))
-            {
-                Console.WriteLine($"No hay un cobrador asociado");
-                return false;
-            }
+            //if (string.IsNullOrEmpty(cobrador.cbu))
+            //{
+            //    Console.WriteLine($"No hay un cobrador asociado");
+            //    return false;
+            //}
 
-            if (montoPagar <= 0)
-            {
-                Console.WriteLine($"\n");
-                Console.WriteLine("Error al pagar. ");
-                return false;
-            }
+            //if (montoPagar <= 0)
+            //{
+            //    Console.WriteLine($"\n");
+            //    Console.WriteLine("Error al pagar. ");
+            //    return false;
+            //}
 
-            saldoTarjetaCredito -= montoPagar;
-            cobrador.cobrarMonto(montoPagar);
+            //saldoTarjetaCredito -= montoPagar;
+            //cobrador.cobrarMonto(montoPagar);
 
-            decimal mostrarSaldo = cobrador.retornarSaldo();
-            Console.WriteLine($"===== PAGO REALIZADO EXITOSAMENTE ====");
-            Console.WriteLine("\n");
-            Console.WriteLine($"Se realizo el pago correctamente. ");
-            Console.WriteLine($"Saldo actual: ${paypal.tarjeta.limiteSaldo} USD");
-            Console.WriteLine("\n");
-            Console.WriteLine($"===== PAGO REALIZADO EXITOSAMENTE ====");
+            //decimal mostrarSaldo = cobrador.retornarSaldo();
+            //Console.WriteLine($"===== PAGO REALIZADO EXITOSAMENTE ====");
+            //Console.WriteLine("\n");
+            //Console.WriteLine($"Se realizo el pago correctamente. ");
+            //Console.WriteLine($"Saldo actual: ${paypal.tarjeta.limiteSaldo} USD");
+            //Console.WriteLine("\n");
+            //Console.WriteLine($"===== PAGO REALIZADO EXITOSAMENTE ====");
 
             return true;
         }

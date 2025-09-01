@@ -1,5 +1,4 @@
-﻿using BilleterasBack.Wallets.Cards;
-using BilleterasBack.Wallets.Collector.Cobrador;
+﻿using BilleterasBack.Wallets.Collector.Cobrador;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -16,8 +15,8 @@ namespace EjercicioInterfaces
         public string apellido;
         public int dni;
         public string cvu;
-        public Tarjeta? tarjeta;
-        public TarjetaVirtual? tarjetaV;
+        //public Tarjeta? tarjeta;
+        //public TarjetaVirtual? tarjetaV;
         public Cobrador? cobrador;
         public decimal saldoCuentaDni = 0.00m;
         public decimal limiteTransferencia = 500000; //limite transferencia por dia cuenta dni
@@ -33,8 +32,8 @@ namespace EjercicioInterfaces
         public string CrearTarjetaVirtual()
         {
             string numeroGenerado = GenerarNumeroTarjeta();
-            tarjetaV = new TarjetaVirtual(this.nombre, this.apellido, this.dni, numeroGenerado);
-            Console.WriteLine($"Tarjeta virtual creada exitosamente: {tarjetaV.numeroTarjetaVirtual}");
+            //tarjetaV = new TarjetaVirtual(this.nombre, this.apellido, this.dni, numeroGenerado);
+            //Console.WriteLine($"Tarjeta virtual creada exitosamente: {tarjetaV.numeroTarjetaVirtual}");
             return numeroGenerado;
         }
 
@@ -71,7 +70,7 @@ namespace EjercicioInterfaces
 
         public decimal agregarSaldo(decimal saldo)
         {
-            tarjetaV!.limiteSaldo -= saldo;
+            //tarjetaV!.limiteSaldo -= saldo;
             return this.saldoCuentaDni += saldo;
         }
 

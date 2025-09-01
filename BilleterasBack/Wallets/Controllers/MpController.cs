@@ -7,10 +7,11 @@ using Microsoft.EntityFrameworkCore;
 namespace BilleterasBack.Wallets.Controllers
 {
     [ApiController]
-    [Route("/[Controller]")]
+    [Route("api/[Controller]")]
     public class MpController : ControllerBase
     {
         private readonly AppDbContext _context;
+        private readonly AppMp _appMp;
         public MpController(AppDbContext context)
         {
             _context = context;
@@ -20,40 +21,15 @@ namespace BilleterasBack.Wallets.Controllers
         [HttpPost("crearCuentaAppMp")]
         public async Task<IActionResult> CrearCuenta()
         {
-            // Obtener id_usuario y dni desde el JWT
             var userIdClaim = User.Claims.FirstOrDefault(c => c.Type == "id_usuario")?.Value;
-            var dniClaim = User.Claims.FirstOrDefault(c => c.Type == "dni")?.Value;
+            if (userIdClaim == null) return Unauthorized();
 
-            if (userIdClaim == null || dniClaim == null)
-                return Unauthorized("No se pudo obtener información del usuario");
+            var usuario = await _context.Usuarios.FindAsync(int.Parse(userIdClaim));
+            if (usuario == null) return NotFound();
 
-            int userId = int.Parse(userIdClaim);
-            int dni = int.Parse(dniClaim);
-
-            // Obtener nombre y apellido desde la DB
-            var usuario = await _context.Usuarios.FindAsync(userId);
-            if (usuario == null)
-                return NotFound("Usuario no encontrado");
-
-            // Crear la cuenta de Mercado Pago
-            var appMp = new AppMp(usuario.nombre, usuario.apellido, dni);
-
-            var nuevaCuenta = new Mp
-            {
-                id_usuario = userId,
-                nombre = usuario.nombre,
-                apellido = usuario.apellido,
-                dni = dni,
-                cvu_mp = appMp.GenerarNumeroCbu(),
-                saldo_cuenta_mercado_pago = 0.0m
-            };
-
-            _context.Mp.Add(nuevaCuenta);
-            await _context.SaveChangesAsync();
-
-            return Ok(nuevaCuenta);
+            var cuenta = await _appMp.CrearCuenta(usuario);
+            return Ok(cuenta);
         }
-
 
         [Authorize]
         [HttpPost("AgregarSaldoMp")]

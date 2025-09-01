@@ -1,5 +1,4 @@
-﻿using BilleterasBack.Wallets.Cards;
-using BilleterasBack.Wallets.Shared.Interfaces;
+﻿using BilleterasBack.Wallets.Shared.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,7 +10,6 @@ namespace EjercicioInterfaces.Estrategias.ppEstrategias
     public class paypAgregarTarjeta : IAgregarCard
     {
         public PayPal ppal;
-        public Tarjeta? tarjeta;
 
 
         public paypAgregarTarjeta(PayPal payPal)
@@ -56,8 +54,8 @@ namespace EjercicioInterfaces.Estrategias.ppEstrategias
                 Console.WriteLine($"Error con el codigo. ");
                 return false;
             }
-            tarjeta = new Tarjeta(numTarjeta, nombre, apellido, dni, fechaVenc, cod);
-            ppal.tarjeta = tarjeta;
+            //tarjeta = new Tarjeta(numTarjeta, nombre, apellido, dni, fechaVenc, cod);
+            //ppal.tarjeta = tarjeta;
 
             bool cobroExitoso = ppal.RealizarCobro(1);
 
@@ -70,8 +68,8 @@ namespace EjercicioInterfaces.Estrategias.ppEstrategias
             Console.WriteLine($"===== REGISTRO EXITOSO =====.");
             Console.WriteLine($"******************************");
             Console.WriteLine($"\n");
-            Console.WriteLine($"Por politicas de PayPal se cobro $1.00 USD de su tarjeta por haberla registrado. {tarjeta.limiteSaldo}");
-            Console.WriteLine($"Se registro la tarjeta con N°: {tarjeta.numeroTarjeta}");
+            //Console.WriteLine($"Por politicas de PayPal se cobro $1.00 USD de su tarjeta por haberla registrado. {tarjeta.limiteSaldo}");
+            //Console.WriteLine($"Se registro la tarjeta con N°: {tarjeta.numeroTarjeta}");
             Console.WriteLine($"\n");
             return true;
         }

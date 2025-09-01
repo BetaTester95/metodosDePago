@@ -1,5 +1,4 @@
-﻿using BilleterasBack.Wallets.Cards;
-using BilleterasBack.Wallets.Models;
+﻿using BilleterasBack.Wallets.Models;
 using BilleterasBack.Wallets.Shared;
 using BilleterasBack.Wallets.Shared.Interfaces;
 using BilleterasBack.Wallets.Shared.Strategies.Mp;
@@ -27,7 +26,7 @@ namespace BilleterasBack.Wallets.Controllers
 
         [Authorize]
         [HttpPost("agregar-tarjeta")]
-        public IActionResult AgregarTarjeta([FromBody] Tarjeta tarjeta)
+        public IActionResult AgregarTarjeta([FromBody] TarjetaEntity tarjeta)
         {
             try
             {
@@ -38,7 +37,7 @@ namespace BilleterasBack.Wallets.Controllers
                         error = "Tarjeta es null",
                         paso = "1_validacion_entrada"
                     });
-
+                
                 // 2️⃣ Obtener idUsuario desde el JWT
                 var claimUsuario = User.FindFirst("id_usuario")?.Value;
 
@@ -91,7 +90,6 @@ namespace BilleterasBack.Wallets.Controllers
                         dni_recibido = tarjeta.dniTitular
                     });
                 }
-
                 // 7️⃣ Procesar la tarjeta
                 bool exito = _contextoPago.Procesar(estrategia,
                     tarjeta.numeroTarjeta,
@@ -111,8 +109,7 @@ namespace BilleterasBack.Wallets.Controllers
                         {
                             numero = tarjeta.numeroTarjeta,
                             titular = tarjeta.nombreTitular,
-                            dni = tarjeta.dniTitular,
-                            id_usuario = tarjeta.id_usuario
+                            dni = tarjeta.dniTitular
                         }
                     });
 

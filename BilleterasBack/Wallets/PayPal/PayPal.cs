@@ -1,5 +1,4 @@
 ﻿
-using BilleterasBack.Wallets.Cards;
 using BilleterasBack.Wallets.Collector.Cobrador;
 using System.Text.RegularExpressions;
 namespace EjercicioInterfaces
@@ -12,7 +11,6 @@ namespace EjercicioInterfaces
         public string numeroTelefono;
         public string mail;
         public decimal saldoPayPal = 0.00m;
-        public Tarjeta? tarjeta;
         public Cobrador? cobrador;
 
 
@@ -87,16 +85,16 @@ namespace EjercicioInterfaces
                 return false; // Indica un error
             }
 
-            if (cobro > tarjeta?.limiteSaldo)
-            {
-                Console.WriteLine("No hay suficiente saldo para realizar el cobro.");
-                return true; // saldo insuficiente
-            }
+            //if (cobro > tarjeta?.limiteSaldo)
+            //{
+            //    Console.WriteLine("No hay suficiente saldo para realizar el cobro.");
+            //    return true; // saldo insuficiente
+            //}
 
             // restamos el cobro del saldo disponible
             //tarjeta?.limiteSaldo -= cobro; heck
 
-            Console.WriteLine($"Cobro realizado con éxito. Saldo restante: {tarjeta?.limiteSaldo}");
+            //Console.WriteLine($"Cobro realizado con éxito. Saldo restante: {tarjeta?.limiteSaldo}");
             return true;
         }
 
@@ -155,18 +153,18 @@ namespace EjercicioInterfaces
 
         public bool AgregarSaldoPaypal(decimal saldo)
         {
-            if (tarjeta == null)
-            {
-                Console.WriteLine($"no es posible agregar saldo, no tiene tarjeta asociada. ");
-                return false;
-            }
+            //if (tarjeta == null)
+            //{
+            //    Console.WriteLine($"no es posible agregar saldo, no tiene tarjeta asociada. ");
+            //    return false;
+            //}
 
-            if (tarjeta.limiteSaldo == 0)
-            {
-                Console.WriteLine($"Error el limite de su saldo es 0 USD. ");
+            //if (tarjeta.limiteSaldo == 0)
+            //{
+            //    Console.WriteLine($"Error el limite de su saldo es 0 USD. ");
 
-                return false;
-            }
+            //    return false;
+            //}
 
             if (saldo <= 0)
             {
@@ -174,14 +172,14 @@ namespace EjercicioInterfaces
                 return false;
             }
 
-            if (tarjeta.limiteSaldo < saldo)
-            {
-                Console.WriteLine($"No posee suficiente saldo para esta operacion. ");
-                return false;
-            }
+            //if (tarjeta.limiteSaldo < saldo)
+            //{
+            //    Console.WriteLine($"No posee suficiente saldo para esta operacion. ");
+            //    return false;
+            //}
 
-            tarjeta.limiteSaldo -= saldo;
-            saldoPayPal += saldo;
+            //tarjeta.limiteSaldo -= saldo;
+            //saldoPayPal += saldo;
             //Console.WriteLine($"Saldo agregado correctamente. Nuevo saldo PayPal: ${saldoPayPal} USD");
             return true;
         }

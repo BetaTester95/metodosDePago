@@ -1,5 +1,4 @@
 ﻿using BilleterasBack.Wallets.Models;
-using BilleterasBack.Wallets.Cards;
 using BilleterasBack.Wallets.Shared.Interfaces;
 using System;
 using System.Collections.Generic;

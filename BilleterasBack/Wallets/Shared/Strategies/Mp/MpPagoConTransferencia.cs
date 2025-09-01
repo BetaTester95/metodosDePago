@@ -1,5 +1,4 @@
-﻿using BilleterasBack.Wallets.Cards;
-using BilleterasBack.Wallets.Collector.Cobrador;
+﻿using BilleterasBack.Wallets.Collector.Cobrador;
 using BilleterasBack.Wallets.Shared.Interfaces;
 using EjercicioInterfaces;
 using System;
@@ -12,7 +11,6 @@ namespace BilleterasBack.Wallets.Shared.Strategies.Mp
 {
     public class MpPagoConTransferencia : IPagoCardTransferencia
     {
-        public Tarjeta? tarjeta;
         public Cobrador cobrador;
         public AppMp mp;
 
