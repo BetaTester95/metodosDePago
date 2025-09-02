@@ -29,11 +29,11 @@ namespace EjercicioInterfaces.Estrategias.ppEstrategias
                 return false;
             }
 
-            if (ppal.saldoPayPal <= 0)
-            {
-                Console.WriteLine($"Saldo insuficiente para trasferir. ");
-                return false;
-            }
+            //if (ppal.saldoPayPal <= 0)
+            //{
+            //    Console.WriteLine($"Saldo insuficiente para trasferir. ");
+            //    return false;
+            //}
 
             if (cobrador == null || cobrador.mailCobrador == null)
             {
@@ -47,11 +47,11 @@ namespace EjercicioInterfaces.Estrategias.ppEstrategias
                 return false;
             }
 
-            if (ppal.saldoPayPal < montoPagar)
-            {
-                Console.WriteLine($"Saldo insuficiente. ");
-                return false;
-            }
+            //if (ppal.saldoPayPal < montoPagar)
+            //{
+            //    Console.WriteLine($"Saldo insuficiente. ");
+            //    return false;
+            //}
 
             if (string.IsNullOrEmpty(mail))
             {
@@ -67,14 +67,14 @@ namespace EjercicioInterfaces.Estrategias.ppEstrategias
                 return false;
             }
 
-            ppal.saldoPayPal -= montoPagar;
-            cobrador.cobrarMonto(montoPagar);
-            Console.WriteLine($"\n");
-            Console.WriteLine($"Se realizo el pago");
-            Console.WriteLine($"Se realizo una transferencia de: {montoPagar}");
-            Console.WriteLine($"Pago realizado al mail: {mail}");
-            Console.WriteLine($"Su saldo actual es de: ${ppal.saldoPayPal} USD");
-            Console.WriteLine($"\n");
+            //ppal.saldoPayPal -= montoPagar;
+            //cobrador.cobrarMonto(montoPagar);
+            //Console.WriteLine($"\n");
+            //Console.WriteLine($"Se realizo el pago");
+            //Console.WriteLine($"Se realizo una transferencia de: {montoPagar}");
+            //Console.WriteLine($"Pago realizado al mail: {mail}");
+            //Console.WriteLine($"Su saldo actual es de: ${ppal.saldoPayPal} USD");
+            //Console.WriteLine($"\n");
 
             return true;
         }

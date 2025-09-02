@@ -9,12 +9,11 @@ namespace EjercicioInterfaces.Estrategias.ppEstrategias
 {
     public class paypAgregarTarjeta : IAgregarCard
     {
-        public PayPal ppal;
+        private readonly AppDbContext _context;
 
-
-        public paypAgregarTarjeta(PayPal payPal)
+        public paypAgregarTarjeta(AppDbContext context)
         {
-            ppal = payPal;
+            _context = context;
         }
 
         public bool AgregarTarjeta(string numTarjeta, string nombre, string apellido, int dni, DateTime fechaVenc, int cod)
@@ -33,12 +32,12 @@ namespace EjercicioInterfaces.Estrategias.ppEstrategias
                 Console.WriteLine($"No se puede pasar nombres o apellido vacios. ");
                 return false;
             }
-            if (ppal.nombre != nombre || ppal.apellido != apellido)
-            {
-                Console.WriteLine($"\n");
-                Console.WriteLine($"Error los datos de la cuenta paypal no coincide con el titular de la cuenta. ");
-                return false;
-            }
+            //if (ppal.nombre != nombre || ppal.apellido != apellido)
+            //{
+            //    Console.WriteLine($"\n");
+            //    Console.WriteLine($"Error los datos de la cuenta paypal no coincide con el titular de la cuenta. ");
+            //    return false;
+            //}
 
             // Validar fecha de vencimiento
             if (ahora > fechaVenc)
@@ -57,12 +56,12 @@ namespace EjercicioInterfaces.Estrategias.ppEstrategias
             //tarjeta = new Tarjeta(numTarjeta, nombre, apellido, dni, fechaVenc, cod);
             //ppal.tarjeta = tarjeta;
 
-            bool cobroExitoso = ppal.RealizarCobro(1);
+            //bool cobroExitoso = ppal.RealizarCobro(1);
 
-            if (!cobroExitoso)
-            {
-                return false;
-            }
+            //if (!cobroExitoso)
+            //{
+            //    return false;
+            //}
             Console.WriteLine($"\n");
             Console.WriteLine($"******************************");
             Console.WriteLine($"===== REGISTRO EXITOSO =====.");

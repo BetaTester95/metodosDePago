@@ -17,11 +17,10 @@ namespace BilleterasBack.Wallets.Shared
     }
     public class ContextoPago
     {
-        public IAgregarCard? _agregarCard { get; private set; }
-        public IPagoCardTransferencia? _pagoTransferenciaEstrategia { get; private set; }
-        public IpagoCardCred? _pagoCardEstrategia { get; private set; }
-
-        public TipoMetodoPago TipoSeleccionado { get; private set; }
+        public IAgregarCard? _agregarCard { get; set; }
+        public IPagoCardTransferencia? _pagoTransferenciaEstrategia { get;  set; }
+        public IpagoCardCred? _pagoCardEstrategia { get;  set; }
+        public TipoMetodoPago TipoSeleccionado { get;  set; }
 
         // Constructor con tipo de método de pago
         public ContextoPago(TipoMetodoPago tipoMetodo)
@@ -64,7 +63,7 @@ namespace BilleterasBack.Wallets.Shared
             }
         }
 
-        // Método genérico para procesar cualquier tipo de operación
+        // Metodo generico para procesar cualquier tipo de operación
         public bool Procesar<T>(T estrategia, params object[] args)
         {
             try
@@ -106,30 +105,28 @@ namespace BilleterasBack.Wallets.Shared
                 return false;
             }
         }
-
-        // Método de conveniencia para agregar tarjeta
-        public bool AgregarTarjeta(string numero, string titular, string cvv, int mesExp, DateTime fechaExp, int anioExp)
+        //// Método de conveniencia para agregar tarjeta
+        public bool agregartarjeta(string numTarjeta, string nombre, string apellido, int dni, DateTime fechaVenc, int cod)
         {
             if (_agregarCard == null)
-                throw new InvalidOperationException($"No hay estrategia de agregar tarjeta configurada para {TipoSeleccionado}");
+                throw new InvalidOperationException($"no hay estrategia de agregar tarjeta configurada para {TipoSeleccionado}");
 
-            return Procesar(_agregarCard, numero, titular, cvv, mesExp, fechaExp, anioExp);
+            return Procesar(_agregarCard, numTarjeta, nombre, apellido, dni, fechaVenc, cod);
         }
-
-        // Método de conveniencia para pago con transferencia
-        public bool PagoConTransferencia(decimal monto, string cuentaDestino)
+        // método de conveniencia para pago con transferencia
+        public bool pagocontransferencia(decimal monto, string cuentadestino)
         {
             if (_pagoTransferenciaEstrategia == null)
-                throw new InvalidOperationException($"No hay estrategia de transferencia configurada para {TipoSeleccionado}");
+                throw new InvalidOperationException($"no hay estrategia de transferencia configurada para {TipoSeleccionado}");
 
-            return Procesar(_pagoTransferenciaEstrategia, monto, cuentaDestino);
+            return Procesar(_pagoTransferenciaEstrategia, monto, cuentadestino);
         }
 
-        // Método de conveniencia para pago con tarjeta de crédito
-        public bool PagoConTarjetaCredito(decimal monto, int cuotas)
+        // método de conveniencia para pago con tarjeta de crédito
+        public bool pagocontarjetacredito(decimal monto, int cuotas)
         {
             if (_pagoCardEstrategia == null)
-                throw new InvalidOperationException($"No hay estrategia de tarjeta de crédito configurada para {TipoSeleccionado}");
+                throw new InvalidOperationException($"no hay estrategia de tarjeta de crédito configurada para {TipoSeleccionado}");
 
             return Procesar(_pagoCardEstrategia, monto, cuotas);
         }
@@ -146,7 +143,6 @@ namespace BilleterasBack.Wallets.Shared
             return $"Método: {TipoSeleccionado}, Estrategias disponibles: {string.Join(", ", estrategias)}";
         }
     }
-
     // Factory para crear contextos específicos (opcional, para mayor claridad)
     public static class ContextoPagoFactory
     {
@@ -164,7 +160,5 @@ namespace BilleterasBack.Wallets.Shared
         {
             return new ContextoPago(TipoMetodoPago.CuentaDNI);
         }
-
-
     }
 }

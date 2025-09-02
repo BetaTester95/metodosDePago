@@ -10,40 +10,43 @@ public class AppMp
     {
         _context = context;
     }
-    public bool agregarDineroCuentaMp(decimal dinero)
+    //public bool agregarDineroCuentaMp(decimal dinero)
+    //{
+    //    if (tarjeta == null || tarjeta.limiteSaldo == 0)
+    //    {
+    //        Console.WriteLine($"No tenes una tarjeta asociada para cargar saldo en MercadoPago.");
+    //        return false;
+    //    }
+
+    //    if (dinero > tarjeta.limiteSaldo)
+    //    {
+    //       Console.WriteLine($"No es posible transferir su saldo: {tarjeta.limiteSaldo} es menor al saldo que desea transferir; ${dinero} Pesos");
+    //        return false;
+    //    }
+
+    //    decimal saldoTarjetaCredito = tarjeta.SaldoLimite();
+    //    saldoTarjetaCredito -= dinero;
+    //    saldo_cuenta_mercado_pago += saldoTarjetaCredito;
+    //    return true;
+    //}
+
+    public async Task<Billetera> CrearCuentaMercadoPago(Usuario usuario)
     {
-        //if (tarjeta == null || tarjeta.limiteSaldo == 0)
-        //{
-        //    Console.WriteLine($"No tenes una tarjeta asociada para cargar saldo en MercadoPago.");
-        //    return false;
-        //}
-
-        //if (dinero > tarjeta.limiteSaldo)
-        //{
-        //    Console.WriteLine($"No es posible transferir su saldo: {tarjeta.limiteSaldo} es menor al saldo que desea transferir; ${dinero} Pesos");
-        //    return false;
-        //}
-
-        //decimal saldoTarjetaCredito = tarjeta.SaldoLimite();
-        //saldoTarjetaCredito -= dinero;
-        //saldo_cuenta_mercado_pago += saldoTarjetaCredito;
-        return true;
-    }
-
-    public async Task<Mp> CrearCuenta(Usuario usuario)
-    {
-        var nuevaCuenta = new Mp
+        if(usuario == null)
         {
-            id_usuario = usuario.id_usuario,
-            nombre = usuario.nombre,
-            apellido = usuario.apellido,
-            dni = usuario.dni,
-            cvu_mp = GenerarNumeroCbu(),
-            saldo_cuenta_mercado_pago = 0.0m
+            throw new ArgumentNullException(nameof(usuario));
+        }
+
+        var billetera = new Billetera
+        {
+            IdUsuario = usuario.IdUsuario,
+            Tipo = "MercadoPago",
+            Cvu = GenerarNumeroCbu(),
+            Saldo = 0.0m
         };
-        _context.Mp.Add(nuevaCuenta);
+        _context.Billeteras.Add(billetera);
         await _context.SaveChangesAsync();
-        return nuevaCuenta;
+        return billetera;
 
     }
 

@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using System.Security.Cryptography;
 using System.Text;
 using BCrypt.Net;
+using BilleterasBack.Wallets.Models;
 
 [ApiController]
 [Route("api/[controller]")]
@@ -14,12 +15,12 @@ public class UsuariosController : ControllerBase
         _context = context;
     }
 
-    [HttpPost]
+    [HttpPost("registrar")]
     public async Task<IActionResult> GuardarUsuarios(Usuario usuario)
     {
         try
-        {
-            bool maiLExiste = await _context.Usuarios.AnyAsync(u => u.email == usuario.email);
+            {
+            bool maiLExiste = await _context.Usuarios.AnyAsync(u => u.Email == usuario.Email);
             if (maiLExiste)
             {
                 return BadRequest(new
@@ -31,7 +32,7 @@ public class UsuariosController : ControllerBase
             }
 
             // Verificar si el DNI ya existe
-            bool dniExiste = await _context.Usuarios.AnyAsync(u => u.dni == usuario.dni);
+            bool dniExiste = await _context.Usuarios.AnyAsync(u => u.Dni == usuario.Dni);
 
             if (dniExiste)
             {
@@ -43,7 +44,7 @@ public class UsuariosController : ControllerBase
                 });
             }
 
-            if(string.IsNullOrEmpty(usuario.nombre) || string.IsNullOrEmpty(usuario.apellido))
+            if(string.IsNullOrEmpty(usuario.Nombre) || string.IsNullOrEmpty(usuario.Apellido))
             {
                 return BadRequest(new
                 {
@@ -53,13 +54,13 @@ public class UsuariosController : ControllerBase
                 });
             }
 
-            if(string.IsNullOrEmpty(usuario.password_hash))
+            if(string.IsNullOrEmpty(usuario.PasswordHash))
             {
                 return BadRequest("Error la contraseña es obligatoria. ");
             }
 
-            string passwordHash = BCrypt.Net.BCrypt.HashPassword(usuario.password_hash);
-            usuario.password_hash = passwordHash;
+            string passwordHash = BCrypt.Net.BCrypt.HashPassword(usuario.PasswordHash);
+            usuario.PasswordHash = passwordHash;
 
             _context.Usuarios.Add(usuario);
             await _context.SaveChangesAsync();
@@ -81,6 +82,6 @@ public class UsuariosController : ControllerBase
                 Error = ex.Message
             };
             return new JsonResult(error) { StatusCode = 500 };
-        }
+        }        
     }
 }

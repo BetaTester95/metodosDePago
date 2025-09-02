@@ -1,28 +1,39 @@
 ﻿
 using BilleterasBack.Wallets.Collector.Cobrador;
+using BilleterasBack.Wallets.Models;
 using System.Text.RegularExpressions;
 namespace EjercicioInterfaces
 {
     public class PayPal
     {
-        public string nombre;
-        public string apellido;
-        public int dni;
-        public string numeroTelefono;
-        public string mail;
-        public decimal saldoPayPal = 0.00m;
-        public Cobrador? cobrador;
+        private readonly AppDbContext _context;
 
-
-        public PayPal(string nombre, string apellido, int dni)
+        public PayPal(AppDbContext context)
         {
-            this.nombre = nombre;
-            this.apellido = apellido;
-            this.dni = dni;      
-            mail = agregarMail();
-            numeroTelefono = agregarNumero();
+            _context = context;
         }
-       
+
+
+        public async Task<Billetera> CrearCuentaPayPal(Usuario usuario)
+        {
+            if(usuario == null)
+            {
+                throw new ArgumentNullException(nameof(usuario));
+            }
+            
+            var billetera = new Billetera
+            {
+                IdUsuario = usuario.IdUsuario,
+                Tipo = "PayPal",
+                Cvu = usuario.Email,
+                Saldo = 0.0m
+            };
+            _context.Billeteras.Add(billetera);
+            await _context.SaveChangesAsync();
+            return billetera;
+        }
+
+
         public static bool ValidarNumeroCelular(string numero)
         {
             if (string.IsNullOrEmpty(numero))
@@ -49,11 +60,6 @@ namespace EjercicioInterfaces
             return true;
         }
 
-        public string agregarNumero()
-        {
-            return numeroTelefono;
-        }
-
         public static bool mailValidar(string mail)
         {
             string regMail = @"^[^@\s]+@[^@\s]+\.[^@\s]+$";
@@ -72,10 +78,6 @@ namespace EjercicioInterfaces
             return true;
         }
 
-        public string agregarMail()
-        {
-            return mail;
-        }
 
         public bool RealizarCobro(decimal cobro)
         {

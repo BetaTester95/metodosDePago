@@ -1,4 +1,5 @@
 ﻿using BilleterasBack.Wallets.Collector.Cobrador;
+using BilleterasBack.Wallets.Models;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -11,32 +12,34 @@ namespace EjercicioInterfaces
 {
     public class CuentaDni
     {
-        public string nombre;
-        public string apellido;
-        public int dni;
-        public string cvu;
-        //public Tarjeta? tarjeta;
-        //public TarjetaVirtual? tarjetaV;
-        public Cobrador? cobrador;
-        public decimal saldoCuentaDni = 0.00m;
-        public decimal limiteTransferencia = 500000; //limite transferencia por dia cuenta dni
 
-        public CuentaDni(string nombre, string apellido, int dni)
+        private readonly AppDbContext _context;
+        public CuentaDni(AppDbContext context)
         {
-            this.nombre = nombre;
-            this.apellido = apellido;
-            this.dni = dni;
-            this.cvu = GenerarNumeroCvu();
+            _context = context;
         }
 
-        public string CrearTarjetaVirtual()
-        {
-            string numeroGenerado = GenerarNumeroTarjeta();
-            //tarjetaV = new TarjetaVirtual(this.nombre, this.apellido, this.dni, numeroGenerado);
-            //Console.WriteLine($"Tarjeta virtual creada exitosamente: {tarjetaV.numeroTarjetaVirtual}");
-            return numeroGenerado;
-        }
 
+        public async Task<Billetera> CrearCuentaDni(Usuario usuario)
+        {
+            if(usuario == null)
+            {
+                throw new ArgumentNullException(nameof(usuario));
+            }
+
+            var billetera = new Billetera
+            {
+                IdUsuario = usuario.IdUsuario,
+                Tipo = "CuentaDni",
+                Cvu = GenerarNumeroCvu(),
+                Saldo = 0.0m
+            };
+
+            _context.Billeteras.Add(billetera);
+            await _context.SaveChangesAsync();
+            return billetera;
+        }
+     
         public string GenerarNumeroTarjeta()
         {
             Random random = new Random();
@@ -68,11 +71,11 @@ namespace EjercicioInterfaces
             return fecha > ahora;
         }
 
-        public decimal agregarSaldo(decimal saldo)
-        {
-            //tarjetaV!.limiteSaldo -= saldo;
-            return this.saldoCuentaDni += saldo;
-        }
+        //public decimal agregarSaldo(decimal saldo)
+        //{
+        //    //tarjetaV!.limiteSaldo -= saldo;
+        //    return this.saldoCuentaDni += saldo;
+        //}
 
         public static bool validarNombre(string nombre)
         {
@@ -102,8 +105,6 @@ namespace EjercicioInterfaces
                 return false;
             }
 
-
-
             if (!Regex.IsMatch(apellido, expNombre))
             {
                 Console.WriteLine($"El nombre '{apellido}' no es válido.");
@@ -113,6 +114,13 @@ namespace EjercicioInterfaces
 
         }
 
+        public string CrearTarjetaVirtual()
+        {
+            string numeroGenerado = GenerarNumeroTarjeta();
+            //tarjetaV = new TarjetaVirtual(this.nombre, this.apellido, this.dni, numeroGenerado);
+            //Console.WriteLine($"Tarjeta virtual creada exitosamente: {tarjetaV.numeroTarjetaVirtual}");
+            return numeroGenerado;
+        }
         public static bool validarDNI(int dni)
         {
 

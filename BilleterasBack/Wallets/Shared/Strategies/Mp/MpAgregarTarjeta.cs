@@ -1,5 +1,6 @@
 ﻿using BilleterasBack.Wallets.Models;
 using BilleterasBack.Wallets.Shared.Interfaces;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,80 +13,66 @@ namespace BilleterasBack.Wallets.Shared.Strategies.Mp
     public class MpAgregarTarjeta : IAgregarCard
     {
         private readonly AppDbContext _context;
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
-        public MpAgregarTarjeta(AppDbContext context)
+        public MpAgregarTarjeta(AppDbContext context, IHttpContextAccessor httpContextAccessor)
         {
             _context = context;
-        }
+            _httpContextAccessor = httpContextAccessor;
 
+        }
         public bool AgregarTarjeta(string numTarjeta, string nombre, string apellido, int dni, DateTime fechaVenc, int cod)
         {
-            DateTime ahora = DateTime.Now;
+           try
+           {
+                var httpContext = _httpContextAccessor.HttpContext;
+                var idUsuarioStr = httpContext?.User.Claims.FirstOrDefault(c => c.Type == "idUsuario")?.Value;
 
-            // Validaciones
-            //if (numTarjeta.Length != 16)
-            //{
-            //    Console.WriteLine($"Error: el número de tarjeta {numTarjeta} debe tener 16 dígitos.");
-            //    return false;
-            //}
+                if (string.IsNullOrEmpty(idUsuarioStr))
+                    throw new InvalidOperationException("JWT no contiene id_usuario");
 
-            //if (string.IsNullOrEmpty(nombre) || string.IsNullOrEmpty(apellido))
-            //{
-            //    Console.WriteLine("Error: nombre o apellido inválidos.");
-            //    return false;
-            //}
+                int idUsuario = int.Parse(idUsuarioStr);
 
-            //if (dni.ToString().Length < 8)
-            //{
-            //    Console.WriteLine("Error: el DNI debe tener al menos 8 dígitos.");
-            //    return false;
-            //}
+                var billetera = _context.Billeteras
+                    .Include(b => b.Usuario)
+                    .FirstOrDefault(b => b.Usuario.IdUsuario == idUsuario && b.Tipo == "MercadoPago");  
 
-            //if (fechaVenc < ahora)
-            //{
-            //    Console.WriteLine("Error: la fecha de vencimiento no puede ser menor a hoy.");
-            //    return false;
-            //}
+                if (billetera == null)
+                    throw new InvalidOperationException("Billetera no encontrada");
 
-            //if (cod < 100 || cod > 999)
-            //{
-            //    Console.WriteLine($"Error: el código de seguridad {cod} no es válido.");
-            //    return false;
-            //}
+                /*
+                  // Obtener la billetera del usuario
+            var billetera = _context.Billeteras.FirstOrDefault(b => b.Usuario.IdUsuario == idUsuario);
+            if (billetera == null)
+                throw new InvalidOperationException("No se encontró la billetera del usuario.");
 
-            // Crear entidad
+            // Verificar si ya existe la tarjeta para esa billetera
+            var tarjetaExistente = _context.Tarjetas
+                .FirstOrDefault(t => t.NumeroTarjeta == numTarjeta && t.IdBilletera == billetera.IdBilletera);
 
-            var cuentaMP = _context.Mp.FirstOrDefault(mp => mp.dni == dni);
-            string tipoCuenta = cuentaMP != null ? "MercadoPago" : "Desconocido";
+            if (tarjetaExistente != null)
+                return false; // no duplicar
+                 */
 
-            var tarjeta = new TarjetaEntity
-            {
-                numeroTarjeta = numTarjeta,
-                nombreTitular = nombre,
-                apellidoTitular = apellido,
-                dniTitular = dni,
-                fechaVencimiento = fechaVenc,
-                cod = cod,
-                tipo_cuenta = tipoCuenta
-            };
+                var tarjeta = new Tarjeta
+                {
+                    NumeroTarjeta = numTarjeta,
+                    FechaVencimiento = fechaVenc,
+                    CodigoSeguridad = cod,
+                    Saldo = 10000,
+                };
 
-            try
-            {
                 _context.Tarjetas.Add(tarjeta);
                 _context.SaveChanges();
-
-                Console.WriteLine("========== TARJETA AGREGADA CORRECTAMENTE ==========");
-                Console.WriteLine($"Nombre: {tarjeta.nombreTitular} Apellido: {tarjeta.apellidoTitular}");
-                Console.WriteLine($"Tarjeta N°: {tarjeta.numeroTarjeta}");
-                Console.WriteLine("===================================================");
                 return true;
+
             }
-            catch (Exception ex)
+
+            catch
             {
-                Console.WriteLine($"Error al guardar la tarjeta en la base de datos: {ex.Message}");
-                return false;
+                    return false;
             }
+
         }
     }
-
 }

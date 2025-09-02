@@ -1,38 +1,28 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Text.Json.Serialization;
 
 namespace BilleterasBack.Wallets.Models
 {
-    [Table("tarjeta")]
-    public class TarjetaEntity
+    [Table("Tarjeta")]
+    public class Tarjeta
     {
         [Key]
-        public int id_tarjeta { get; set; }
+        public int IdTarjeta { get; set; }
 
-        [ForeignKey("Usuario")]
-        public int? id_usuario { get; set; }  // opcional, permite null si aún no se asigna
+        [ForeignKey("Billetera")]
+        public int IdBilletera { get; set; }
+        public Billetera Billetera { get; set; }
 
-        public string numeroTarjeta { get; set; }
+        [Required, MaxLength(20)]
+        public string NumeroTarjeta { get; set; }
 
-        [Column(TypeName = "varchar(50)")]
-        public string nombreTitular { get; set; }
+        [Required]
+        public DateTime FechaVencimiento { get; set; }
 
-        [Column(TypeName = "varchar(50)")]
-        public string apellidoTitular { get; set; }
+        [Required, MaxLength(3)]
+        public int CodigoSeguridad { get; set; }
 
-        public int dniTitular { get; set; }
+        public decimal Saldo { get; set; } = 10000;
 
-        public DateTime fechaVencimiento { get; set; }
-
-        public int cod { get; set; }  // código de seguridad (CVV)
-
-        [Column(TypeName = "varchar(20)")]
-        public string? tipo_cuenta { get; set; }
-        public DateTime fecha_creacion { get; set; } = DateTime.Now;
-
-        public bool activo { get; set; } = true;
-
-        public virtual Usuario? Usuario { get; set; }  // relación con usuario
     }
 }

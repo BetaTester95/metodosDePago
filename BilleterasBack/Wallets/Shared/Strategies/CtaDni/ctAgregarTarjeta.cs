@@ -1,5 +1,4 @@
-﻿using BilleterasBack.Wallets.Cards;
-using BilleterasBack.Wallets.Shared.Interfaces;
+﻿using BilleterasBack.Wallets.Shared.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,12 +9,11 @@ namespace EjercicioInterfaces.Estrategias.ctdEstrategias
 {
     public class ctAgregarTarjeta : IAgregarCard
     {
-        public CuentaDni ctdni;
-        public Tarjeta? tarjeta;
+        private readonly AppDbContext _context;
 
-        public ctAgregarTarjeta(CuentaDni ctaDni)
+        public ctAgregarTarjeta(AppDbContext context)
         {
-            ctdni = ctaDni;
+            _context = context;
         }
 
         public bool AgregarTarjeta(string numTarjeta, string nombre, string apellido, int dni, DateTime fechaVenc, int cod)
@@ -38,11 +36,11 @@ namespace EjercicioInterfaces.Estrategias.ctdEstrategias
             {
                 return false;
             }
-            if (ctdni.nombre != nombre || ctdni.apellido != apellido || ctdni.dni != dni)
-            {
-                Console.WriteLine($"Error con el nombre, apellido o dni. ");
-                return false;
-            }
+            //if (ctdni.nombre != nombre || ctdni.apellido != apellido || ctdni.dni != dni)
+            //{
+            //    Console.WriteLine($"Error con el nombre, apellido o dni. ");
+            //    return false;
+            //}
             // Validar fecha de vencimiento
             if (fechaVenc < ahora)
             {
@@ -56,9 +54,9 @@ namespace EjercicioInterfaces.Estrategias.ctdEstrategias
                 return false;
             }
 
-            tarjeta = new Tarjeta(numTarjeta, nombre, apellido, dni, fechaVenc, cod);
-            ctdni.tarjeta = tarjeta;
-            Console.WriteLine($"Se agrego la tarjeta {ctdni.tarjeta.numeroTarjeta}");
+            //tarjeta = new Tarjeta(numTarjeta, nombre, apellido, dni, fechaVenc, cod);
+            //ctdni.tarjeta = tarjeta;
+            //Console.WriteLine($"Se agrego la tarjeta {ctdni.tarjeta.numeroTarjeta}");
             return true;
         }
 
