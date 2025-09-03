@@ -14,7 +14,6 @@ using BilleterasBack.Wallets.Dtos;
 public class AuthController : ControllerBase
 {
     private readonly AppDbContext _context;
-    private readonly string jwtKey = "estaEsUnaClaveSuperSecreta123333!!";
     public AuthController(AppDbContext context)
     {
         _context = context;
@@ -36,25 +35,9 @@ public class AuthController : ControllerBase
         {
             return Unauthorized(new {message = "correo o contraseña incorrecta"});
         }
-        var tokenHandler = new JwtSecurityTokenHandler();
-        var key = Encoding.ASCII.GetBytes(jwtKey);
-        var tokenDescriptor = new SecurityTokenDescriptor
-        {
-            Subject = new ClaimsIdentity(new[]
-            {
-                    new Claim("id_usuario", usuario.IdUsuario.ToString()), // <-- ahora se llama id_usuario
-                    new Claim(ClaimTypes.Role, usuario.TipoUsuario?.NombreTipo ?? "Cliente"),
-                    new Claim("Dni", usuario.Dni.ToString()),               // <-- agregamos el DNI
-                    new Claim(ClaimTypes.Email, usuario.Email)
-                }),
-            Expires = DateTime.UtcNow.AddHours(1),
-            SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
-        };
-        var token = tokenHandler.CreateToken(tokenDescriptor);
-        var tokenString = tokenHandler.WriteToken(token);
-
+        
         return Ok(new {message="Login exitoso",
-            token = tokenString
+            
         });
     }
 

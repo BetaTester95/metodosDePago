@@ -22,8 +22,8 @@ namespace BilleterasBack.Wallets.Models
         [Required, MaxLength(255)]
         public string PasswordHash { get; set; }
 
-        [Required, MaxLength(20)]
-        public string Dni { get; set; }
+        [Required]
+        public int Dni { get; set; }
 
         [ForeignKey("TipoUsuario")]
         public int IdTipoUsuario { get; set; }

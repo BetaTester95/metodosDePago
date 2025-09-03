@@ -1,4 +1,5 @@
-﻿using BilleterasBack.Wallets.Models;
+﻿using Azure.Core;
+using BilleterasBack.Wallets.Models;
 using BilleterasBack.Wallets.Shared.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -13,46 +14,29 @@ namespace BilleterasBack.Wallets.Shared.Strategies.Mp
     public class MpAgregarTarjeta : IAgregarCard
     {
         private readonly AppDbContext _context;
-        private readonly IHttpContextAccessor _httpContextAccessor;
-
-        public MpAgregarTarjeta(AppDbContext context, IHttpContextAccessor httpContextAccessor)
+        //agregar logger
+        private readonly ILogger<MpAgregarTarjeta> _logger;
+        public MpAgregarTarjeta(AppDbContext context, ILogger<MpAgregarTarjeta> logger)
         {
-            _context = context;
-            _httpContextAccessor = httpContextAccessor;
-
+           _context = context;
+           _logger = logger;
         }
+
         public bool AgregarTarjeta(string numTarjeta, string nombre, string apellido, int dni, DateTime fechaVenc, int cod)
         {
            try
-           {
-                var httpContext = _httpContextAccessor.HttpContext;
-                var idUsuarioStr = httpContext?.User.Claims.FirstOrDefault(c => c.Type == "idUsuario")?.Value;
-
-                if (string.IsNullOrEmpty(idUsuarioStr))
-                    throw new InvalidOperationException("JWT no contiene id_usuario");
-
-                int idUsuario = int.Parse(idUsuarioStr);
-
+           {  
+                //buscar dni de usuario
+                var usuario = _context.Usuarios.FirstOrDefault(u => u.Dni == dni); 
                 var billetera = _context.Billeteras
                     .Include(b => b.Usuario)
-                    .FirstOrDefault(b => b.Usuario.IdUsuario == idUsuario && b.Tipo == "MercadoPago");  
+                    .FirstOrDefault(b => b.Usuario.Dni == dni && b.Tipo == "MercadoPago");  
+                if (billetera == null) {
 
-                if (billetera == null)
-                    throw new InvalidOperationException("Billetera no encontrada");
-
-                /*
-                  // Obtener la billetera del usuario
-            var billetera = _context.Billeteras.FirstOrDefault(b => b.Usuario.IdUsuario == idUsuario);
-            if (billetera == null)
-                throw new InvalidOperationException("No se encontró la billetera del usuario.");
-
-            // Verificar si ya existe la tarjeta para esa billetera
-            var tarjetaExistente = _context.Tarjetas
-                .FirstOrDefault(t => t.NumeroTarjeta == numTarjeta && t.IdBilletera == billetera.IdBilletera);
-
-            if (tarjetaExistente != null)
-                return false; // no duplicar
-                 */
+                    _logger.LogWarning(message: "DEBUG: Billetera no encontrada para usuario:{dni} ", dni);
+                    return false;
+                }
+                _logger.LogInformation("DEBUG: Billetera encontrada, creando tarjeta...");
 
                 var tarjeta = new Tarjeta
                 {
@@ -60,19 +44,17 @@ namespace BilleterasBack.Wallets.Shared.Strategies.Mp
                     FechaVencimiento = fechaVenc,
                     CodigoSeguridad = cod,
                     Saldo = 10000,
+                    IdBilletera = billetera.IdBilletera
                 };
-
                 _context.Tarjetas.Add(tarjeta);
                 _context.SaveChanges();
-                return true;
-
+               return true;
             }
-
-            catch
+            catch(Exception ex)
             {
-                    return false;
+                _logger.LogError(ex, "ERROR: Falló al guardar la tarjeta");
+                return false;
             }
-
         }
     }
 }

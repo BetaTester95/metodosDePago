@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace BilleterasBack.Wallets.Controllers
 {
 
-    [Authorize]
+    
     [ApiController]
     [Route("api/[controller]")]
     public class BilleteraController : ControllerBase
@@ -27,7 +27,7 @@ namespace BilleterasBack.Wallets.Controllers
         [HttpPost("crear/mercadopago")]
         public async Task<IActionResult> CrearMercadoPago()
         {
-            var userId = int.Parse(User.Claims.First(c => c.Type == "id_usuario").Value);
+            var userDni = await _context.Usuarios.FindAsync(u => u.Dni == userDni);
             var usuario = await _context.Usuarios.FindAsync(userId);
             if (usuario == null) return NotFound("Usuario no encontrado");
 

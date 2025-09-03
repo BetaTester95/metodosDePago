@@ -1,12 +1,26 @@
-﻿namespace BilleterasBack.Wallets.Dtos
+﻿using System.Text.Json.Serialization;
+
+namespace BilleterasBack.Wallets.Dtos
 {
     public class TarjetaDTO
     {
-        public string? NumeroTarjeta { get; set; }
-        public string? Nombre { get; set; }
-        public string? Apellido { get; set; }
+        [JsonPropertyName("numTarjeta")]
+        public string NumeroTarjeta { get; set; }
+
+        [JsonPropertyName("nombre")]
+        public string Nombre { get; set; }
+
+        [JsonPropertyName("apellido")]
+        public string Apellido { get; set; }
+
+        [JsonPropertyName("dni")]
         public int Dni { get; set; }
+
+        [JsonPropertyName("fechaVenc")]
         public DateTime FechaExp { get; set; }
-        public int Cvv { get; set; }
+
+        [JsonPropertyName("cod")]
+        public int Cod { get; set; }
     }
-}
+ }
+

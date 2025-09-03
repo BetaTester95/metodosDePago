@@ -13,7 +13,7 @@ namespace BilleterasBack.Wallets.Models
         public int IdBilletera { get; set; }
         public Billetera Billetera { get; set; }
 
-        [Required, MaxLength(20)]
+        [Required, MaxLength(22)]
         public string NumeroTarjeta { get; set; }
 
         [Required]
@@ -22,6 +22,7 @@ namespace BilleterasBack.Wallets.Models
         [Required, MaxLength(3)]
         public int CodigoSeguridad { get; set; }
 
+        [Column(TypeName = "decimal(18,2)")]
         public decimal Saldo { get; set; } = 10000;
 
     }

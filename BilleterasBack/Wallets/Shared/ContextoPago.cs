@@ -4,9 +4,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-//using EjercicioInterfaces.Estrategias.ctdEstrategias;
-//using EjercicioInterfaces.Estrategias.ppEstrategias;
-//using EjercicioInterfaces.Pagos;
 namespace BilleterasBack.Wallets.Shared
 {
     public enum TipoMetodoPago
@@ -26,12 +23,6 @@ namespace BilleterasBack.Wallets.Shared
         public ContextoPago(TipoMetodoPago tipoMetodo)
         {
             TipoSeleccionado = tipoMetodo;
-        }
-
-        // Constructor con estrategia inicial
-        public ContextoPago(TipoMetodoPago tipoMetodo, IAgregarCard agregarCard) : this(tipoMetodo)
-        {
-            _agregarCard = agregarCard;
         }
 
         // Método para cambiar el tipo de método de pago
@@ -62,6 +53,7 @@ namespace BilleterasBack.Wallets.Shared
                     throw new ArgumentException($"Tipo de estrategia no soportada: {estrategia.GetType().Name}");
             }
         }
+        
 
         // Metodo generico para procesar cualquier tipo de operación
         public bool Procesar<T>(T estrategia, params object[] args)
@@ -143,22 +135,5 @@ namespace BilleterasBack.Wallets.Shared
             return $"Método: {TipoSeleccionado}, Estrategias disponibles: {string.Join(", ", estrategias)}";
         }
     }
-    // Factory para crear contextos específicos (opcional, para mayor claridad)
-    public static class ContextoPagoFactory
-    {
-        public static ContextoPago CrearMercadoPago()
-        {
-            return new ContextoPago(TipoMetodoPago.MercadoPago);
-        }
-
-        public static ContextoPago CrearPayPal()
-        {
-            return new ContextoPago(TipoMetodoPago.PayPal);
-        }
-
-        public static ContextoPago CrearCuentaDNI()
-        {
-            return new ContextoPago(TipoMetodoPago.CuentaDNI);
-        }
-    }
+   
 }

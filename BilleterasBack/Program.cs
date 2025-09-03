@@ -1,4 +1,5 @@
 using BilleterasBack.Wallets.Shared;
+using BilleterasBack.Wallets.Shared.Strategies.Mp;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -11,6 +12,8 @@ var key = Encoding.ASCII.GetBytes("estaEsUnaClaveSuperSecreta123333!!");
 builder.Services.AddCors(); // <-- Agrega esta línea
 // Agregar servicios de Controllers
 builder.Services.AddControllers();
+builder.Services.AddHttpContextAccessor(); // <--- esto es clave
+builder.Services.AddScoped<MpAgregarTarjeta>();
 
 // Configurar DbContext con la cadena de conexión
 builder.Services.AddDbContext<AppDbContext>(options =>
