@@ -11,10 +11,10 @@ namespace BilleterasBack.Wallets.Models
 
         [ForeignKey("Billetera")]
         public int IdBilletera { get; set; }
-        public Billetera Billetera { get; set; }
+        public Billetera? Billetera { get; set; }
 
         [Required, MaxLength(22)]
-        public string NumeroTarjeta { get; set; }
+        public string? NumeroTarjeta { get; set; }
 
         [Required]
         public DateTime FechaVencimiento { get; set; }

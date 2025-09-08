@@ -49,7 +49,6 @@ namespace EjercicioInterfaces
             {
                 numero += random.Next(0, 10).ToString();
             }
-
             return numero;
         }
         public string GenerarNumeroCvu()
@@ -61,7 +60,6 @@ namespace EjercicioInterfaces
             {
                 numero += random.Next(0, 10).ToString();
             }
-
             return numero;
         }
 
@@ -101,7 +99,6 @@ namespace EjercicioInterfaces
 
             if (apellido == null)
             {
-
                 return false;
             }
 
@@ -111,9 +108,7 @@ namespace EjercicioInterfaces
                 return false;
             }
             return true;
-
         }
-
         public string CrearTarjetaVirtual()
         {
             string numeroGenerado = GenerarNumeroTarjeta();
@@ -123,12 +118,8 @@ namespace EjercicioInterfaces
         }
         public static bool validarDNI(int dni)
         {
-
             string dniString = dni.ToString();
             string expDNI = @"^\d{8}$";
-
-
-
             if (!Regex.IsMatch(dniString, expDNI))
             {
                 Console.WriteLine($"El DNI '{dni}' no es valido. Debe contener 8 digitos.");
@@ -136,7 +127,6 @@ namespace EjercicioInterfaces
             }
             return true;
         }
-
         public static bool validarCod(int cod)
         {
 

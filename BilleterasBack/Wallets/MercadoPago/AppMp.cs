@@ -47,7 +47,6 @@ public class AppMp
         _context.Billeteras.Add(billetera);
         await _context.SaveChangesAsync();
         return billetera;
-
     }
 
     private string GenerarNumeroCbu()
@@ -59,25 +58,6 @@ public class AppMp
         {
             numero += random.Next(0, 10).ToString();
         }
-
         return numero;
-    }
-
-    public bool ValidarMonto(decimal montoTransferencia)
-    {
-        //    if (montoTransferencia <= 0)
-        //    {
-        //        Console.WriteLine($"El monto a transferir no puede ser $0 Pesos.");
-        //        return false;
-        //    }
-
-        //    if (montoTransferencia > saldo_cuenta_mercado_pago)
-        //    {
-        //        Console.WriteLine($"Saldo insuficiente para realizar esta operación. ");
-        //        return false;
-        //    }
-
-        return true;
-        //}
     }
 }

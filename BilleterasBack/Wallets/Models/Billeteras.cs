@@ -14,14 +14,14 @@ namespace BilleterasBack.Wallets.Models
         public int IdUsuario { get; set; }
 
         [JsonIgnore]
-        public Usuario Usuario { get; set; }
+        public Usuario? Usuario { get; set; }
 
         [Required]
         [MaxLength(50)]
-        public string Tipo { get; set; } // MercadoPago, PayPal, CuentaDNI
+        public string? Tipo { get; set; } // MercadoPago, PayPal, CuentaDNI
 
         [Required, MaxLength(50)]
-        public string Cvu { get; set; }
+        public string? Cvu { get; set; }
 
         [Column(TypeName = "decimal(15,2)")]
         public decimal Saldo { get; set; } = 0;

@@ -98,5 +98,15 @@ namespace BilleterasBack.Wallets.Controllers
             };
             return Ok(responseObj);
         }
+
+
+
+
+        //[HttpPost("pagarConTarjeta")]
+        //public async Task<IActionResult> PagarConTarjeta([FromBody] request)
+        //{
+        //    return BadRequest();
+        //}
+
     }
 }

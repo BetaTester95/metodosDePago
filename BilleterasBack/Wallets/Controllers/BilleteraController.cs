@@ -23,17 +23,16 @@ namespace BilleterasBack.Wallets.Controllers
             _payPal = new PayPal(_context);
         }
 
+        //[HttpPost("crear/mercadopago")]
+        //public async Task<IActionResult> CrearMercadoPago()
+        //{
+        //    //var userDni = await _context.Usuarios.FindAsync(u => u.Dni == userDni);
+        //    //var usuario = await _context.Usuarios.FindAsync(userId);
+        //    //if (usuario == null) return NotFound("Usuario no encontrado");
 
-        [HttpPost("crear/mercadopago")]
-        public async Task<IActionResult> CrearMercadoPago()
-        {
-            var userDni = await _context.Usuarios.FindAsync(u => u.Dni == userDni);
-            var usuario = await _context.Usuarios.FindAsync(userId);
-            if (usuario == null) return NotFound("Usuario no encontrado");
-
-            var billetera = await _appMp.CrearCuentaMercadoPago(usuario);
-            return Ok(billetera);
-        }
+        //    //var billetera = await _appMp.CrearCuentaMercadoPago(usuario);
+        //    //return Ok(billetera);
+        //}
 
         [HttpPost("crear/cuentadni")]
         public async Task<IActionResult> CrearCuentaDNI()

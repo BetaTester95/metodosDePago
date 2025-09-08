@@ -10,13 +10,13 @@ namespace EjercicioInterfaces.Estrategias.ppEstrategias
 {
     public class paypPagoConTransferencia : IPagoCardTransferencia
     {
-        public PayPal ppal;
-        public Cobrador cobrador;
+        
+        private readonly AppDbContext _context;
 
-        public paypPagoConTransferencia(PayPal payPal, Cobrador collector)
+        public paypPagoConTransferencia(AppDbContext context)
         {
-            ppal = payPal;
-            cobrador = collector;
+           _context = context;
+
         }
 
         public bool PagoConTransferencia(decimal montoPagar, string cbu)
@@ -35,11 +35,7 @@ namespace EjercicioInterfaces.Estrategias.ppEstrategias
             //    return false;
             //}
 
-            if (cobrador == null || cobrador.mailCobrador == null)
-            {
-                Console.WriteLine($"Error es mail del cobrador no existe. ");
-                return false;
-            }
+
 
             if (montoPagar <= 0)
             {

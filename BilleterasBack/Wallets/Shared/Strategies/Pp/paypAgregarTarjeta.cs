@@ -11,7 +11,6 @@ namespace EjercicioInterfaces.Estrategias.ppEstrategias
     public class paypAgregarTarjeta : IAgregarCard
     {
         private readonly AppDbContext _context;
-
         public paypAgregarTarjeta(AppDbContext context)
         {
             _context = context;

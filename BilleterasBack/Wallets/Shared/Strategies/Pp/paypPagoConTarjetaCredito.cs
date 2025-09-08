@@ -1,6 +1,7 @@
 ﻿using BilleterasBack.Wallets.Collector.Cobrador;
 using BilleterasBack.Wallets.Shared.Interfaces;
 using EjercicioInterfaces;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,53 +12,67 @@ namespace BilleterasBack.Wallets.Shared.Strategies.Pp
 {
     public class paypPagoConTarjetaCredito : IpagoCardCred
     {
-        public Cobrador cobrador;
-        public PayPal paypal;
+      
+        private readonly AppDbContext _context;
+        private decimal saldoTarjetaCredito;
+        private string? _cvuCobradorSeleccionado;
+        private int _idDni;
 
-        public paypPagoConTarjetaCredito(PayPal ppal, Cobrador collector)
+        public paypPagoConTarjetaCredito(AppDbContext context)
         {
-            paypal = ppal;
-            cobrador = collector;
+            _context = context;
+        }
+
+
+        public string CvuCobradorSeleccionado(string cvu)
+        {
+            _cvuCobradorSeleccionado = cvu;
+            return _cvuCobradorSeleccionado;
+        }
+
+        public int identificarTarjeta(int dni)
+        {
+            _idDni = dni;
+            return _idDni;
         }
 
         public bool PagoConTarjetaCredito(decimal montoPagar, int cantCuotas)
         {
-            //decimal saldoTarjetaCredito = paypal.tarjeta!.limiteSaldo;
-            //if (paypal.tarjeta.numeroTarjeta == null || paypal.tarjeta.numeroTarjeta == "")
-            //{
-            //    Console.WriteLine($"\n");
-            //    Console.WriteLine("No hay tarjetas asociadas a esta cuenta PayPal");
-            //    Console.WriteLine("Debe agregar una tarjeta para realizar esta operación. ");
-            //    return false;
-            //}
+            var checkCobrador = _context.Billeteras.Include(b => b.Usuario).FirstOrDefault(b => b.Tipo == "Cobrador" && _cvuCobradorSeleccionado == b.Cvu); //revisamos que exista el cobrador
+            var checkTarjeta = _context.Tarjetas.FirstOrDefault(t => t.IdTarjeta == _idDni); //revisamos que tengamos una tarjeta asociada
 
-            //if (string.IsNullOrEmpty(cobrador.cbu))
-            //{
-            //    Console.WriteLine($"No hay un cobrador asociado");
-            //    return false;
-            //}
+            var checkSaldo = _context.Billeteras.Include(u => u.Usuario).FirstOrDefault(b => b.Usuario.Dni == _idDni);
+            saldoTarjetaCredito = checkTarjeta.Saldo;
 
-            //if (montoPagar <= 0)
-            //{
-            //    Console.WriteLine($"\n");
-            //    Console.WriteLine("Error al pagar. ");
-            //    return false;
-            //}
+            if (checkTarjeta.NumeroTarjeta == null)
+            {
+              return false;
+            }
+            
+            if (checkCobrador == null)
+            {
+                return false;
+            }
+            if (checkSaldo == null)
+            {
+                return false;
+            }
+            
+            if (montoPagar <= 0)
+            {
+                Console.WriteLine("Error el monto es 0");
+                return false;
+            }
+            if (montoPagar > saldoTarjetaCredito)
+            {
+                Console.WriteLine("No posee saldo suficiente en la tarjeta");
+                return false;
+            }
 
-            //saldoTarjetaCredito -= montoPagar;
-            //cobrador.cobrarMonto(montoPagar);
-
-            //decimal mostrarSaldo = cobrador.retornarSaldo();
-            //Console.WriteLine($"===== PAGO REALIZADO EXITOSAMENTE ====");
-            //Console.WriteLine("\n");
-            //Console.WriteLine($"Se realizo el pago correctamente. ");
-            //Console.WriteLine($"Saldo actual: ${paypal.tarjeta.limiteSaldo} USD");
-            //Console.WriteLine("\n");
-            //Console.WriteLine($"===== PAGO REALIZADO EXITOSAMENTE ====");
-
+            saldoTarjetaCredito -= montoPagar;
+            checkCobrador.Saldo += montoPagar;
+            _context.SaveChanges();
             return true;
         }
-        
-
     }
 }

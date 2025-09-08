@@ -34,12 +34,9 @@ public class AuthController : ControllerBase
         if (!passValida)
         {
             return Unauthorized(new {message = "correo o contraseña incorrecta"});
-        }
-        
+        }      
         return Ok(new {message="Login exitoso",
             
         });
     }
-
-
 }

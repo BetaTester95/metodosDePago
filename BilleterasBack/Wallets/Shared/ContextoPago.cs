@@ -53,8 +53,6 @@ namespace BilleterasBack.Wallets.Shared
                     throw new ArgumentException($"Tipo de estrategia no soportada: {estrategia.GetType().Name}");
             }
         }
-        
-
         // Metodo generico para procesar cualquier tipo de operación
         public bool Procesar<T>(T estrategia, params object[] args)
         {

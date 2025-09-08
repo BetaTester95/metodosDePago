@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.EntityFrameworkCore.Storage.ValueConversion.Internal;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -18,7 +19,6 @@ namespace BilleterasBack.Wallets.Collector.Cobrador
 
             public Cobrador(string nombre, string apellido, int dni, string mail)
             {
-
                 this.nombre = nombre;
                 this.apellido = apellido;
                 this.dni = dni;
@@ -26,8 +26,7 @@ namespace BilleterasBack.Wallets.Collector.Cobrador
                 cbu = GenerarNumeroCbu();
             }
 
-
-            public decimal retornarSaldo()
+        public decimal retornarSaldo()
             {
                 return saldoCobrador;
             }

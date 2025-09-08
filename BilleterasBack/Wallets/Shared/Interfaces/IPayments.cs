@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 namespace BilleterasBack.Wallets.Shared.Interfaces
 {
+
     public interface IPagoCardTransferencia
     {
         bool PagoConTransferencia(decimal montoPagar, string cbu);
@@ -21,6 +22,4 @@ namespace BilleterasBack.Wallets.Shared.Interfaces
         bool PagoConTarjetaCredito(decimal montoPagar, int cantCuotas);
 
     }
-
-
 }

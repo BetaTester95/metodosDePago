@@ -1,6 +1,7 @@
 ﻿using BilleterasBack.Wallets.Collector.Cobrador;
 using BilleterasBack.Wallets.Shared.Interfaces;
 using EjercicioInterfaces;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,58 +12,52 @@ namespace BilleterasBack.Wallets.Shared.Strategies.Mp
 {
     public class MpPagoConTransferencia : IPagoCardTransferencia
     {
-        public Cobrador cobrador;
-        public AppMp mp;
+        private readonly AppDbContext _context;
+        private string? _cvuCobradorSeleccionado;
+        private int _idDni;
 
-        public MpPagoConTransferencia(Cobrador cobradorAsociado, AppMp cuenta)
+        public MpPagoConTransferencia(AppDbContext context)
         {
-            cobrador = cobradorAsociado;
-            mp = cuenta;
+           _context = context;
+        }
+
+        public string CvuCobradorSeleccionado(string cvu)
+        {
+            _cvuCobradorSeleccionado = cvu;
+            return _cvuCobradorSeleccionado;
+        }
+
+        public int identificarTarjeta(int dni)
+        {
+            _idDni = dni;
+            return _idDni;
         }
 
         public bool PagoConTransferencia(decimal montoPagar, string cbu)
         {
+            string? cvuCobrador = _cvuCobradorSeleccionado;
+            int idDni = _idDni;
+            var checkCobrador = _context.Billeteras.FirstOrDefault(b => b.Tipo == "Cobrador" && b.Cvu == cbu);
+            var checkMercadoPago = _context.Billeteras.Include(b => b.Usuario).FirstOrDefault(b => b.Tipo == "MercadoPago" && b.Usuario.Dni == idDni);
+            var checkSaldo = _context.Billeteras.Include(u => u.Usuario).FirstOrDefault(b => b.Usuario.Dni == idDni);
 
-            //if (cobrador == null || cobrador.cbu == null)
-            //{
-            //    Console.WriteLine("No hay un cobrador asociado a ese CBU.");
-            //    return false;
-            //}
-            //string cobradorCbu = cobrador.cbu;
+            if(checkCobrador == null || checkCobrador.Cvu == null)
+            {                
+               return false;
+            }
 
-            //if (cbu.Length != 22)
-            //{
-            //    return false;
-            //}
-            //if (cobradorCbu == cbu)
-            //{
-            //    if (mp.saldo_cuenta_mercado_pago >= montoPagar)
-            //    {
-            //        mp.saldo_cuenta_mercado_pago -= montoPagar;
-            //        cobrador.cobrarMonto(montoPagar);
-            //        Console.WriteLine($"===== TRANSFERENCIA REALIZADA EXITOSAMENTE =====");
-            //        Console.WriteLine($"\n");
-            //        Console.WriteLine($"Se realizo una transferencia de: ${montoPagar} Pesos");
-            //        Console.WriteLine($"Datos del Cobrador: {cobrador.cbu}.");
-            //        Console.WriteLine($"Nombre Completo: {cobrador.nombre} {cobrador.apellido}");
-            //        Console.WriteLine($"DNI: {cobrador.dni}");
-            //        Console.WriteLine($"\n");
-            //        Console.WriteLine($"===== TRANSFERENCIA REALIZADA EXITOSAMENTE =====");
-
-            //        return true;
-            //    }
-            //    else
-            //    {
-            //        Console.WriteLine($"Saldo insuficiente. ${mp.saldo_cuenta_mercado_pago} Pesos.");
-            //        return false;
-            //    }
-            //}
-            //else
-            //{
-            //    Console.WriteLine($"Error con el {cbu}");
-            //    return false;
-            //}
-            return false;
+            if(checkCobrador.Cvu == cbu)
+            {
+               decimal saldoMp = checkMercadoPago.Saldo;
+               saldoMp -= montoPagar;
+               checkCobrador.Saldo += montoPagar;
+               _context.SaveChanges();
+                return true;
+            }
+            else
+            {
+               return false;
+            }
         }
     }
 }
