@@ -1,6 +1,7 @@
-﻿using BilleterasBack.Wallets.Collector.Cobrador;
+﻿using BilleterasBack;
+using BilleterasBack.Wallets.Collector.Cobrador;
 using BilleterasBack.Wallets.Shared.Interfaces;
-using EjercicioInterfaces;
+using BilleterasBack.Wallets.Shared.Strategies.Pp;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -13,7 +14,6 @@ namespace BilleterasBack.Wallets.Shared.Strategies.Mp
     public class MpPagoConTransferencia : IPagoCardTransferencia
     {
         private readonly AppDbContext _context;
-        private string? _cvuCobradorSeleccionado;
         private int _idDni;
 
         public MpPagoConTransferencia(AppDbContext context)
@@ -21,37 +21,54 @@ namespace BilleterasBack.Wallets.Shared.Strategies.Mp
            _context = context;
         }
 
-        public string CvuCobradorSeleccionado(string cvu)
-        {
-            _cvuCobradorSeleccionado = cvu;
-            return _cvuCobradorSeleccionado;
-        }
-
-        public int identificarTarjeta(int dni)
-        {
-            _idDni = dni;
-            return _idDni;
-        }
+       
 
         public bool PagoConTransferencia(decimal montoPagar, string cbu)
         {
-            string? cvuCobrador = _cvuCobradorSeleccionado;
-            int idDni = _idDni;
-            var checkCobrador = _context.Billeteras.FirstOrDefault(b => b.Tipo == "Cobrador" && b.Cvu == cbu);
-            var checkMercadoPago = _context.Billeteras.Include(b => b.Usuario).FirstOrDefault(b => b.Tipo == "MercadoPago" && b.Usuario.Dni == idDni);
-            var checkSaldo = _context.Billeteras.Include(u => u.Usuario).FirstOrDefault(b => b.Usuario.Dni == idDni);
+            //agregar ilogger para debuguear
+            var logger = LoggerFactory.Create(builder => builder.AddConsole()).CreateLogger<MpPagoConTransferencia>();
 
-            if(checkCobrador == null || checkCobrador.Cvu == null)
-            {                
-               return false;
+            string cvuCobrador = "0046922191583351343977";
+            int idDni = 12345678;
+
+            var billeteraCobrador = _context.Billeteras.FirstOrDefault(b => b.Tipo == "Cobrador" && b.Cvu == cbu);
+            if(billeteraCobrador == null)
+            {
+                logger.LogError($"Billetera del cobrador no encontrada. {{Cbu: {cbu}}}");
+                return false;
+            }
+            
+            var tarjetaUsuario = _context.Tarjetas.Include(t => t.Billetera)
+                 .ThenInclude(b => b.Usuario)
+                 .FirstOrDefault(t => t.Billetera.Usuario.Dni == idDni && t.Billetera.Tipo == "MercadoPago");
+
+            if (tarjetaUsuario == null)
+            {
+                logger.LogError("Tarjeta del usuario no encontrada.");
+                return false;
             }
 
-            if(checkCobrador.Cvu == cbu)
+            var billeteraUsuario = _context.Billeteras.Include(u => u.Usuario).FirstOrDefault(b => b.Usuario.Dni == idDni && b.Tipo == "MercadoPago");
+            if(billeteraUsuario == null)
             {
-               decimal saldoMp = checkMercadoPago.Saldo;
-               saldoMp -= montoPagar;
-               checkCobrador.Saldo += montoPagar;
-               _context.SaveChanges();
+                logger.LogError("Billetera del usuario no encontrada.");
+                return false;
+            }
+
+            if (billeteraCobrador.Cvu == cbu)
+            {
+                decimal saldoMp = billeteraUsuario.Saldo;
+
+                if (saldoMp < montoPagar)
+                {
+                    logger.LogWarning($"Saldo insuficiente. Saldo actual: {saldoMp}, monto a pagar: {montoPagar}");
+                    return false; 
+                }
+
+                saldoMp -= montoPagar;
+                billeteraCobrador.Saldo += montoPagar;
+                billeteraUsuario.Saldo = saldoMp;
+                _context.SaveChanges();
                 return true;
             }
             else

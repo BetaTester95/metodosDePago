@@ -1,15 +1,17 @@
-﻿using BilleterasBack.Wallets.Dtos;
+﻿using Azure.Core;
+using BilleterasBack.Wallets.Dtos;
 using BilleterasBack.Wallets.Models;
 using BilleterasBack.Wallets.Shared;
 using BilleterasBack.Wallets.Shared.Interfaces;
+using BilleterasBack.Wallets.Shared.Strategies.CtaDni;
 using BilleterasBack.Wallets.Shared.Strategies.Mp;
-using EjercicioInterfaces;
-using EjercicioInterfaces.Estrategias.ctdEstrategias;
-using EjercicioInterfaces.Estrategias.ppEstrategias;
+using BilleterasBack.Wallets.Shared.Strategies.Pp;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
+using System.Linq.Expressions;
 using System.Security.Claims;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
@@ -27,13 +29,16 @@ namespace BilleterasBack.Wallets.Controllers
             _context = context;
             _logger = logger;
         }
-        
+
         [HttpPost("agregar-tarjeta")]
-        public async Task<IActionResult> AgregarCard(TipoMetodoPago tipoMetodoPago,[FromBody] TarjetaDTO request)
+        public async Task<IActionResult> AgregarCard(TipoMetodoPago tipoMetodoPago, [FromBody] TarjetaDTO request)
         {
+            var tipoMetodoPagoRecibido = tipoMetodoPago;
+            var tipoMetodoPagoStr = tipoMetodoPago.ToString();
+
             DateTime fechaHoy = DateTime.Now;
 
-            if (string.IsNullOrWhiteSpace(request.Nombre))     
+            if (string.IsNullOrWhiteSpace(request.Nombre))
                 return BadRequest(new { mensaje = "El nombre no puede estar vacío." });
 
             if (string.IsNullOrWhiteSpace(request.Apellido))
@@ -42,35 +47,41 @@ namespace BilleterasBack.Wallets.Controllers
             if (request.Dni <= 0)
                 return BadRequest(new { mensaje = "El DNI debe ser un numero positivo." });
 
-            if(fechaHoy > request.FechaExp)
+            if (fechaHoy > request.FechaExp)
                 return BadRequest(new { mensaje = "La fecha de expiracion no puede ser en el pasado." });
 
-            if(request.Cod < 100 || request.Cod > 999)
+            if (request.Cod < 100 || request.Cod > 999)
                 return BadRequest(new { mensaje = "El codigo de seguridad debe tener 3 digitos." });
 
-            if (string.IsNullOrWhiteSpace(request.NumeroTarjeta) || request.NumeroTarjeta.Length != 16 || !request.NumeroTarjeta.All(char.IsDigit))
-                return BadRequest(new { mensaje = "El numero de tarjeta debe tener 16 digitos." });
+            if (string.IsNullOrWhiteSpace(request.NumeroTarjeta) || request.NumeroTarjeta.Length > 22 | !request.NumeroTarjeta.All(char.IsDigit))
+                return BadRequest(new { mensaje = "El numero de tarjeta debe tener 22 digitos." });
+
+            if (request.NumeroTarjeta.Length < 16)
+                return BadRequest(new { mensaje = "El numero de tarjeta debe tener al menos 16 digitos." });
 
             var existeNumTarjeta = await _context.Tarjetas.AnyAsync(t => t.NumeroTarjeta == request.NumeroTarjeta);
             if (existeNumTarjeta)
                 return BadRequest(new { mensaje = "El numero de tarjeta ya esta agregada en su cuenta." });
-           
+
             var billetera = await _context.Billeteras
                 .Include(b => b.Usuario)
                 .FirstOrDefaultAsync(b => b.Usuario.Dni == request.Dni && b.Tipo == tipoMetodoPago.ToString());
+
+            bool billeteraEncontrada = billetera != null;
+
 
             if (billetera == null)
             {
                 System.Diagnostics.Debug.WriteLine("DEBUG: Billetera no encontrada");
                 return NotFound(new { mensaje = "Billetera no encontrada para el usuario y tipo especificado" });
             }
-               
+
             IAgregarCard estrategia = tipoMetodoPago switch
             {
-               TipoMetodoPago.MercadoPago => new MpAgregarTarjeta(_context, _logger),
-               TipoMetodoPago.CuentaDNI => new ctAgregarTarjeta(_context),
-               TipoMetodoPago.PayPal => new paypAgregarTarjeta(_context),
-               _=> throw new NotImplementedException($"Estrategia no implementada para el tipo de pago: {tipoMetodoPago}")
+                TipoMetodoPago.MercadoPago => new MpAgregarTarjeta(_context, _logger),
+                TipoMetodoPago.CuentaDni => new ctAgregarTarjeta(_context),
+                TipoMetodoPago.PayPal => new paypAgregarTarjeta(_context),
+                _ => throw new NotImplementedException($"Estrategia no implementada para el tipo de pago: {tipoMetodoPago}")
             };
 
             var resultado = estrategia.AgregarTarjeta(
@@ -83,8 +94,14 @@ namespace BilleterasBack.Wallets.Controllers
             );
             var responseObj = new
             {
-                mensaje = resultado ? "Tarjeta agregada correctamente" : "Error al agregar tarjeta",
-                datos = new
+                mensaje = billeteraEncontrada ?
+                (resultado ? "Tarjeta agregada correctamente" : "Error al agregar tarjeta")
+                : "Billetera no encontrada para el usuario y tipo especificado",
+                tipoMetodoPagoRecibido,
+                tipoMetodoPagoStr,
+                idDni = request.Dni,
+                billeteraEncontrada,
+                datosTarjeta = new
                 {
                     request.NumeroTarjeta,
                     request.Nombre,
@@ -92,7 +109,7 @@ namespace BilleterasBack.Wallets.Controllers
                     request.Dni,
                     request.FechaExp,
                     request.Cod,
-                    TipoMetodoPago = tipoMetodoPago.ToString()
+                    TipoMetodoPago = tipoMetodoPagoStr
                 },
                 resultadoEstrategia = resultado
             };
@@ -100,13 +117,58 @@ namespace BilleterasBack.Wallets.Controllers
         }
 
 
+        [HttpPost("pagarcontarjeta")]
+        public async Task<IActionResult> PagarConTarjeta([FromBody] PagoTarjetaRequest request)
+        {
+            var logger = HttpContext.RequestServices.GetRequiredService<ILogger<MpPagoConTarjetaCredito>>();
+            var logger2 = HttpContext.RequestServices.GetRequiredService<ILogger<ctPagoConTarjetaCredito>>();
+
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+            IpagoCardCred? estrategia = request.tipoMetodoPago switch
+            {
+                TipoMetodoPago.MercadoPago => new MpPagoConTarjetaCredito(_context, logger),
+                TipoMetodoPago.CuentaDni => new ctPagoConTarjetaCredito(_context, logger2),
+                TipoMetodoPago.PayPal => new paypPagoConTarjetaCredito(_context),
+                _ => null
+            };
+            var exito = estrategia?.PagoConTarjetaCredito(request.montoPagar, request.cantCuotas) ?? false;
+            if (exito)
+            {
+                return Ok(new { mensaje = "Pago realizado con tarjeta exitosamente." });
+            }
+            else
+            {
+                return BadRequest(new { mensaje = "Error al procesar el pago con tarjeta." });
+            }
+        }
 
 
-        //[HttpPost("pagarConTarjeta")]
-        //public async Task<IActionResult> PagarConTarjeta([FromBody] request)
-        //{
-        //    return BadRequest();
-        //}
 
+
+        [HttpPost("pagarcontransferencia")]
+        public async Task<IActionResult> PagoConTransferencia(TipoMetodoPago TipoMetodoPago, decimal montoPagar, string cbu)
+        {
+            IPagoCardTransferencia? estrategia = TipoMetodoPago switch
+            {
+                TipoMetodoPago.MercadoPago => new MpPagoConTransferencia(_context),
+                TipoMetodoPago.CuentaDni => new ctPagoConTransferencia(_context),
+                TipoMetodoPago.PayPal => new paypPagoConTransferencia(_context),
+                _ => null
+            };
+            var exito = estrategia?.PagoConTransferencia(montoPagar, cbu) ?? false;
+
+            if (!exito)
+            {
+                return BadRequest(new { mensaje = "Error al procesar el pago con transferencia." });
+            }
+            else
+            {
+                return Ok(new { mensaje = "Pago con transferencia exitoso." });
+
+            }
+        }
     }
 }

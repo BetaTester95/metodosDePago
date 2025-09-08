@@ -1,4 +1,5 @@
 ﻿using BilleterasBack.Wallets.Collector.Cobrador;
+using BilleterasBack.Wallets.Models;
 using BilleterasBack.Wallets.Shared.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -7,16 +8,18 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace EjercicioInterfaces.Estrategias.ctdEstrategias
+namespace BilleterasBack.Wallets.Shared.Strategies.CtaDni
 {
     public class ctPagoConTarjetaCredito : IpagoCardCred
     {
         private readonly AppDbContext _context;
         private string? _cvuCobradorSeleccionado;
         private int _idDni;
-        public ctPagoConTarjetaCredito(AppDbContext context)
+        private readonly ILogger<ctPagoConTarjetaCredito> _logger;
+        public ctPagoConTarjetaCredito(AppDbContext context, ILogger<ctPagoConTarjetaCredito> logger)
         {
-           _context = context;
+            _context = context;
+            _logger = logger;
         }
 
         public string CvuCobradorSeleccionado(string cvu)
@@ -31,60 +34,46 @@ namespace EjercicioInterfaces.Estrategias.ctdEstrategias
             return _idDni;
         }
 
-        public bool PagoConTarjetaCredito(decimal montoPagar, int cantCuotas)
+        public bool PagoConTarjetaCredito(decimal montoPagar, int cantCuotas = 0)
         {
-            string cvuCobrador = _cvuCobradorSeleccionado;
-            int idDni = _idDni;
+            string cvuCobrador = "0046922191583351343977";
+            int idDni = 12345678;
 
-            var checkCobrador = _context.Billeteras.Include(b => b.Usuario).FirstOrDefault(b => b.Tipo == "Cobrador" && cvuCobrador == b.Cvu); //revisamos que exista el cobrador
-            var checkTarjeta = _context.Tarjetas.Include(t => t.Billetera).ThenInclude(b => b.Usuario).FirstOrDefault(t => t.Billetera.Usuario.Dni == idDni); //revisamos que exista la tarjeta
-            var checkSaldo = _context.Billeteras.Include(u => u.Usuario).FirstOrDefault(b => b.Usuario.Dni == idDni);
-            decimal saldo = checkSaldo.Saldo;
-
-            if (checkCobrador == null)
-              return false;
-           
-            if(checkCobrador.Cvu == null)            
-              return false;
-           
-
-            if (checkTarjeta.NumeroTarjeta == null)          
-              return false;
-            
-            if (checkTarjeta.Saldo < montoPagar)
-                return false;
-
-            //if (accountDni.tarjetaV == null || accountDni.tarjetaV.numeroTarjetaVirtual == null)
-            //{
-            //    Console.WriteLine("No hay una tarjeta cargada para poder pagar.");
-            //    return false;
-            //}
-
-            if(saldo < montoPagar)
-            return false;
-
-            if (saldo > montoPagar)
+            var billeteraCobrador = _context.Billeteras.Include(b => b.Usuario)
+                .FirstOrDefault(b => b.Tipo == "Cobrador" && b.Cvu == cvuCobrador);
+            if (billeteraCobrador == null || billeteraCobrador.Tipo == null)
             {
-                saldo -= montoPagar;
-                checkSaldo.Saldo = saldo;
-                checkCobrador.Saldo += montoPagar;
-                _context.SaveChanges();
+                _logger.LogWarning("El cobrador con CVU: {cvuCobrador} no existe.", cvuCobrador);
+                return false;
             }
 
-            //decimal saldoTarjetaCredito = accountDni.tarjetaV.saldo();
+            var tarjetaUsuario = _context.Tarjetas.Include(t => t.Billetera)
+                .ThenInclude(b => b.Usuario)
+                .FirstOrDefault(t => t.Billetera.Usuario.Dni == idDni && t.Billetera.Tipo == "CuentaDni");
 
-            //if (saldoTarjetaCredito < montoPagar)
-            //{
-            //    Console.WriteLine("Saldo insuficiente en la tarjeta de credito virtual.");
-            //    return false;
-            //}
+            if (tarjetaUsuario == null)
+            {
+                _logger.LogWarning("La tarjeta asociada al DNI: {idDni} no existe.", idDni);
+                return false;
+            }
 
-            //var tarjetaVirtual = tarjetaV!.limiteSaldo -= montoPagar;
-            //accountDni.tarjetaV.limiteSaldo = saldoTarjetaCredito;
+            var billeteraUsuario = _context.Billeteras.Include(u => u.Usuario)
+                .FirstOrDefault(b => b.Usuario.Dni == idDni && b.Tipo == "CuentaDni");
+            if (billeteraUsuario == null)
+                return false;
 
-            //cobrador.cobrarMonto(montoPagar);
-            //Console.WriteLine($"¡Se realizó el pago!");
+            if (montoPagar > tarjetaUsuario.Saldo)
+            {
+                _logger.LogWarning("Saldo insuficiente en Cuenta DNI.");
+                return false;
+            }
 
+            if (montoPagar <= 0)
+                return false;
+
+            tarjetaUsuario.Saldo -= montoPagar;
+            billeteraUsuario.Saldo += montoPagar;
+            _context.SaveChanges();
             return true;
         }
     }

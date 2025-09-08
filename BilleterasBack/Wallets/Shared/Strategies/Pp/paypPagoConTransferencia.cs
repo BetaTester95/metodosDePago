@@ -1,17 +1,23 @@
 ﻿using BilleterasBack.Wallets.Collector.Cobrador;
 using BilleterasBack.Wallets.Shared.Interfaces;
+using BilleterasBack.Wallets.Shared.Strategies.Mp;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace EjercicioInterfaces.Estrategias.ppEstrategias
+namespace BilleterasBack.Wallets.Shared.Strategies.Pp
 {
     public class paypPagoConTransferencia : IPagoCardTransferencia
     {
         
         private readonly AppDbContext _context;
+        private string? _cvuCobradorSeleccionado;
+        private int _idDni;
+        private decimal _saldoPayPal;
+
 
         public paypPagoConTransferencia(AppDbContext context)
         {
@@ -21,21 +27,39 @@ namespace EjercicioInterfaces.Estrategias.ppEstrategias
 
         public bool PagoConTransferencia(decimal montoPagar, string cbu)
         {
+            var logger = LoggerFactory.Create(builder => builder.AddConsole()).CreateLogger<paypPagoConTransferencia>();
+
             string mail = cbu;
 
-            if (montoPagar == 0)
+            int idDni = 12345678;
+
+            var billeteraCobrador = _context.Billeteras.Include(b => b.Usuario).FirstOrDefault(b => b.Tipo == "Cobrador" && b.Usuario.Email == mail);
+            if (billeteraCobrador == null) 
             {
-                Console.WriteLine($"Error no se puede transferir 0 USD. ");
+                logger.LogError($"Billetera del cobrador no encontrada. {{Mail: {mail}}}"); 
                 return false;
             }
 
-            //if (ppal.saldoPayPal <= 0)
-            //{
-            //    Console.WriteLine($"Saldo insuficiente para trasferir. ");
-            //    return false;
-            //}
+            var billeteraUsuario = _context.Billeteras.Include(b => b.Usuario).FirstOrDefault(b => b.Usuario.Dni == idDni && b.Tipo == "PayPal");
+            if (billeteraUsuario == null)
+            {
+                logger.LogError("Billetera del usuario no encontrada.");
+                return false;
+            }
 
 
+            if (montoPagar <= 0)
+            {
+                logger.LogError("El monto a pagar debe ser mayor que cero.");
+                return false;
+            }
+
+            if (montoPagar > 10000)
+            {
+                logger.LogError("El monto a pagar excede el límite permitido de 10,000.");
+                return false;
+            }
+           
 
             if (montoPagar <= 0)
             {
@@ -43,35 +67,30 @@ namespace EjercicioInterfaces.Estrategias.ppEstrategias
                 return false;
             }
 
-            //if (ppal.saldoPayPal < montoPagar)
-            //{
-            //    Console.WriteLine($"Saldo insuficiente. ");
-            //    return false;
-            //}
+            if (billeteraUsuario.Saldo < montoPagar)
+            {
+                logger.LogWarning($"Saldo insuficiente. Saldo actual: {billeteraUsuario.Saldo}, monto a pagar: {montoPagar}");
+                return false;
+            }
 
             if (string.IsNullOrEmpty(mail))
             {
-                Console.WriteLine($"error mail vacio.");
-
+                logger.LogError("El mail no puede estar vacío.");
                 return false;
-
             }
 
-            if (mail != cobrador.mailCobrador)
+            if (mail != billeteraCobrador.Cvu)
             {
                 Console.WriteLine($"La cuenta asociada con el mail: {mail} no existe. ");
                 return false;
             }
 
-            //ppal.saldoPayPal -= montoPagar;
-            //cobrador.cobrarMonto(montoPagar);
-            //Console.WriteLine($"\n");
-            //Console.WriteLine($"Se realizo el pago");
-            //Console.WriteLine($"Se realizo una transferencia de: {montoPagar}");
-            //Console.WriteLine($"Pago realizado al mail: {mail}");
-            //Console.WriteLine($"Su saldo actual es de: ${ppal.saldoPayPal} USD");
-            //Console.WriteLine($"\n");
-
+            _saldoPayPal = billeteraUsuario.Saldo;
+            _saldoPayPal -= montoPagar;
+            billeteraUsuario.Saldo = _saldoPayPal;
+            billeteraCobrador.Saldo += montoPagar;
+            _context.SaveChanges();
+            logger.LogInformation($"Pago realizado exitosamente. {montoPagar} transferido a {mail}");
             return true;
         }
 

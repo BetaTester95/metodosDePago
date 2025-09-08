@@ -26,6 +26,12 @@ namespace BilleterasBack.Wallets.Models
         [Column(TypeName = "decimal(15,2)")]
         public decimal Saldo { get; set; } = 0;
 
+        [NotMapped]
+        public bool Success { get; set; }
+
+        [NotMapped]
+        public string Message { get; set; } = string.Empty;
+
         // Relación con Tarjetas
         public ICollection<Tarjeta> Tarjetas { get; set; } = new List<Tarjeta>();
     }

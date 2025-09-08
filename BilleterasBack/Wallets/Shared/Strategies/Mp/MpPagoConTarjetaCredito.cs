@@ -15,86 +15,72 @@ namespace BilleterasBack.Wallets.Shared.Strategies.Mp
     {
         private readonly AppDbContext _context;
         private string? _cvuCobradorSeleccionado;
+        private readonly ILogger<MpPagoConTarjetaCredito> _logger;
         private int _idDni;
-
-        public MpPagoConTarjetaCredito(AppDbContext context)
+        private decimal resultado;
+        public MpPagoConTarjetaCredito(AppDbContext context, ILogger<MpPagoConTarjetaCredito> logger)
         {
             _context = context;
+            _logger = logger;
         }
-
-
-        public string CvuCobradorSeleccionado(string cvu)
-        {
-            _cvuCobradorSeleccionado = cvu;
-            return _cvuCobradorSeleccionado;
-        }
-
-        public int identificarTarjeta(int dni)
-        {
-            _idDni = dni;
-            return _idDni;
-        }   
+  
 
         public bool PagoConTarjetaCredito(decimal montoPagar, int cantCuotas)
         {
-           string cvuCobrador = _cvuCobradorSeleccionado;
-           int idDni = _idDni; 
+            _logger.LogInformation("=== INICIO DEBUG ===");
+            _logger.LogInformation($"Monto: {montoPagar}, Cuotas: {cantCuotas}");
 
-           var checkCobrador = _context.Billeteras.Include(b=> b.Usuario).FirstOrDefault(b => b.Tipo =="Cobrador" && cvuCobrador == b.Cvu); //revisamos que exista el cobrador
-           var checkTarjeta = _context.Tarjetas.FirstOrDefault(t => t.IdTarjeta == _idDni); //revisamos que tengamos una tarjeta asociada
-           var checkSaldo = _context.Billeteras.Include(u => u.Usuario).FirstOrDefault(b=> b.IdBilletera == idDni);
+            string cvuCobrador = "0046922191583351343977";
+            int idDni = 12345678; 
 
-            if (checkCobrador == null)
+            var billeteraCobrador = _context.Billeteras.Include(b=> b.Usuario).FirstOrDefault(b => b.Tipo =="Cobrador" && cvuCobrador == b.Cvu); //revisamos que exista el cobrador
+            var tarjetaUsuario = _context.Tarjetas.Include(t => t.Billetera).ThenInclude(t => t.Usuario).FirstOrDefault(t=>t.Billetera.Usuario.Dni == idDni && t.Billetera.Tipo == "MercadoPago");//revisamos que tengamos una tarjeta asociada
+            var billeteraUsuario = _context.Billeteras.Include(u => u.Usuario).FirstOrDefault(b => b.Usuario.Dni == idDni && b.Tipo == "MercadoPago");  
+
+            if (billeteraCobrador == null)
             {
+                _logger.LogWarning("El cobrador con CVU: {cvuCobrador} no existe.", cvuCobrador);
                 return false;
             }
 
-            if(checkTarjeta == null)
+            if (tarjetaUsuario == null)
             {
-                 return false;
-            }
-            if(checkSaldo == null)
-            {
+                _logger.LogWarning("La tarjeta asociada al DNI: {idDni} no existe.", idDni);
                 return false;
             }
-            decimal resultado;
+            if (billeteraUsuario == null)
+            {
+                _logger.LogWarning("La billetera asociada al DNI: {idDni} no existe.", idDni);
+                return false;
+            }
 
             if (montoPagar <= 0)
             {
-                Console.WriteLine("Error el monto es 0");
                 return false;
             }
 
-            if (montoPagar > checkSaldo.Saldo)
+            if (montoPagar > tarjetaUsuario.Saldo)
             {
-                Console.WriteLine($"El monto supera su saldo de la tarjeta de credito: ${checkSaldo.Saldo} Pesos");
                 return false;
             }
             if (cantCuotas > 12)
             {
-                Console.WriteLine($"La cantidad de cuotas que selecciono {cantCuotas} no estan permitidas. ");
                 return false;
             }
 
             if (cantCuotas == 1)
             {
-                checkSaldo.Saldo -= montoPagar;             
-                checkCobrador.Saldo += montoPagar;
+                billeteraUsuario.Saldo -= montoPagar;             
+                billeteraCobrador.Saldo += montoPagar;
+                _context.SaveChanges();
                 return true;
             }
             if (cantCuotas == 3)
             {
                 resultado = montoPagar + (0.15m * montoPagar);
-
-                checkSaldo.Saldo -= resultado;
-                checkCobrador.Saldo += resultado;
-                //Console.WriteLine($"\n");
-                //Console.WriteLine($"DATOS DEL COBRADOR: ");
-                //Console.WriteLine($"Nombre Completo: {cobrador.nombre} {cobrador.apellido} ");
-                //Console.WriteLine($"DNI: {cobrador.dni}");
-                //Console.WriteLine($"Se realizo el pago total de: ${resultado}Pesos");
-                //Console.WriteLine($"\n");
-
+                billeteraUsuario.Saldo -= resultado;
+                billeteraCobrador.Saldo += resultado;
+                _context.SaveChanges();
                 return true;
             }
 
@@ -102,35 +88,21 @@ namespace BilleterasBack.Wallets.Shared.Strategies.Mp
             {
                 resultado = montoPagar + (0.20m * montoPagar);
 
-                checkSaldo.Saldo -= resultado;
-                checkCobrador.Saldo += resultado;
-                //Console.WriteLine($"\n");
-                //Console.WriteLine($"Su saldo de la tarjeta de credito actualmente: ${checkSaldo.Saldo} Pesos");
-                //Console.WriteLine($"DATOS DEL COBRADOR: ");
-                //Console.WriteLine($"Nombre Completo: {cobrador.nombre} {cobrador.apellido} ");
-                //Console.WriteLine($"DNI: {cobrador.dni}");
-                //Console.WriteLine($"Se realizo el pago total de: ${resultado}Pesos");
-                //Console.WriteLine($"\n");
-                return true;
+                billeteraUsuario.Saldo -= resultado;
+                billeteraCobrador.Saldo += resultado;
+                _context.SaveChanges();
 
+                return true;
             }
             if (cantCuotas == 12)
             {
                 resultado = montoPagar + (0.25m * montoPagar);
-
-                checkSaldo.Saldo -= resultado;
-                checkSaldo.Saldo += resultado;
-                //Console.WriteLine($"\n");
-                //Console.WriteLine($"Su saldo de la tarjeta de credito actualmente: ${checkSaldo.Saldo} Pesos");
-                //Console.WriteLine($"DATOS DEL COBRADOR: ");
-                //Console.WriteLine($"Nombre Completo: {cobrador.nombre} {cobrador.apellido} ");
-                //Console.WriteLine($"DNI: {cobrador.dni}");
-                //Console.WriteLine($"Se realizo el pago total de: ${resultado}Pesos");
-                //Console.WriteLine($"\n");
+                billeteraUsuario.Saldo -= resultado;
+                billeteraCobrador.Saldo += resultado;
+                _context.SaveChanges();
                 return true;
 
             }
-            Console.WriteLine($"Error no se pudo pagar. ");
             return false;
         }
         

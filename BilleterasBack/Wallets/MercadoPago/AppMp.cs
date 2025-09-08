@@ -1,5 +1,7 @@
 ﻿using BilleterasBack.Wallets.Models;
+using Microsoft.EntityFrameworkCore;
 using System;
+using System.Threading.Tasks;
 
 
 public class AppMp
@@ -10,31 +12,54 @@ public class AppMp
     {
         _context = context;
     }
-    //public bool agregarDineroCuentaMp(decimal dinero)
-    //{
-    //    if (tarjeta == null || tarjeta.limiteSaldo == 0)
-    //    {
-    //        Console.WriteLine($"No tenes una tarjeta asociada para cargar saldo en MercadoPago.");
-    //        return false;
-    //    }
-
-    //    if (dinero > tarjeta.limiteSaldo)
-    //    {
-    //       Console.WriteLine($"No es posible transferir su saldo: {tarjeta.limiteSaldo} es menor al saldo que desea transferir; ${dinero} Pesos");
-    //        return false;
-    //    }
-
-    //    decimal saldoTarjetaCredito = tarjeta.SaldoLimite();
-    //    saldoTarjetaCredito -= dinero;
-    //    saldo_cuenta_mercado_pago += saldoTarjetaCredito;
-    //    return true;
-    //}
-
-    public async Task<Billetera> CrearCuentaMercadoPago(Usuario usuario)
+    public async Task<bool> agregarDineroCuentaMp(int dni, decimal monto)
     {
-        if(usuario == null)
+        var tarjetaUsuario = await _context.Tarjetas
+       .Include(t => t.Billetera)
+           .ThenInclude(b => b.Usuario)
+       .FirstOrDefaultAsync(t => t.Billetera.Usuario.Dni == dni && t.Billetera.Tipo == "MercadoPago");
+
+        if (tarjetaUsuario == null)
+            return false;
+
+        if(tarjetaUsuario.Saldo < monto)
+            return false;
+
+        var billetera = await _context.Billeteras
+        .Include(b => b.Usuario)
+        .FirstOrDefaultAsync(b => b.Usuario.Dni == dni && b.Tipo == "MercadoPago");
+
+        if (billetera == null) return false;
+
+        tarjetaUsuario.Saldo -= monto;
+        billetera.Saldo += monto;
+        await _context.SaveChangesAsync();
+        return true;
+
+    }
+
+    public async Task<Billetera> CrearCuentaMercadoPago(int dni)
+    {
+        //validar que sea hasta 8 digitos
+        if (dni <= 0 || dni > 99999999)
         {
-            throw new ArgumentNullException(nameof(usuario));
+            throw new Exception("DNI debe ser mayor que cero y hasta 8 digitos");
+        }
+
+        var usuario = await _context.Usuarios.Include(u => u.Billeteras).FirstOrDefaultAsync(u => u.Dni == dni);
+        
+        if (usuario == null) throw new Exception("Usuario no encontrado");
+
+        bool existeBilletera = usuario.Billeteras.Any(b => b.Tipo == "MercadoPago");
+        if (existeBilletera)
+        {
+            throw new Exception("Ya existe una billetera de MercadoPago para este usuario.");
+        }
+
+        bool existeCobrador = usuario.Billeteras.Any(b => b.Tipo == "Cobrador");
+        if (existeCobrador)
+        {
+            throw new Exception("No se puede crear una billetera de MercadoPago para un usuario que es Cobrador.");
         }
 
         var billetera = new Billetera
@@ -53,7 +78,6 @@ public class AppMp
     {
         Random random = new Random();
         string numero = "";
-
         for (int i = 0; i < 22; i++)
         {
             numero += random.Next(0, 10).ToString();

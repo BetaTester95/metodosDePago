@@ -19,7 +19,7 @@ public class UsuariosController : ControllerBase
     public async Task<IActionResult> GuardarUsuarios(Usuario usuario)
     {
         try
-            {
+        {
             bool maiLExiste = await _context.Usuarios.AnyAsync(u => u.Email == usuario.Email);
             if (maiLExiste)
             {
@@ -30,8 +30,6 @@ public class UsuariosController : ControllerBase
                     field = "correo"
                 });
             }
-
-            // Verificar si el DNI ya existe
             bool dniExiste = await _context.Usuarios.AnyAsync(u => u.Dni == usuario.Dni);
 
             if (dniExiste)
@@ -44,7 +42,7 @@ public class UsuariosController : ControllerBase
                 });
             }
 
-            if(string.IsNullOrEmpty(usuario.Nombre) || string.IsNullOrEmpty(usuario.Apellido))
+            if (string.IsNullOrEmpty(usuario.Nombre) || string.IsNullOrEmpty(usuario.Apellido))
             {
                 return BadRequest(new
                 {
@@ -54,7 +52,7 @@ public class UsuariosController : ControllerBase
                 });
             }
 
-            if(string.IsNullOrEmpty(usuario.PasswordHash))
+            if (string.IsNullOrEmpty(usuario.PasswordHash))
             {
                 return BadRequest("Error la contraseña es obligatoria. ");
             }
@@ -82,6 +80,6 @@ public class UsuariosController : ControllerBase
                 Error = ex.Message
             };
             return new JsonResult(error) { StatusCode = 500 };
-        }        
+        }
     }
 }

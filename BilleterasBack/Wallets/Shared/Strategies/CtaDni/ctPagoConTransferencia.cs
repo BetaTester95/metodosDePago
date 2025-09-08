@@ -1,16 +1,17 @@
 ﻿using BilleterasBack.Wallets.Collector.Cobrador;
 using BilleterasBack.Wallets.Shared.Interfaces;
+using BilleterasBack.Wallets.Shared.Strategies.Mp;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-
-namespace EjercicioInterfaces.Estrategias.ctdEstrategias
+namespace BilleterasBack.Wallets.Shared.Strategies.CtaDni
 {
-    public class ctPagoConTransferencia /*: IPagoCardTransferencia*/
+    public class ctPagoConTransferencia : IPagoCardTransferencia
     {
         private readonly AppDbContext _context;
         private string? _cvuCobradorSeleccionado;
@@ -23,40 +24,43 @@ namespace EjercicioInterfaces.Estrategias.ctdEstrategias
           _context = context;
         }
 
-        public string CvuCobradorSeleccionado(string cvu)
-        {
-            _cvuCobradorSeleccionado = cvu;
-            return _cvuCobradorSeleccionado;
-        }
-
-        public int identificarTarjeta(int dni)
-        {
-            _idDni = dni;
-            return _idDni;
-        }
-
         public bool PagoConTransferencia(decimal montoPagar, string cbu)
         {
-            string? cvuCobrador = _cvuCobradorSeleccionado;
-            int idDni = _idDni;
-            var checkCobrador = _context.Billeteras.Include(b => b.Usuario).FirstOrDefault(b => b.Tipo == "Cobrador" && cvuCobrador == b.Cvu); //revisamos que exista el cobrador
-            var checkTarjeta = _context.Tarjetas.Include(t => t.Billetera).ThenInclude(b => b.Usuario).FirstOrDefault(t => t.Billetera.Usuario.Dni == idDni); //revisamos que exista la tarjeta
-            var checkSaldo = _context.Billeteras.Include(u => u.Usuario).FirstOrDefault(b => b.Usuario.Dni == idDni);
-            decimal saldo = checkSaldo.Saldo;
+            var logger = LoggerFactory.Create(builder => builder.AddConsole()).CreateLogger<ctPagoConTransferencia>();
+            int idDni = 12345678;
 
-            if (checkCobrador == null)
+            var billeteraCobrador = _context.Billeteras.FirstOrDefault(b => b.Tipo == "Cobrador" && b.Cvu == cbu);
+            if (billeteraCobrador == null)
+            {
+                logger.LogError($"Billetera del cobrador no encontrada. {{Cbu: {cbu}}}");
                 return false;
+            }
 
-            string? cbuCobrador = checkCobrador.Cvu;
+            var tarjetaUsuario = _context.Tarjetas.Include(t => t.Billetera)
+               .ThenInclude(b => b.Usuario)
+               .FirstOrDefault(t => t.Billetera.Usuario.Dni == idDni && t.Billetera.Tipo == "CuentaDni");
+
+            if (tarjetaUsuario == null)
+            {
+                logger.LogError("Tarjeta del usuario no encontrada.");
+                return false;
+            }
+
+            var billeteraUsuario = _context.Billeteras.Include(u => u.Usuario).FirstOrDefault(b => b.Usuario.Dni == idDni && b.Tipo == "MercadoPago");
+            if (billeteraUsuario == null)
+            {
+                logger.LogError("Billetera del usuario no encontrada.");
+                return false;
+            }
+            decimal saldo = billeteraUsuario.Saldo;
 
             DateTime hoy = DateTime.Now;
             var region = new CultureInfo("es-ES");
             string diaSemana = hoy.ToString("dddd", region).ToLower();
 
-
             if (saldo < montoPagar)
             {
-                Console.WriteLine("Saldo insuficiente en Cuenta DNI.");
+                logger.LogError("Saldo insuficiente para realizar el pago.");
                 return false;
             }
 
@@ -64,32 +68,26 @@ namespace EjercicioInterfaces.Estrategias.ctdEstrategias
             {
                 descuentoTotal = montoPagar - (descuentoLyM * montoPagar);
                 saldo -= descuentoTotal;
-                checkSaldo.Saldo = saldo;
-                checkCobrador.Saldo += descuentoTotal;
+                billeteraUsuario.Saldo = saldo;
+                billeteraCobrador.Saldo += descuentoTotal;
                 _context.SaveChanges();              
-                /*Console.WriteLine($"Resultado del monto a pagar con descuento aplicado: {descuentoTotal}");
-                Console.WriteLine($"Le quedo un saldo de : {ctdni.saldoCuentaDni}");
-                Console.WriteLine("Descuento del 15% aplicado por ser Lunes o Miércoles.");*/
                 return true;
             }
             else if (diaSemana == "sábado")
             {
                 descuentoTotal = montoPagar - (descuentoS * montoPagar);
                 saldo -= descuentoTotal;
-                checkSaldo.Saldo = saldo;
-                checkCobrador.Saldo += descuentoTotal;
+                billeteraUsuario.Saldo = saldo;
+                billeteraCobrador.Saldo += descuentoTotal;
                 _context.SaveChanges();
-                /*Console.WriteLine($"Resultado del monto a pagar con descuento aplicado: {descuentoTotal}");
-                Console.WriteLine($"Le quedo un saldo de : {ctdni.saldoCuentaDni}");
-                Console.WriteLine("Descuento del 20% aplicado por ser sábado.");*/
                 return true;
             }
 
             if (montoPagar >= saldo)
             {
                 saldo -= montoPagar;
-                checkSaldo.Saldo = saldo;
-                checkCobrador.Saldo += montoPagar;
+                billeteraUsuario.Saldo = saldo;
+                billeteraCobrador.Saldo += montoPagar;
                 _context.SaveChanges();
                return true;
            }

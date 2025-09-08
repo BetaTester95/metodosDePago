@@ -10,20 +10,20 @@ namespace BilleterasBack.Wallets.Models
         [Key]
         public int IdUsuario { get; set; }
 
-        [Required, MaxLength(100)]
-        public string Nombre { get; set; }
+        [Required(ErrorMessage ="El nombre es obligatorio"), MaxLength(100)]
+        public string? Nombre { get; set; }
 
-        [Required, MaxLength(100)]
-        public string Apellido { get; set; }
+        [Required(ErrorMessage ="El apellido es obligatorio"), MaxLength(100)]
+        public string? Apellido { get; set; }
 
-        [Required, MaxLength(100)]
-        public string Email { get; set; }
+        [Required(ErrorMessage ="El email es obligatorio"), MaxLength(100)]
+        public string? Email { get; set; }
 
-        [Required, MaxLength(255)]
-        public string PasswordHash { get; set; }
+        [Required(ErrorMessage ="El password es obligatorio"), MaxLength(255)]
+        public string? PasswordHash { get; set; }
 
-        [Required]
-        public int Dni { get; set; }
+        [Required(ErrorMessage ="El DNI es obligatorio")]
+        public int? Dni { get; set; }
 
         [ForeignKey("TipoUsuario")]
         public int IdTipoUsuario { get; set; }
@@ -33,7 +33,7 @@ namespace BilleterasBack.Wallets.Models
 
         [Required]
         [MaxLength(20)]
-        public string Estado { get; set; } = "activo"; // activo, suspendido, eliminado
+        public string? Estado { get; set; } = "activo"; // activo, suspendido, eliminado
 
         // Relación con Billeteras
         [JsonIgnore]

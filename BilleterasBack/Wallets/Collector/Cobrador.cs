@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore.Storage.ValueConversion.Internal;
+﻿using BilleterasBack.Wallets.Models;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion.Internal;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,15 +17,39 @@ namespace BilleterasBack.Wallets.Collector.Cobrador
             public string mailCobrador;
             public decimal saldoCobrador = 0.00m;
             public string cbu;
+            private readonly AppDbContext _context;
 
-            public Cobrador(string nombre, string apellido, int dni, string mail)
+        public Cobrador(AppDbContext context)
+        {    
+            _context = context;
+        }
+
+
+        public async Task<Billetera?> CrearCuentaCobrador(Usuario usuario)
+        {
+            if (usuario == null)
             {
-                this.nombre = nombre;
-                this.apellido = apellido;
-                this.dni = dni;
-                mailCobrador = mail;
-                cbu = GenerarNumeroCbu();
+                throw new ArgumentNullException(nameof(usuario));
             }
+
+            if (usuario.IdTipoUsuario != 2)
+                throw new Exception("Un usuario de tipo Cliente no puede crear una billetera Cobrador.");
+
+            bool existeCobrador = usuario.Billeteras.Any(b => b.Tipo == "Cobrador");
+            if (existeCobrador)
+                throw new Exception("El usuario ya tiene una billetera de tipo Cobrador.");
+
+            var billetera = new Billetera
+            {
+                IdUsuario = usuario.IdUsuario,
+                Tipo = "Cobrador",
+                Cvu = GenerarNumeroCbu(),
+                Saldo = 0.0m
+            };
+            await _context.Billeteras.AddAsync(billetera);
+            await _context.SaveChangesAsync();
+            return billetera;
+        }
 
         public decimal retornarSaldo()
             {

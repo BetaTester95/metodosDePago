@@ -1,6 +1,5 @@
 ﻿using BilleterasBack.Wallets.Collector.Cobrador;
 using BilleterasBack.Wallets.Shared.Interfaces;
-using EjercicioInterfaces;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -24,53 +23,52 @@ namespace BilleterasBack.Wallets.Shared.Strategies.Pp
         }
 
 
-        public string CvuCobradorSeleccionado(string cvu)
+        public bool PagoConTarjetaCredito(decimal montoPagar, int cantCuotas=0)
         {
-            _cvuCobradorSeleccionado = cvu;
-            return _cvuCobradorSeleccionado;
-        }
+            var logger = LoggerFactory.Create(builder => builder.AddConsole()).CreateLogger<paypAgregarTarjeta>();
 
-        public int identificarTarjeta(int dni)
-        {
-            _idDni = dni;
-            return _idDni;
-        }
+            string cvuCobrador = "0046922191583351343977";
+            int idDni = 12345678;
 
-        public bool PagoConTarjetaCredito(decimal montoPagar, int cantCuotas)
-        {
-            var checkCobrador = _context.Billeteras.Include(b => b.Usuario).FirstOrDefault(b => b.Tipo == "Cobrador" && _cvuCobradorSeleccionado == b.Cvu); //revisamos que exista el cobrador
-            var checkTarjeta = _context.Tarjetas.FirstOrDefault(t => t.IdTarjeta == _idDni); //revisamos que tengamos una tarjeta asociada
-
-            var checkSaldo = _context.Billeteras.Include(u => u.Usuario).FirstOrDefault(b => b.Usuario.Dni == _idDni);
-            saldoTarjetaCredito = checkTarjeta.Saldo;
-
-            if (checkTarjeta.NumeroTarjeta == null)
+            var billeteraCobrador = _context.Billeteras.Include(b => b.Usuario).FirstOrDefault(b => b.Tipo == "Cobrador" && cvuCobrador == b.Cvu); //revisamos que exista el cobrador
+            if(billeteraCobrador == null)
             {
-              return false;
-            }
-            
-            if (checkCobrador == null)
-            {
+                logger.LogWarning("El cobrador con CVU: {cvuCobrador} no existe.", cvuCobrador);
                 return false;
             }
-            if (checkSaldo == null)
+
+            var tarjetaUsuario = _context.Tarjetas.Include(t => t.Billetera)
+                 .ThenInclude(b => b.Usuario)
+                 .FirstOrDefault(t => t.Billetera.Usuario.Dni == idDni && t.Billetera.Tipo == "PayPal");
+
+            var billeteraUsuario = _context.Billeteras.Include(u => u.Usuario).FirstOrDefault(b => b.Usuario.Dni == idDni && b.Tipo == "PayPal");
+            saldoTarjetaCredito = billeteraCobrador.Saldo;
+
+            if (tarjetaUsuario == null)
             {
+                logger.LogWarning("La tarjeta asociada al DNI: {idDni} no existe.", idDni);
+                return false;
+            }
+                       
+            if (billeteraUsuario == null)
+            {
+                logger.LogWarning("La billetera asociada al DNI: {idDni} no existe.", idDni);
                 return false;
             }
             
             if (montoPagar <= 0)
             {
-                Console.WriteLine("Error el monto es 0");
+                logger.LogWarning("El monto a pagar debe ser mayor que cero.");
                 return false;
             }
             if (montoPagar > saldoTarjetaCredito)
             {
-                Console.WriteLine("No posee saldo suficiente en la tarjeta");
+                logger.LogWarning("El monto a pagar excede el saldo disponible en la tarjeta de crédito.");
                 return false;
             }
 
             saldoTarjetaCredito -= montoPagar;
-            checkCobrador.Saldo += montoPagar;
+            billeteraCobrador.Saldo += montoPagar;
             _context.SaveChanges();
             return true;
         }

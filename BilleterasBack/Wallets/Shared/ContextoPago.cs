@@ -3,14 +3,16 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 namespace BilleterasBack.Wallets.Shared
 {
+    [JsonConverter(typeof(JsonStringEnumConverter))]
     public enum TipoMetodoPago
     {
         MercadoPago,
         PayPal,
-        CuentaDNI
+        CuentaDni
     }
     public class ContextoPago
     {

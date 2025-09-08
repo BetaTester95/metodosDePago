@@ -1,26 +1,50 @@
 ﻿
 using BilleterasBack.Wallets.Collector.Cobrador;
 using BilleterasBack.Wallets.Models;
+using BilleterasBack.Wallets.Shared.Strategies.Mp;
+using Microsoft.EntityFrameworkCore;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.RegularExpressions;
 namespace EjercicioInterfaces
 {
     public class PayPal
     {
         private readonly AppDbContext _context;
-
+       
         public PayPal(AppDbContext context)
         {
             _context = context;
         }
 
-
-        public async Task<Billetera> CrearCuentaPayPal(Usuario usuario)
+        public async Task<Billetera> CrearCuentaPayPal(int dni)
         {
-            if(usuario == null)
+            if(!validarDNI(dni))
             {
-                throw new ArgumentNullException(nameof(usuario));
+                return new Billetera { Message = "DNI no valido." };
             }
-            
+
+            var usuario = await _context.Usuarios.Include(u=> u.Billeteras).FirstOrDefaultAsync(u => u.Dni == dni);
+            if (usuario == null)
+            {
+                return new Billetera { Message = "Usuario no encontrado." };
+            }
+
+            bool tieneCobrador = usuario.Billeteras.Any(b => b.Tipo == "Cobrador");
+            if (tieneCobrador)
+            {
+                return new Billetera { Message = "El usuario es un cobrador y no puede registrar PayPal." };
+            }
+
+            bool existeBilletera = usuario.Billeteras.Any(b => b.Tipo == "PayPal");
+            if (existeBilletera) {
+                return new Billetera { Message = "El usuario ya esta registrado." };
+            }
+
+            if (!mailValidar(usuario.Email))
+            {
+                return new Billetera { Message = "Correo electrónico no válido." };
+            }
+
             var billetera = new Billetera
             {
                 IdUsuario = usuario.IdUsuario,
@@ -33,28 +57,22 @@ namespace EjercicioInterfaces
             return billetera;
         }
 
-
         public static bool ValidarNumeroCelular(string numero)
         {
             if (string.IsNullOrEmpty(numero))
             {
-                Console.WriteLine($"\n");
-                Console.WriteLine($"Error al validar el numero de celular");
                 return false;
             }
 
             string regEspacios = @"[\s\-\(\)]";
             string regNumeros = @"\d{10,12}$";
 
-
             if (!Regex.IsMatch(numero, regEspacios))
             {
-                Console.WriteLine($"Error con el numero: {numero}");
                 return false;
             }
             if (Regex.IsMatch(numero, regNumeros))
             {
-                Console.WriteLine($"Error con el numero: {numero}");
                 return false;
             }
             return true;
@@ -66,13 +84,30 @@ namespace EjercicioInterfaces
 
             if (string.IsNullOrEmpty(mail))
             {
-                Console.WriteLine($"Debe ingresar un mail. ");
                 return false;
             }
 
             if (!Regex.IsMatch(mail, regMail))
             {
-                Console.WriteLine($"Error al validar el mail. ");
+                return false;
+            }
+            return true;
+        }
+
+        public static bool validarDNI(int dni)
+        {
+            string dniString = dni.ToString();   
+            string expDNI = @"^\d{8}$";
+
+            if (dni == 0)
+            {
+                Console.WriteLine($"Error el dni no puede ser {dni}");
+                return false;
+            }
+
+            if (!Regex.IsMatch(dniString, expDNI))
+            {
+                Console.WriteLine($"El DNI '{dni}' no es valido. Debe contener 8 digitos.");
                 return false;
             }
             return true;
@@ -134,24 +169,6 @@ namespace EjercicioInterfaces
 
         }
 
-        public static bool validarDNI(int dni)
-        {
-            string dniString = dni.ToString();
-            string expDNI = @"^\d{8}$";
-
-            if (dni == 0)
-            {
-                Console.WriteLine($"Error el dni no puede ser {dni}");
-                return false;
-            }
-
-            if (!Regex.IsMatch(dniString, expDNI))
-            {
-                Console.WriteLine($"El DNI '{dni}' no es valido. Debe contener 8 digitos.");
-                return false;
-            }
-            return true;
-        }
 
         public bool AgregarSaldoPaypal(decimal saldo)
         {

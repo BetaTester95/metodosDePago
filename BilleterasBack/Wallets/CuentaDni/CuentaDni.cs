@@ -1,5 +1,7 @@
 ﻿using BilleterasBack.Wallets.Collector.Cobrador;
 using BilleterasBack.Wallets.Models;
+using BilleterasBack.Wallets.Shared.Strategies.Pp;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -19,12 +21,28 @@ namespace EjercicioInterfaces
             _context = context;
         }
 
-
-        public async Task<Billetera> CrearCuentaDni(Usuario usuario)
+        public async Task<Billetera> CrearCuentaDni(int dni)
         {
-            if(usuario == null)
+            var logger = LoggerFactory.Create(builder => builder.AddConsole()).CreateLogger<Billetera>();
+            var usuario = await _context.Usuarios.Include(u => u.Billeteras)
+                                                 .FirstOrDefaultAsync(u => u.Dni == dni);
+            if (usuario == null)
             {
-                throw new ArgumentNullException(nameof(usuario));
+                logger.LogError($"Usuario con DNI {dni} no encontrado.");
+                return null; 
+            }
+
+            bool tieneCobrador = usuario.Billeteras.Any(b => b.Tipo == "Cobrador");
+            if (tieneCobrador)
+            {
+                logger.LogError($"El usuario con DNI {dni} tiene una billetera tipo 'Cobrador' y no puede crear CuentaDni.");
+                return null; 
+            }
+            bool existeBilletera = usuario.Billeteras.Any(b => b.Tipo == "CuentaDni");
+            if (existeBilletera)
+            {
+                logger.LogError($"El usuario con DNI {dni} ya tiene una billetera de tipo CuentaDni.");
+                return null; 
             }
 
             var billetera = new Billetera
@@ -37,9 +55,11 @@ namespace EjercicioInterfaces
 
             _context.Billeteras.Add(billetera);
             await _context.SaveChangesAsync();
+
+            logger.LogInformation($"Billetera de CuentaDni creada para usuario {dni} con CVU {billetera.Cvu}");
             return billetera;
         }
-     
+
         public string GenerarNumeroTarjeta()
         {
             Random random = new Random();
@@ -68,12 +88,6 @@ namespace EjercicioInterfaces
             DateTime ahora = DateTime.Now;
             return fecha > ahora;
         }
-
-        //public decimal agregarSaldo(decimal saldo)
-        //{
-        //    //tarjetaV!.limiteSaldo -= saldo;
-        //    return this.saldoCuentaDni += saldo;
-        //}
 
         public static bool validarNombre(string nombre)
         {

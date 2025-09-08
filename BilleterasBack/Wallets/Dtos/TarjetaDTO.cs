@@ -1,4 +1,5 @@
-﻿using System.Text.Json.Serialization;
+﻿using BilleterasBack.Wallets.Shared;
+using System.Text.Json.Serialization;
 
 namespace BilleterasBack.Wallets.Dtos
 {
@@ -21,6 +22,8 @@ namespace BilleterasBack.Wallets.Dtos
 
         [JsonPropertyName("cod")]
         public int Cod { get; set; }
+
+        public TipoMetodoPago TipoMetodoPago { get; set; }
     }
  }
 

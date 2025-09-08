@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace EjercicioInterfaces.Estrategias.ctdEstrategias
+namespace BilleterasBack.Wallets.Shared.Strategies.CtaDni
 {
     public class ctAgregarTarjeta : IAgregarCard
     {
@@ -20,9 +20,16 @@ namespace EjercicioInterfaces.Estrategias.ctdEstrategias
             try
             {
                 DateTime ahora = DateTime.Now;
-                var usuarioIdentifacion = _context.Usuarios.FirstOrDefault(u => u.Dni == dni);
-                if (usuarioIdentifacion == null)
+               
+
+                var billetera = _context.Billeteras
+                    .Where(b => b.Tipo == "CuentaDni" && b.Usuario.Dni == dni)
+                    .FirstOrDefault();
+
+                if (billetera == null)
+                {
                     return false;
+                }
 
                 if (!numTarjeta.StartsWith("5195")) //con startwith comprobamos que la cadena empiece con el dato que pasamos por parametro.
                 {
@@ -56,7 +63,7 @@ namespace EjercicioInterfaces.Estrategias.ctdEstrategias
                     FechaVencimiento = fechaVenc,
                     CodigoSeguridad = cod,
                     Saldo = 10000,
-                    IdBilletera = usuarioIdentifacion.IdUsuario
+                    IdBilletera = billetera.IdBilletera
                 };
                 _context.Tarjetas.Add(tarjeta);
                 _context.SaveChanges();
