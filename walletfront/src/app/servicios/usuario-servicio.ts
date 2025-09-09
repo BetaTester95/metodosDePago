@@ -19,5 +19,4 @@ export class UsuarioServicio {
     {
         return this.http.post<any>(this.apiUrlLogin, usuarioLogin) //usuario login
     }
-
 }

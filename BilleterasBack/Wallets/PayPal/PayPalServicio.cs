@@ -1,0 +1,119 @@
+﻿
+using BilleterasBack.Wallets.Collector.Cobrador;
+using BilleterasBack.Wallets.Models;
+using BilleterasBack.Wallets.Shared.Strategies.Mp;
+using Microsoft.EntityFrameworkCore;
+using System;
+using BilleterasBack.Wallets.PayPal;
+using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.RegularExpressions;
+using BilleterasBack.Wallets.Validaciones;
+
+namespace BilleterasBack.Wallets.PayPal
+{
+    public class PayPalServicio
+    {
+        private readonly AppDbContext _context;
+        private readonly Validador _validador = new Validador();
+
+        public PayPalServicio(AppDbContext context)
+        {
+            _context = context;
+        }
+        public async Task<Billetera> CrearCuentaPayPal(string mail)
+        {     
+            if(!_validador.mailValidar(mail))
+            {
+                return new Billetera { Message = "Correo electrónico no válido." };
+            }
+
+            var usuario = await _context.Usuarios.Include(u=> u.Billeteras).FirstOrDefaultAsync(u => u.Email == mail);
+            if (usuario == null)
+            {
+                return new Billetera { Message = "Usuario no encontrado." };
+            }
+
+            bool tieneCobrador = usuario.Billeteras.Any(b => b.Tipo == "Cobrador");
+            if (tieneCobrador)
+            {
+                return new Billetera { Message = "El usuario es un cobrador y no puede registrar PayPal." };
+            }
+
+            bool existeBilletera = usuario.Billeteras.Any(b => b.Tipo == "PayPal");
+            if (existeBilletera) {
+                return new Billetera { Message = "El usuario ya esta registrado." };
+            }
+
+            if (!_validador.mailValidar(usuario.Email))
+            {
+                return new Billetera { Message = "Correo electrónico no válido." };
+            }
+
+            var billetera = new Billetera
+            {
+                IdUsuario = usuario.IdUsuario,
+                Tipo = "PayPal",
+                Cvu = usuario.Email,
+                Saldo = 0.0m
+            };
+            _context.Billeteras.Add(billetera);
+            await _context.SaveChangesAsync();
+            return billetera;
+        }
+        
+        public bool RealizarCobro(decimal cobro)
+        {
+            // Verificar que el cobro no sea negativo y que haya saldo suficiente
+            if (cobro < 0)
+            {
+                return false; // Indica un error
+            }
+
+            //if (cobro > tarjeta?.limiteSaldo)
+            //{
+            //    Console.WriteLine("No hay suficiente saldo para realizar el cobro.");
+            //    return true; // saldo insuficiente
+            //}
+
+            // restamos el cobro del saldo disponible
+            //tarjeta?.limiteSaldo -= cobro; heck
+
+            //Console.WriteLine($"Cobro realizado con éxito. Saldo restante: {tarjeta?.limiteSaldo}");
+            return true;
+        }
+
+        public bool AgregarSaldoPaypal(decimal saldo)
+        {
+            //if (tarjeta == null)
+            //{
+            //    Console.WriteLine($"no es posible agregar saldo, no tiene tarjeta asociada. ");
+            //    return false;
+            //}
+
+            //if (tarjeta.limiteSaldo == 0)
+            //{
+            //    Console.WriteLine($"Error el limite de su saldo es 0 USD. ");
+
+            //    return false;
+            //}
+
+            if (saldo <= 0)
+            {
+                Console.WriteLine("El saldo a agregar debe ser mayor a cero USD.");
+                return false;
+            }
+
+            //if (tarjeta.limiteSaldo < saldo)
+            //{
+            //    Console.WriteLine($"No posee suficiente saldo para esta operacion. ");
+            //    return false;
+            //}
+
+            //tarjeta.limiteSaldo -= saldo;
+            //saldoPayPal += saldo;
+            //Console.WriteLine($"Saldo agregado correctamente. Nuevo saldo PayPal: ${saldoPayPal} USD");
+            return true;
+        }
+
+    }
+}

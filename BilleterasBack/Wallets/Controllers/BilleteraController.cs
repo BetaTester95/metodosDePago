@@ -1,9 +1,12 @@
-﻿using BilleterasBack.Wallets.Collector.Cobrador;
+﻿
+using BilleterasBack.Wallets.Collector.Cobrador;
+using BilleterasBack.Wallets.CuentaDni;
 using BilleterasBack.Wallets.Models;
-using EjercicioInterfaces;
+using BilleterasBack.Wallets.PayPal;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+
 
 namespace BilleterasBack.Wallets.Controllers
 {
@@ -16,15 +19,15 @@ namespace BilleterasBack.Wallets.Controllers
 
         private readonly AppDbContext _context;
         private readonly AppMp _appMp;
-        private readonly CuentaDni _cuentaDni;
-        private readonly PayPal _payPal;
+        private readonly CuentaDniServicio _cuentaDni;
+        private readonly PayPalServicio _payPal;
         private readonly Cobrador _cobrador;
         public BilleteraController(AppDbContext context)
         {
             _context = context;
             _appMp = new AppMp(_context);
-            _cuentaDni = new CuentaDni(_context);
-            _payPal = new PayPal(_context);
+            _cuentaDni = new CuentaDniServicio(_context);
+            _payPal = new PayPalServicio(_context);
             _cobrador = new Cobrador(_context);
         }
 
@@ -52,7 +55,7 @@ namespace BilleterasBack.Wallets.Controllers
                 return BadRequest(new
                 {
                     mensaje = ex.Message,
-                    datos = (object?)null
+                    //datos = (object?)null
                 });
             }
         }
@@ -80,11 +83,11 @@ namespace BilleterasBack.Wallets.Controllers
         }
 
         [HttpPost("crear/paypal")]
-        public async Task<IActionResult> CrearCuentaPaypal(int dni)
+        public async Task<IActionResult> CrearCuentaPaypal(string mail)
         {
             try
             {
-                var billetera = await _payPal.CrearCuentaPayPal(dni);
+                var billetera = await _payPal.CrearCuentaPayPal(mail);
 
                 if (billetera == null)
                     return NotFound("Billetera de PayPal no encontrada.");

@@ -6,6 +6,7 @@ using BilleterasBack.Wallets.Shared.Interfaces;
 using BilleterasBack.Wallets.Shared.Strategies.CtaDni;
 using BilleterasBack.Wallets.Shared.Strategies.Mp;
 using BilleterasBack.Wallets.Shared.Strategies.Pp;
+using BilleterasBack.Wallets.Validaciones;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -24,6 +25,7 @@ namespace BilleterasBack.Wallets.Controllers
         private readonly AppDbContext _context;
         public readonly TipoMetodoPago _tipoDePago;
         private readonly ILogger<MpAgregarTarjeta> _logger;
+        private readonly Validador _validaciones = new Validador();
         public EstrategiasController(AppDbContext context, ILogger<MpAgregarTarjeta> logger)
         {
             _context = context;
@@ -96,7 +98,7 @@ namespace BilleterasBack.Wallets.Controllers
             {
                 mensaje = billeteraEncontrada ?
                 (resultado ? "Tarjeta agregada correctamente" : "Error al agregar tarjeta")
-                : "Billetera no encontrada para el usuario y tipo especificado",
+                : "Billetera no encontrada para el usuario",
                 tipoMetodoPagoRecibido,
                 tipoMetodoPagoStr,
                 idDni = request.Dni,
@@ -116,17 +118,16 @@ namespace BilleterasBack.Wallets.Controllers
             return Ok(responseObj);
         }
 
-
         [HttpPost("pagarcontarjeta")]
         public async Task<IActionResult> PagarConTarjeta([FromBody] PagoTarjetaRequest request)
         {
             var logger = HttpContext.RequestServices.GetRequiredService<ILogger<MpPagoConTarjetaCredito>>();
             var logger2 = HttpContext.RequestServices.GetRequiredService<ILogger<ctPagoConTarjetaCredito>>();
 
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
+            if(_validaciones.ValidarMonto(request.montoPagar))
+                return BadRequest(new { mensaje = "Error al ingresar el monto." });
+            
+
             IpagoCardCred? estrategia = request.tipoMetodoPago switch
             {
                 TipoMetodoPago.MercadoPago => new MpPagoConTarjetaCredito(_context, logger),
@@ -145,12 +146,18 @@ namespace BilleterasBack.Wallets.Controllers
             }
         }
 
-
-
-
         [HttpPost("pagarcontransferencia")]
         public async Task<IActionResult> PagoConTransferencia(TipoMetodoPago TipoMetodoPago, decimal montoPagar, string cbu)
         {
+            if(_validaciones.ValidarTipoMetodoPago(TipoMetodoPago.ToString()))
+                return BadRequest(new { mensaje = "El tipo de metodo de pago no es valido." });
+            
+            if (_validaciones.ValidarMonto(montoPagar))
+                return BadRequest(new { mensaje = "El monto a pagar debe ser mayor que cero." });
+
+            if(!_validaciones.validarNumTarjeta(cbu))
+                return BadRequest(new { mensaje = "El CBU ingresado no es valido." });
+
             IPagoCardTransferencia? estrategia = TipoMetodoPago switch
             {
                 TipoMetodoPago.MercadoPago => new MpPagoConTransferencia(_context),
@@ -167,7 +174,6 @@ namespace BilleterasBack.Wallets.Controllers
             else
             {
                 return Ok(new { mensaje = "Pago con transferencia exitoso." });
-
             }
         }
     }

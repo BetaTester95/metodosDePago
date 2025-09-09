@@ -24,10 +24,9 @@ namespace BilleterasBack.Wallets.Shared.Strategies.Mp
             _logger = logger;
         }
   
-
         public bool PagoConTarjetaCredito(decimal montoPagar, int cantCuotas)
         {
-            _logger.LogInformation("=== INICIO DEBUG ===");
+            _logger.LogInformation("INICIO DEBUG");
             _logger.LogInformation($"Monto: {montoPagar}, Cuotas: {cantCuotas}");
 
             string cvuCobrador = "0046922191583351343977";

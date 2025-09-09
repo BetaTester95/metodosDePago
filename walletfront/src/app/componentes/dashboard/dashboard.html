@@ -1,153 +1,253 @@
-<div class="dashboard-container">
-      <!-- Sidebar -->
-      <nav class="sidebar">
-        <div class="sidebar-header">
-          <h2>💳 Mis Billeteras</h2>
-        </div>
+<!-- Navbar Superior -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+      <div class="container-fluid">
+        <!-- Botón para mostrar/ocultar sidebar -->
+        <button 
+          class="btn btn-outline-light me-3" 
+          type="button" 
+          (click)="alternarSidebar()">
+          <i class="bi bi-list"></i>
+        </button>
         
-        <ul class="nav-menu">
-          <li class="nav-item" 
-              *ngFor="let wallet of wallets"
-              [class.active]="selectedWallet === wallet.id"
-              (click)="selectWallet(wallet.id)">
-            <span class="nav-icon">{{wallet.icon}}</span>
-            <span class="nav-text">{{wallet.name}}</span>
-            <span class="nav-badge" *ngIf="wallet.balance !== undefined">
-              {{wallet.currency}}{{wallet.balance | number:'1.2-2'}}
-            </span>
-          </li>
-        </ul>
-      </nav>
-
-      <!-- Main Content -->
-      <main class="main-content">
-        <div class="content-header">
-          <h1>{{getCurrentWalletName()}}</h1>
-          <div class="header-actions">
-            <button class="btn btn-primary" (click)="addMoney()">
-              + Agregar Dinero
-            </button>
-            <button class="btn btn-secondary" (click)="sendMoney()">
-              📤 Enviar
-            </button>
-          </div>
+        <a class="navbar-brand" href="#">Dashboard Admin</a>
+        
+        <div class="navbar-nav ms-auto">
+          <span class="navbar-text text-light me-3">Administrador</span>
+          <button class="btn btn-outline-light btn-sm">
+            <i class="bi bi-box-arrow-right"></i> Salir
+          </button>
         </div>
+      </div>
+    </nav>
 
-        <div class="wallet-content">
-          <!-- DNI Account -->
-          <div *ngIf="selectedWallet === 'dni'" class="wallet-section">
-            <div class="balance-card">
-              <h3>Balance Cuenta DNI</h3>
-              <div class="balance-amount">${{dniBalance | number:'1.2-2'}}</div>
-              <div class="balance-info">
-                <p>DNI: {{userDni}}</p>
-                <p>Último movimiento: {{lastMovementDate}}</p>
-              </div>
-            </div>
+    <!-- Contenedor Principal -->
+    <div class="container-fluid" style="margin-top: 56px;">
+      <div class="row">
+        
+        <!-- Sidebar Izquierdo -->
+        <nav 
+          [class]="obtenerClaseSidebar()" 
+          style="min-height: calc(100vh - 56px); transition: all 0.3s;">
+          
+          <div class="d-flex flex-column p-3 bg-light border-end" style="height: 100%;">
+            <h5 class="mb-4 text-center">Gestión de Usuarios</h5>
             
-            <div class="quick-actions">
-              <button class="action-btn" (click)="transferMoney()">
-                🔄 Transferir
-              </button>
-              <button class="action-btn" (click)="payServices()">
-                📋 Pagar Servicios
-              </button>
-              <button class="action-btn" (click)="viewHistory()">
-                📊 Historial
-              </button>
-            </div>
+            <ul class="nav nav-pills flex-column mb-auto">
+              <!-- Opción Lista de Usuarios -->
+              <li class="nav-item mb-2">
+                <button 
+                  [class]="obtenerClaseBotonMenu('lista')"
+                  (click)="cambiarVentana('lista')">
+                  <i class="bi bi-people me-2"></i>
+                  Lista de Usuarios
+                </button>
+              </li>
+              
+              <!-- Opción Crear Usuario -->
+              <li class="nav-item mb-2">
+                <button 
+                  [class]="obtenerClaseBotonMenu('crear')"
+                  (click)="cambiarVentana('crear')">
+                  <i class="bi bi-person-plus me-2"></i>
+                  Crear Usuario
+                </button>
+              </li>
+              
+              <!-- Opción Reportes -->
+              <li class="nav-item mb-2">
+                <button 
+                  [class]="obtenerClaseBotonMenu('reportes')"
+                  (click)="cambiarVentana('reportes')">
+                  <i class="bi bi-graph-up me-2"></i>
+                  Reportes
+                </button>
+              </li>
+              
+              <!-- Opción Configuración -->
+              <li class="nav-item mb-2">
+                <button 
+                  [class]="obtenerClaseBotonMenu('configuracion')"
+                  (click)="cambiarVentana('configuracion')">
+                  <i class="bi bi-gear me-2"></i>
+                  Configuración
+                </button>
+              </li>
+            </ul>
           </div>
+        </nav>
 
-          <!-- PayPal -->
-          <div *ngIf="selectedWallet === 'paypal'" class="wallet-section">
-            <div class="balance-card">
-              <h3>PayPal Balance</h3>
-              <div class="balance-amount">USD {{paypalBalance | number:'1.2-2'}}</div>
-              <div class="balance-info">
-                <p>Email: {{paypalEmail}}</p>
-                <p>Status: ✅ Verificado</p>
-              </div>
-            </div>
+        <!-- Área de Contenido Principal -->
+        <main [class]="obtenerClaseContenidoPrincipal()">
+          <div class="p-4">
             
-            <div class="quick-actions">
-              <button class="action-btn" (click)="withdrawPaypal()">
-                🏦 Retirar
-              </button>
-              <button class="action-btn" (click)="sendPaypalMoney()">
-                💸 Enviar
-              </button>
-              <button class="action-btn" (click)="requestMoney()">
-                📩 Solicitar
-              </button>
+            <!-- Encabezado de la ventana actual -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+              <h2>{{ obtenerTituloVentanaActual() }}</h2>
+              <small class="text-muted">{{ obtenerFechaActual() }}</small>
             </div>
-          </div>
 
-          <!-- Mercado Pago -->
-          <div *ngIf="selectedWallet === 'mercadopago'" class="wallet-section">
-            <div class="balance-card">
-              <h3>Mercado Pago</h3>
-              <div class="balance-amount">${{mercadoPagoBalance | number:'1.2-2'}}</div>
-              <div class="balance-info">
-                <p>CVU: {{mercadoPagoCVU}}</p>
-                <p>Nivel: ⭐ Verificado</p>
-              </div>
-            </div>
-            
-            <div class="quick-actions">
-              <button class="action-btn" (click)="payWithQR()">
-                📱 Pagar con QR
-              </button>
-              <button class="action-btn" (click)="generateLink()">
-                🔗 Generar Link
-              </button>
-              <button class="action-btn" (click)="investMoney()">
-                📈 Invertir
-              </button>
-            </div>
-          </div>
+            <!-- Contenido según ventana seleccionada -->
+            <div class="row">
+              <div class="col-12">
+                
+                <!-- Vista Lista de Usuarios -->
+                <div *ngIf="ventanaActual === 'lista'" class="card">
+                  <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Usuarios Registrados</h5>
+                    <button class="btn btn-primary btn-sm" (click)="cambiarVentana('crear')">
+                      <i class="bi bi-plus-circle me-1"></i>Nuevo Usuario
+                    </button>
+                  </div>
+                  <div class="card-body">
+                    <div class="table-responsive">
+                      <table class="table table-striped table-hover">
+                        <thead class="table-dark">
+                          <tr>
+                            <th>ID</th>
+                            <th>Nombre</th>
+                            <th>Email</th>
+                            <th>Rol</th>
+                            <th>Estado</th>
+                            <th>Acciones</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <tr *ngFor="let usuario of obtenerListaUsuarios()">
+                            <td>{{ usuario.id }}</td>
+                            <td>{{ usuario.nombre }}</td>
+                            <td>{{ usuario.email }}</td>
+                            <td>
+                              <span [class]="'badge ' + obtenerClaseRol(usuario.rol)">
+                                {{ usuario.rol }}
+                              </span>
+                            </td>
+                            <td>
+                              <span [class]="'badge ' + obtenerClaseEstado(usuario.activo)">
+                                {{ usuario.activo ? 'Activo' : 'Inactivo' }}
+                              </span>
+                            </td>
+                            <td>
+                              <button class="btn btn-sm btn-outline-primary me-1" title="Editar">
+                                <i class="bi bi-pencil"></i>
+                              </button>
+                              <button class="btn btn-sm btn-outline-danger" title="Eliminar">
+                                <i class="bi bi-trash"></i>
+                              </button>
+                            </td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
 
-          <!-- Cobrador -->
-          <div *ngIf="selectedWallet === 'cobrador'" class="wallet-section">
-            <div class="balance-card">
-              <h3>Sistema Cobrador</h3>
-              <div class="balance-amount">${{cobradorBalance | number:'1.2-2'}}</div>
-              <div class="balance-info">
-                <p>Comisiones del mes: ${{monthlyCommissions | number:'1.2-2'}}</p>
-                <p>Cobranzas pendientes: {{pendingCollections}}</p>
-              </div>
-            </div>
-            
-            <div class="quick-actions">
-              <button class="action-btn" (click)="newCollection()">
-                📝 Nueva Cobranza
-              </button>
-              <button class="action-btn" (click)="viewCollections()">
-                📋 Ver Cobranzas
-              </button>
-              <button class="action-btn" (click)="generateReport()">
-                📊 Reportes
-              </button>
-            </div>
-          </div>
-        </div>
+                <!-- Vista Crear Usuario -->
+                <div *ngIf="ventanaActual === 'crear'" class="card">
+                  <div class="card-header">
+                    <h5 class="mb-0">Crear Nuevo Usuario</h5>
+                  </div>
+                  <div class="card-body">
+                    <form class="row g-3">
+                      <div class="col-md-6">
+                        <label class="form-label">Nombre Completo</label>
+                        <input type="text" class="form-control" placeholder="Ingrese el nombre completo">
+                      </div>
+                      <div class="col-md-6">
+                        <label class="form-label">Email</label>
+                        <input type="email" class="form-control" placeholder="usuario@ejemplo.com">
+                      </div>
+                      <div class="col-md-6">
+                        <label class="form-label">Contraseña</label>
+                        <input type="password" class="form-control">
+                      </div>
+                      <div class="col-md-6">
+                        <label class="form-label">Rol</label>
+                        <select class="form-select">
+                          <option selected>Seleccionar rol...</option>
+                          <option value="admin">Administrador</option>
+                          <option value="editor">Editor</option>
+                          <option value="usuario">Usuario</option>
+                        </select>
+                      </div>
+                      <div class="col-12">
+                        <div class="form-check">
+                          <input class="form-check-input" type="checkbox" checked>
+                          <label class="form-check-label">Usuario activo</label>
+                        </div>
+                      </div>
+                      <div class="col-12">
+                        <button type="submit" class="btn btn-success me-2">
+                          <i class="bi bi-check-circle me-1"></i>Crear Usuario
+                        </button>
+                        <button type="button" class="btn btn-secondary" (click)="cambiarVentana('lista')">
+                          <i class="bi bi-arrow-left me-1"></i>Volver a Lista
+                        </button>
+                      </div>
+                    </form>
+                  </div>
+                </div>
 
-        <!-- Recent Transactions -->
-        <div class="recent-transactions">
-          <h3>Movimientos Recientes</h3>
-          <div class="transaction-list">
-            <div class="transaction-item" *ngFor="let transaction of recentTransactions">
-              <div class="transaction-icon">{{transaction.icon}}</div>
-              <div class="transaction-details">
-                <div class="transaction-description">{{transaction.description}}</div>
-                <div class="transaction-date">{{transaction.date}}</div>
-              </div>
-              <div class="transaction-amount" 
-                   [class.positive]="transaction.amount > 0"
-                   [class.negative]="transaction.amount < 0">
-                {{transaction.amount > 0 ? '+' : ''}}${{transaction.amount | number:'1.2-2'}}
+                <!-- Vista Reportes -->
+                <div ngIf="ventanaActual === 'reportes'" class="card">
+                  <div class="card-header">
+                    <h5 class="mb-0">Reportes y Estadísticas</h5>
+                  </div>
+                  <div class="card-body">
+                    <div class="row">
+                      <div class="col-md-3">
+                        <div class="card text-white bg-primary">
+                          <div class="card-body">
+                            <h5 class="card-title">Total Usuarios</h5>
+                            <h2>{{ obtenerListaUsuarios().length }}</h2>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="col-md-3">
+                        <div class="card text-white bg-success">
+                          <div class="card-body">
+                            <h5 class="card-title">Usuarios Activos</h5>
+                            <h2>{{ contarUsuariosActivos() }}</h2>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="col-md-3">
+                        <div class="card text-white bg-warning">
+                          <div class="card-body">
+                            <h5 class="card-title">Administradores</h5>
+                            <h2>{{ contarAdministradores() }}</h2>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="col-md-3">
+                        <div class="card text-white bg-danger">
+                          <div class="card-body">
+                            <h5 class="card-title">Usuarios Inactivos</h5>
+                            <h2>{{ contarUsuariosInactivos() }}</h2>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Vista Configuración -->
+                @if (ventanaActual === 'configuracion') {
+                    <div class="card">
+                      <div class="card-header">
+                        <h5 class="mb-0">Configuración del Sistema</h5>
+                      </div>
+                      <div class="card-body">
+                        <p class="text-muted">Aquí podrás configurar las opciones del sistema de gestión de usuarios.</p>
+                        <div class="alert alert-info">
+                          <i class="bi bi-info-circle me-2"></i>
+                          Esta sección estará disponible próximamente para configurar parámetros del sistema.
+                        </div>
+                      </div>
+                    </div>
+                  }
               </div>
             </div>
           </div>
-        </div>
-      </main>
+        </main>
+      </div>
     </div>

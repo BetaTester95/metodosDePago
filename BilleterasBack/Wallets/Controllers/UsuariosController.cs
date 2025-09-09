@@ -4,12 +4,17 @@ using System.Security.Cryptography;
 using System.Text;
 using BCrypt.Net;
 using BilleterasBack.Wallets.Models;
+using BilleterasBack.Wallets.PayPal;
+using System.Text.RegularExpressions;
+using BilleterasBack.Wallets.Validaciones;
 
 [ApiController]
 [Route("api/[controller]")]
+
 public class UsuariosController : ControllerBase
 {
     private readonly AppDbContext _context;
+    private readonly Validador _validador = new Validador();
     public UsuariosController(AppDbContext context)
     {
         _context = context;
@@ -18,6 +23,27 @@ public class UsuariosController : ControllerBase
     [HttpPost("registrar")]
     public async Task<IActionResult> GuardarUsuarios(Usuario usuario)
     {
+        if(_validador.validarNombre(usuario.Nombre) || _validador.validarApellido(usuario.Apellido))
+        {
+            return BadRequest(new
+            {
+                error = "NOMBRE_APELLIDO_INVALIDO",
+                message = "El nombre o apellido no puede estar vacio",
+                field = "nombre, apellido"
+            });
+        }
+
+
+        if (!_validador.validarDNI(usuario.Dni))
+        {
+            return BadRequest(new
+            {
+                error = "DNI_INVALIDO",
+                message = "El DNIdebe tener hasta 8 digitos",
+                field = "dni"
+            });
+        }
+
         try
         {
             bool maiLExiste = await _context.Usuarios.AnyAsync(u => u.Email == usuario.Email);
@@ -42,16 +68,6 @@ public class UsuariosController : ControllerBase
                 });
             }
 
-            if (string.IsNullOrEmpty(usuario.Nombre) || string.IsNullOrEmpty(usuario.Apellido))
-            {
-                return BadRequest(new
-                {
-                    error = "Error al validar el nombre o apellido",
-                    message = "El nombre o apellido no puede estar vacio",
-                    field = "nombre, apellido"
-                });
-            }
-
             if (string.IsNullOrEmpty(usuario.PasswordHash))
             {
                 return BadRequest("Error la contraseña es obligatoria. ");
@@ -59,7 +75,6 @@ public class UsuariosController : ControllerBase
 
             string passwordHash = BCrypt.Net.BCrypt.HashPassword(usuario.PasswordHash);
             usuario.PasswordHash = passwordHash;
-
             _context.Usuarios.Add(usuario);
             await _context.SaveChangesAsync();
 

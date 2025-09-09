@@ -21,8 +21,6 @@ namespace BilleterasBack.Wallets.Shared.Strategies.Mp
            _context = context;
         }
 
-       
-
         public bool PagoConTransferencia(decimal montoPagar, string cbu)
         {
             //agregar ilogger para debuguear

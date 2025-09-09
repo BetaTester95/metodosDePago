@@ -12,8 +12,6 @@ public class AppDbContext : DbContext
     public DbSet<Billetera> Billeteras { get; set; }
     public DbSet<Tarjeta> Tarjetas { get; set; }
 
-
-
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         // Índices únicos

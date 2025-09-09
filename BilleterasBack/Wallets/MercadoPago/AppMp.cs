@@ -1,4 +1,5 @@
 ﻿using BilleterasBack.Wallets.Models;
+using BilleterasBack.Wallets.Validaciones;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Threading.Tasks;
@@ -7,13 +8,19 @@ using System.Threading.Tasks;
 public class AppMp
 {
     private readonly AppDbContext _context;
-
+    private readonly Validador _validador = new Validador();
     public AppMp(AppDbContext context)
     {
         _context = context;
     }
     public async Task<bool> agregarDineroCuentaMp(int dni, decimal monto)
     {
+        if(!_validador.validarDNI(dni))
+            return false;
+       
+        if(!_validador.ValidarMonto(monto))
+            return false;
+        
         var tarjetaUsuario = await _context.Tarjetas
        .Include(t => t.Billetera)
            .ThenInclude(b => b.Usuario)
@@ -35,33 +42,23 @@ public class AppMp
         billetera.Saldo += monto;
         await _context.SaveChangesAsync();
         return true;
-
     }
 
-    public async Task<Billetera> CrearCuentaMercadoPago(int dni)
+    public async Task<Billetera> CrearCuentaMercadoPago(int dni)//ok
     {
-        //validar que sea hasta 8 digitos
-        if (dni <= 0 || dni > 99999999)
-        {
-            throw new Exception("DNI debe ser mayor que cero y hasta 8 digitos");
-        }
+        if (_validador.validarDNI(dni)) throw new Exception("DNI debe ser mayor que cero y hasta 8 digitos");     
 
         var usuario = await _context.Usuarios.Include(u => u.Billeteras).FirstOrDefaultAsync(u => u.Dni == dni);
         
         if (usuario == null) throw new Exception("Usuario no encontrado");
 
         bool existeBilletera = usuario.Billeteras.Any(b => b.Tipo == "MercadoPago");
-        if (existeBilletera)
-        {
-            throw new Exception("Ya existe una billetera de MercadoPago para este usuario.");
-        }
+        if (existeBilletera) throw new Exception("Ya existe una billetera de MercadoPago para este usuario.");
+        
 
         bool existeCobrador = usuario.Billeteras.Any(b => b.Tipo == "Cobrador");
-        if (existeCobrador)
-        {
-            throw new Exception("No se puede crear una billetera de MercadoPago para un usuario que es Cobrador.");
-        }
-
+        if (existeCobrador) throw new Exception("No se puede crear una billetera de MercadoPago para un usuario que es Cobrador.");
+        
         var billetera = new Billetera
         {
             IdUsuario = usuario.IdUsuario,
@@ -73,7 +70,6 @@ public class AppMp
         await _context.SaveChangesAsync();
         return billetera;
     }
-
     private string GenerarNumeroCbu()
     {
         Random random = new Random();

@@ -2,14 +2,6 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 
-interface WalletItem {
-  id: string;
-  name: string;
-  icon: string;
-  balance?: number;
-  currency?: string;
-}
-
 @Component({
   selector: 'app-dashboard',
   imports: [CommonModule],
@@ -19,148 +11,141 @@ interface WalletItem {
 
 
 export class Dashboard {
+sidebarVisible: boolean = true;  // Controla si el sidebar está visible
+ventanaActual: string = 'lista'; // Ventana actualmente seleccionada
 
-  selectedWallet = 'dni';
-  
-  wallets: WalletItem[] = [
-    { 
-      id: 'dni', 
-      name: 'Cuenta DNI', 
-      icon: '🏛️', 
-      balance: 15420.50, 
-      currency: '$' 
-    },
-    { 
-      id: 'paypal', 
-      name: 'PayPal', 
-      icon: '💳', 
-      balance: 892.30, 
-      currency: 'USD ' 
-    },
-    { 
-      id: 'mercadopago', 
-      name: 'Mercado Pago', 
-      icon: '💰', 
-      balance: 8750.75, 
-      currency: '$' 
-    },
-    { 
-      id: 'cobrador', 
-      name: 'Cobrador', 
-      icon: '📊', 
-      balance: 25600.00, 
-      currency: '$' 
-    }
+ private usuariosEjemplo = [
+    { id: 1, nombre: 'Juan Pérez', email: 'juan@ejemplo.com', rol: 'admin', activo: true },
+    { id: 2, nombre: 'María García', email: 'maria@ejemplo.com', rol: 'editor', activo: true },
+    { id: 3, nombre: 'Carlos López', email: 'carlos@ejemplo.com', rol: 'usuario', activo: false },
+    { id: 4, nombre: 'Ana Martínez', email: 'ana@ejemplo.com', rol: 'editor', activo: true },
+    { id: 5, nombre: 'Luis Rodríguez', email: 'luis@ejemplo.com', rol: 'usuario', activo: true }
   ];
 
-  // DNI Account data
-  dniBalance = 15420.50;
-  userDni = '12.345.678';
-  lastMovementDate = 'Hoy 14:30';
-
-  // PayPal data
-  paypalBalance = 892.30;
-  paypalEmail = 'usuario@email.com';
-
-  // Mercado Pago data
-  mercadoPagoBalance = 8750.75;
-  mercadoPagoCVU = '0000003100010000000001';
-
-  // Cobrador data
-  cobradorBalance = 25600.00;
-  monthlyCommissions = 1250.00;
-  pendingCollections = 15;
-
-  recentTransactions = [
-    {
-      icon: '🏪',
-      description: 'Compra en Supermercado',
-      date: 'Hoy 14:30',
-      amount: -850.00
-    },
-    {
-      icon: '💰',
-      description: 'Transferencia recibida',
-      date: 'Ayer 09:15',
-      amount: 2500.00
-    },
-    {
-      icon: '⚡',
-      description: 'Pago de servicios',
-      date: '2 días atrás',
-      amount: -320.50
-    },
-    {
-      icon: '📱',
-      description: 'Recarga celular',
-      date: '3 días atrás',
-      amount: -100.00
-    }
-  ];
-
-  selectWallet(walletId: string) {
-    this.selectedWallet = walletId;
+  alternarSidebar(): void {
+    this.sidebarVisible = !this.sidebarVisible;
   }
 
-  getCurrentWalletName(): string {
-    const wallet = this.wallets.find(w => w.id === this.selectedWallet);
-    return wallet ? wallet.name : 'Dashboard';
+  /**
+   * Cambia la ventana actual del dashboard
+   * @param nuevaVentana - Nombre de la ventana a mostrar
+   */
+  cambiarVentana(nuevaVentana: string): void {
+    this.ventanaActual = nuevaVentana;
   }
 
-  // Action methods
-  addMoney() {
-    alert('Funcionalidad: Agregar dinero');
+  /**
+   * Obtiene las clases CSS para el sidebar según su estado
+   * @returns String con las clases CSS del sidebar
+   */
+  obtenerClaseSidebar(): string {
+    return this.sidebarVisible 
+      ? 'col-md-3 col-lg-2' 
+      : 'col-md-3 col-lg-2 sidebar-oculto';
   }
 
-  sendMoney() {
-    alert('Funcionalidad: Enviar dinero');
+  /**
+   * Obtiene las clases CSS para el contenido principal
+   * @returns String con las clases CSS del contenido principal
+   */
+  obtenerClaseContenidoPrincipal(): string {
+    return this.sidebarVisible 
+      ? 'col-md-9 col-lg-10' 
+      : 'col-md-12 contenido-expandido';
   }
 
-  transferMoney() {
-    alert('Funcionalidad: Transferir dinero');
+  /**
+   * Obtiene las clases CSS para los botones del menú
+   * @param ventana - Nombre de la ventana del botón
+   * @returns String con las clases CSS del botón
+   */
+  obtenerClaseBotonMenu(ventana: string): string {
+    const claseBase = 'btn-menu w-100 text-start border-0';
+    return this.ventanaActual === ventana 
+      ? `${claseBase} active` 
+      : claseBase;
   }
 
-  payServices() {
-    alert('Funcionalidad: Pagar servicios');
+  /**
+   * Obtiene el título de la ventana actual
+   * @returns String con el título de la ventana
+   */
+  obtenerTituloVentanaActual(): string {
+    const titulos: { [key: string]: string } = {
+      'lista': 'Gestión de Usuarios',
+      'crear': 'Crear Nuevo Usuario',
+      'reportes': 'Reportes y Estadísticas',
+      'configuracion': 'Configuración del Sistema'
+    };
+    return titulos[this.ventanaActual] || 'Dashboard';
   }
 
-  viewHistory() {
-    alert('Funcionalidad: Ver historial');
+  /**
+   * Obtiene la fecha actual formateada
+   * @returns String con la fecha actual
+   */
+  obtenerFechaActual(): string {
+    return new Date().toLocaleDateString('es-ES', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
   }
 
-  withdrawPaypal() {
-    alert('Funcionalidad: Retirar de PayPal');
+  /**
+   * Obtiene la lista de usuarios
+   * @returns Array con los usuarios
+   */
+  obtenerListaUsuarios() {
+    return this.usuariosEjemplo;
   }
 
-  sendPaypalMoney() {
-    alert('Funcionalidad: Enviar dinero por PayPal');
+  /**
+   * Obtiene la clase CSS para el badge del rol
+   * @param rol - Rol del usuario
+   * @returns String con la clase CSS del badge
+   */
+  obtenerClaseRol(rol: string): string {
+    const clases: { [key: string]: string } = {
+      'admin': 'bg-danger',
+      'editor': 'bg-warning',
+      'usuario': 'bg-primary'
+    };
+    return clases[rol] || 'bg-secondary';
   }
 
-  requestMoney() {
-    alert('Funcionalidad: Solicitar dinero');
+  /**
+   * Obtiene la clase CSS para el badge del estado
+   * @param activo - Estado del usuario
+   * @returns String con la clase CSS del badge
+   */
+  obtenerClaseEstado(activo: boolean): string {
+    return activo ? 'bg-success' : 'bg-secondary';
   }
 
-  payWithQR() {
-    alert('Funcionalidad: Pagar con QR de Mercado Pago');
+  /**
+   * Cuenta los usuarios activos
+   * @returns Número de usuarios activos
+   */
+  contarUsuariosActivos(): number {
+    return this.usuariosEjemplo.filter(u => u.activo).length;
   }
 
-  generateLink() {
-    alert('Funcionalidad: Generar link de pago');
+  /**
+   * Cuenta los usuarios inactivos
+   * @returns Número de usuarios inactivos
+   */
+  contarUsuariosInactivos(): number {
+    return this.usuariosEjemplo.filter(u => !u.activo).length;
   }
 
-  investMoney() {
-    alert('Funcionalidad: Invertir dinero');
-  }
+  /**
+   * Cuenta los administradores
+   * @returns Número de administradores
+   */
+  contarAdministradores(): number {
+    return this.usuariosEjemplo.filter(u => u.rol === 'admin').length;
 
-  newCollection() {
-    alert('Funcionalidad: Nueva cobranza');
-  }
 
-  viewCollections() {
-    alert('Funcionalidad: Ver cobranzas');
-  }
-
-  generateReport() {
-    alert('Funcionalidad: Generar reporte');
   }
 }
