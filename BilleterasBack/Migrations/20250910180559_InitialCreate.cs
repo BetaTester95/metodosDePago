@@ -34,7 +34,7 @@ namespace BilleterasBack.Migrations
                     Apellido = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
                     Email = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
                     PasswordHash = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false),
-                    Dni = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
+                    Dni = table.Column<int>(type: "int", nullable: false),
                     IdTipoUsuario = table.Column<int>(type: "int", nullable: false),
                     FechaRegistro = table.Column<DateTime>(type: "datetime2", nullable: false),
                     Estado = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false)
@@ -79,9 +79,10 @@ namespace BilleterasBack.Migrations
                     IdTarjeta = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     IdBilletera = table.Column<int>(type: "int", nullable: false),
-                    NumeroTarjeta = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
+                    NumeroTarjeta = table.Column<string>(type: "nvarchar(22)", maxLength: 22, nullable: false),
                     FechaVencimiento = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    CodigoSeguridad = table.Column<string>(type: "nvarchar(3)", maxLength: 3, nullable: false)
+                    CodigoSeguridad = table.Column<int>(type: "int", maxLength: 3, nullable: false),
+                    Saldo = table.Column<decimal>(type: "decimal(18,2)", nullable: false)
                 },
                 constraints: table =>
                 {

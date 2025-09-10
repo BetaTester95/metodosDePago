@@ -1,4 +1,5 @@
-﻿using BilleterasBack.Wallets.Models;
+﻿using BilleterasBack.Wallets.Data;
+using BilleterasBack.Wallets.Models;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion.Internal;
 using System;
 using System.Collections.Generic;

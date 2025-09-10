@@ -27,6 +27,7 @@ namespace BilleterasBack.Wallets.Models
 
         [ForeignKey("TipoUsuario")]
         public int IdTipoUsuario { get; set; }
+        
         public TipoUsuario? TipoUsuario { get; set; }
 
         public DateTime FechaRegistro { get; set; } = DateTime.Now;

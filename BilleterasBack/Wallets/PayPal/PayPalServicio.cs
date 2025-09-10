@@ -8,6 +8,7 @@ using BilleterasBack.Wallets.PayPal;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.RegularExpressions;
 using BilleterasBack.Wallets.Validaciones;
+using BilleterasBack.Wallets.Data;
 
 namespace BilleterasBack.Wallets.PayPal
 {

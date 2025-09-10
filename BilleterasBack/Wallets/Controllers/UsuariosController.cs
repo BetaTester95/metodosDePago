@@ -7,6 +7,7 @@ using BilleterasBack.Wallets.Models;
 using BilleterasBack.Wallets.PayPal;
 using System.Text.RegularExpressions;
 using BilleterasBack.Wallets.Validaciones;
+using BilleterasBack.Wallets.Data;
 
 [ApiController]
 [Route("api/[controller]")]
@@ -23,7 +24,7 @@ public class UsuariosController : ControllerBase
     [HttpPost("registrar")]
     public async Task<IActionResult> GuardarUsuarios(Usuario usuario)
     {
-        if(_validador.validarNombre(usuario.Nombre) || _validador.validarApellido(usuario.Apellido))
+        if(!_validador.validarNombre(usuario.Nombre) || !_validador.validarApellido(usuario.Apellido))
         {
             return BadRequest(new
             {

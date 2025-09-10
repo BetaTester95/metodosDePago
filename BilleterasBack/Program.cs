@@ -1,3 +1,5 @@
+using BilleterasBack.Wallets.Data;
+using BilleterasBack.Wallets.Servicios;
 using BilleterasBack.Wallets.Shared;
 using BilleterasBack.Wallets.Shared.Strategies.Mp;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -14,6 +16,7 @@ builder.Services.AddCors(); // <-- Agrega esta línea
 builder.Services.AddControllers();
 builder.Services.AddHttpContextAccessor(); // <--- esto es clave
 builder.Services.AddScoped<MpAgregarTarjeta>();
+builder.Services.AddScoped<UsuarioService>();
 
 // Configurar DbContext con la cadena de conexión
 builder.Services.AddDbContext<AppDbContext>(options =>

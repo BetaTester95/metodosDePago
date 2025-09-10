@@ -1,4 +1,5 @@
 ﻿using BilleterasBack.Wallets.Collector.Cobrador;
+using BilleterasBack.Wallets.Data;
 using BilleterasBack.Wallets.Shared.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using System;

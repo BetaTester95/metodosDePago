@@ -1,4 +1,5 @@
-﻿using BilleterasBack.Wallets.Models;
+﻿using BilleterasBack.Wallets.Data;
+using BilleterasBack.Wallets.Models;
 using BilleterasBack.Wallets.Validaciones;
 using Microsoft.EntityFrameworkCore;
 using System;

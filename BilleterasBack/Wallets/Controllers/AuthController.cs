@@ -8,6 +8,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using BilleterasBack.Wallets.Dtos;
+using BilleterasBack.Wallets.Data;
 
 [ApiController]
 [Route("api/[controller]")]
@@ -19,24 +20,24 @@ public class AuthController : ControllerBase
         _context = context;
     }
   
-    [HttpPost("login")]
-    public async Task<IActionResult> Login(LoginDTO loginUsuario)
-    {
-        var usuario = await _context.Usuarios
-                            .Include(u => u.TipoUsuario)
-                            .FirstOrDefaultAsync(u => u.Email == loginUsuario.Email);
-        if (usuario == null)
-        {
-            return Unauthorized(new {message ="correo o contraseña incorrecta"});
-        }
-        bool passValida = BCrypt.Net.BCrypt.Verify(loginUsuario.PasswordHash, usuario.PasswordHash);
+    //[HttpPost("login")]
+    //public async Task<IActionResult> Login(LoginDTO loginUsuario)
+    //{
+    //    var usuario = await _context.Usuarios
+    //                        .Include(u => u.TipoUsuario)
+    //                        .FirstOrDefaultAsync(u => u.Email == loginUsuario.Email);
+    //    if (usuario == null)
+    //    {
+    //        return Unauthorized(new {message ="correo o contraseña incorrecta"});
+    //    }
+    //    bool passValida = BCrypt.Net.BCrypt.Verify(loginUsuario.PasswordHash, usuario.PasswordHash);
 
-        if (!passValida)
-        {
-            return Unauthorized(new {message = "correo o contraseña incorrecta"});
-        }      
-        return Ok(new {message="Login exitoso",
+    //    if (!passValida)
+    //    {
+    //        return Unauthorized(new {message = "correo o contraseña incorrecta"});
+    //    }      
+    //    return Ok(new {message="Login exitoso",
             
-        });
-    }
+    //    });
+    //}
 }

@@ -1,6 +1,7 @@
 ﻿
 using BilleterasBack.Wallets.Collector.Cobrador;
 using BilleterasBack.Wallets.CuentaDni;
+using BilleterasBack.Wallets.Data;
 using BilleterasBack.Wallets.Models;
 using BilleterasBack.Wallets.PayPal;
 using Microsoft.AspNetCore.Authorization;
@@ -10,7 +11,6 @@ using Microsoft.EntityFrameworkCore;
 
 namespace BilleterasBack.Wallets.Controllers
 {
-
 
     [ApiController]
     [Route("api/[controller]")]
@@ -55,7 +55,6 @@ namespace BilleterasBack.Wallets.Controllers
                 return BadRequest(new
                 {
                     mensaje = ex.Message,
-                    //datos = (object?)null
                 });
             }
         }
