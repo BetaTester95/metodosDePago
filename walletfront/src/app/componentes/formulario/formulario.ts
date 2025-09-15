@@ -48,10 +48,10 @@ export class Formulario {
       dni: this.dni,
       tipo_usuario: this.tipo_usuario
     };
-    this.UsuarioServicio.crearUsuario(usuario).subscribe({
-      next: respuesta => console.log('Usuario creado', respuesta),
-      error: err => console.log('Error',err)
-    });
+    // this.UsuarioServicio.crearUsuario(usuario).subscribe({
+    //   next: respuesta => console.log('Usuario creado', respuesta),
+    //   error: err => console.log('Error',err)
+    // });
 
     return this.erroSalida; 
   }

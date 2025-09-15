@@ -9,14 +9,42 @@ import { Observable } from 'rxjs';
 export class UsuarioServicio {
     private apiUrl = 'http://localhost:5055/api/usuarios';
     private apiUrlLogin = 'http://localhost:5055/api/auth/login';
+    private mostrarUsuarios = 'http://localhost:5055/api/Abm/mostrar/usuarios';
+    private eliminarUserUrl = 'http://localhost:5055/api/Abm/eliminar/usuario';
+    private crearUsuarioUrl = 'http://localhost:5055/api/Abm/crear/usuario';
+    private editarUsuarioUrl = 'http://localhost:5055/api/Abm/editar/usuario';
+
     constructor(private http: HttpClient){
     }
-    crearUsuario(usuarioData: any): Observable<any>{
-        return this.http.post<any>(this.apiUrl, usuarioData) //usuario datas
+    
+
+    listarUsuarios(): Observable<any>
+    {
+        return this.http.get<any>(this.mostrarUsuarios)
+    }
+
+    createUser(usuario: any): Observable<any>
+    {
+        return this.http.post<any>(this.crearUsuarioUrl, usuario)
+    }
+
+    ediUser(usuario: any): Observable<any>
+    {
+        return this.http.put<any>(`${this.editarUsuarioUrl}/${usuario.idUsuario}`, usuario);
+    }
+
+    // crearUsuario(usuarioData: any): Observable<any>{
+    //     return this.http.post<any>(this.apiUrl, usuarioData) //usuario datas
+    // }
+
+    deleteUser(idUsuario: number){
+        return this.http.delete<void>(`${this.eliminarUserUrl}/${idUsuario}`)
     }
 
     loginUsuario(usuarioLogin: any): Observable<any>
     {
         return this.http.post<any>(this.apiUrlLogin, usuarioLogin) //usuario login
     }
+
+
 }

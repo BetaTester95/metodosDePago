@@ -1,0 +1,206 @@
+<div class="container mt-4">
+    <!-- INICIO MODAL ELIMINAR -->
+    <div class="modal fade" id="confirmDeleteModal">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="title">Eliminar Usuario</h5>
+                    <button class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="class-body">
+                    Estás seguro de eliminar a {{ usuarioSeleccionado?.idUsuario }}?
+                </div>
+
+                <div class="modal-footer">
+                    <button class="btn btn-danger" data-bs-dismiss="modal"
+                        (click)="confirmarEliminar()">Eliminar</button>
+                    <button class="btn btn-primary">Cancelar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- FIN MODAL ELIMINAR -->
+    <!-- INICIO MODAL CREAR USUARIO -->
+
+    @if(mostrarModalAgregar) {
+    <div class="modal fade show d-block">
+        <div class="modal-dialog">
+            <div class="modal-content">
+
+                <!-- Header -->
+                <div class="modal-header">
+                    <h5 class="modal-title">Crear Usuario</h5>
+                    <button type="button" class="btn-close" (click)="cerrarModalAgregar()"></button>
+                </div>
+
+                <!-- Body -->
+                <div class="modal-body">
+                    <form (ngSubmit)="altaUser()" #usuarioForm="ngForm">
+
+                        <div class="mb-3">
+                            <label for="nombre">Nombre</label>
+                            <input type="text" id="nombre" class="form-control" [(ngModel)]="nuevoUsuario.nombre"
+                                name="nombre" required>
+                            
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="apellido">Apellido</label>
+                            <input type="text" id="apellido" class="form-control" [(ngModel)]="nuevoUsuario.apellido"
+                                name="apellido" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="email">Email</label>
+                            <input type="email" id="email" class="form-control" [(ngModel)]="nuevoUsuario.email"
+                                name="email" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="passwordHash">Contraseña</label>
+                            <input type="password" id="passwordHash" class="form-control"
+                                [(ngModel)]="nuevoUsuario.passwordHash" name="passwordHash" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="dni">DNI</label>
+                            <input type="text" id="dni" class="form-control" [(ngModel)]="nuevoUsuario.dni" name="dni"
+                                required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="tipoUsuario">Tipo de Usuario</label>
+                            <select id="tipoUsuario" class="form-control" [(ngModel)]="nuevoUsuario.TipoUsuario"
+                                name="TipoUsuario" required>
+                                <option [value]="1">Cliente</option>
+                                <option [value]="2">Cobrador</option>
+                            </select>
+                        </div>
+
+                        <!-- Footer botones dentro del form para submit -->
+                        <div class="modal-footer">
+                            <button type="submit" class="btn btn-success">Crear</button>
+                            <button type="button" class="btn btn-secondary"
+                                (click)="cerrarModalAgregar()">Cancelar</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Backdrop -->
+    <div class="modal-backdrop fade show" (click)="cerrarModalAgregar()"></div>
+    }
+
+    <!-- FIN INICIO MODAL CREAR USUARIOS -->
+
+    <!-- INICIO MODAL EDITAR -->
+@if (mostrarModalEditar) {
+  <div class="modal fade show d-block">
+    <div class="modal-dialog">
+      <div class="modal-content">
+
+        <div class="modal-header">
+          <h5 class="modal-title">Editar Usuario</h5>
+          <button type="button" class="btn-close" (click)="cerrarModalEditar()"></button>
+        </div>
+
+        <div class="modal-body">
+          <form (ngSubmit)="guardarCambios()" #editForm="ngForm">
+            <div class="mb-3">
+              <label>Nombre</label>
+              <input type="text" class="form-control"
+                     [(ngModel)]="usuarioEditando.nombre"
+                     name="editNombre" required>
+            </div>
+
+            <div class="mb-3">
+              <label>Apellido</label>
+              <input type="text" class="form-control"
+                     [(ngModel)]="usuarioEditando.apellido"
+                     name="editApellido" required>
+            </div>
+
+            <div class="mb-3">
+              <label>Email</label>
+              <input type="email" class="form-control"
+                     [(ngModel)]="usuarioEditando.email"
+                     name="editEmail" required>
+            </div>
+
+            <div class="mb-3">
+              <label>DNI</label>
+              <input type="text" class="form-control"
+                     [(ngModel)]="usuarioEditando.dni"
+                     name="editDni" required>
+            </div>
+
+            <div class="modal-footer">
+              <button type="submit" class="btn btn-success">Guardar</button>
+              <button type="button" class="btn btn-secondary" (click)="cerrarModalEditar()">Cancelar</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-backdrop fade show" (click)="cerrarModalEditar()"></div>
+}
+
+    <!-- FIN MODAL EDITAR -->
+
+    <h2 class="mb-3">Lista de Usuarios</h2>
+
+    <!-- Loading -->
+    @if (cargando) {
+    <div class="alert alert-info">
+        Cargando usuarios...
+    </div>
+    }
+    <button class="btn btn-success mb-3" (click)="abrirModalAgregar()">Crear Usuario</button>
+    <!-- Tabla -->
+    @if (!cargando && usuarios.length > 0) {
+    <div class="table-responsive shadow rounded">
+        <table class="table table-striped table-hover align-middle">
+            <thead class="table-dark">
+                <tr>
+                    <th>Id</th>
+                    <th>Nombre</th>
+                    <th>Apellido</th>
+                    <th>Email</th>
+                    <th>Dni</th>
+                    <th>Estado</th>
+                    <th>TipoUsuario</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                @for (usuario of usuarios; track usuario.idUsuario; let i = $index) {
+                <tr>
+                    <td>{{ usuario.idUsuario }}</td>
+                    <td>{{ usuario.nombre }}</td>
+                    <td>{{ usuario.apellido }}</td>
+                    <td>{{ usuario.email}}</td>
+                    <td>{{usuario.dni}}</td>
+                    <td>{{usuario.estado}}</td>
+                    <td>{{usuario.nombreTipo}}</td>
+                    <td>
+                        <button class="btn btn-sm btn-primary me-2" (click)="abrirModalEditar(usuario)">Editar</button>
+                        <button class="btn btn-sm btn-danger" (click)="abrirModalEliminar(usuario)">Eliminar</button>
+                    </td>
+                </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+    }
+
+    <!-- Si no hay usuarios -->
+    @if (!cargando && usuarios.length === 0) {
+    <div class="alert alert-warning">
+        No hay usuarios registrados.
+    </div>
+    }
+</div>

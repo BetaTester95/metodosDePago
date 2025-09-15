@@ -3,6 +3,8 @@ using BilleterasBack.Wallets.Data;
 using Microsoft.EntityFrameworkCore;
 
 using BilleterasBack.Wallets.Servicios;
+using BilleterasBack.Wallets.Models;
+using BilleterasBack.Wallets.Dtos;
 
 namespace BilleterasBack.Wallets.Controllers
 {
@@ -15,6 +17,39 @@ namespace BilleterasBack.Wallets.Controllers
         public AbmController(UsuarioService usuarioServicios)
         {
             _usuarioServicios = usuarioServicios;
+        }
+
+
+        [HttpPost("crear/usuario")] //crear
+        public async Task<IActionResult> crearUsuario([FromBody] Usuario nuevoUsuario)
+        {
+            try
+            {
+                var resultado = await _usuarioServicios.crearUsuario(nuevoUsuario);
+                if (resultado == null)
+                    return BadRequest(new { mensaje = "Error al crear el usuario." });
+                return Ok(resultado);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { mensaje = "Error al crear el usuario.", msg = ex.Message });
+            }
+        }
+
+        [HttpPut("editar/usuario/{id}")] //editar
+        public async Task<IActionResult> editarUsuario(int id, [FromBody] UserDto usuarioActualizado)
+        {
+            try
+            {
+                var resultado = await _usuarioServicios.editarUsuario(id, usuarioActualizado);
+                if (resultado == null)
+                    return BadRequest(new { mensaje = "Error al actualizar el usuario." });
+                return Ok(resultado);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { mensaje = "Error al actualizar el usuario.", msg = ex.Message });
+            }
         }
 
         [HttpGet("mostrar/usuarios")]
@@ -30,14 +65,24 @@ namespace BilleterasBack.Wallets.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(new { mensaje = "Error al obtener los usuarios.", detalle = ex.Message });
+                return BadRequest(new { mensaje = "Error al obtener los usuarios.", msg = ex.Message });
             }
         }
 
-        [HttpGet("test")]
-        public IActionResult Test()
-        {
-            return Ok("Controller funcionando");
-        }
+       [HttpDelete("eliminar/usuario/{id}")]
+       public async Task<IActionResult> eliminarUsuario(int id)
+       {
+           try
+           {
+               var resultado = await _usuarioServicios.borrarUsuario(id);
+               if (resultado == null)
+                   return BadRequest(new { mensaje = "Error al eliminar el usuario." });
+               return Ok(resultado);
+           }
+           catch (Exception ex)
+           {
+               return BadRequest(new { mensaje = "Error al eliminar el usuario.", msg = ex.Message });
+           }
+       }
     }
 }
