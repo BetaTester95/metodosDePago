@@ -41,19 +41,30 @@
                             <label for="nombre">Nombre</label>
                             <input type="text" id="nombre" class="form-control" [(ngModel)]="nuevoUsuario.nombre"
                                 name="nombre" required>
-                            
+                            @if (errorNombre) {
+                                <p style="color: red;">error al validar nombre</p>
+                            }
                         </div>
 
                         <div class="mb-3">
                             <label for="apellido">Apellido</label>
                             <input type="text" id="apellido" class="form-control" [(ngModel)]="nuevoUsuario.apellido"
                                 name="apellido" required>
+                                 @if (errorApellido) {
+                                <p style="color: red;">error al validar nombre</p>
+                            }
                         </div>
 
                         <div class="mb-3">
                             <label for="email">Email</label>
                             <input type="email" id="email" class="form-control" [(ngModel)]="nuevoUsuario.email"
                                 name="email" required>
+                                  @if (errorEmail) {
+                                <p style="color: red;">error al validar nombre</p>
+                            }
+                            @if (errorBackendEmail){
+                                    <p>{{ errorBackendEmail }}</p>
+                                }
                         </div>
 
                         <div class="mb-3">
@@ -64,8 +75,14 @@
 
                         <div class="mb-3">
                             <label for="dni">DNI</label>
-                            <input type="text" id="dni" class="form-control" [(ngModel)]="nuevoUsuario.dni" name="dni"
+                            <input type="number" id="dni" class="form-control" [(ngModel)]="nuevoUsuario.dni" name="dni"
                                 required>
+                                  @if (errorDni) {
+                                <p style="color: red;">error al validar dni</p>
+                            }
+                                @if (errorDni){
+                                    <p>{{ errorDni }}</p>
+                                }
                         </div>
 
                         <div class="mb-3">

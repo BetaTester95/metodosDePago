@@ -22,3 +22,7 @@ dist/
 
 # Ignora archivos de caché de Angular
 .angular/
+
+# Ignorar configuraciones locales
+appsettings.json
+appsettings.*.json

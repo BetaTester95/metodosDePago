@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { Observable } from 'rxjs';
 declare var bootstrap: any;
 import { UsuarioServicio } from 'src/app/servicios/usuario-servicio';
+import { Validation } from 'src/app/utils/validation';
 
 @Component({
   selector: 'app-usuario-tabla',
@@ -15,28 +16,38 @@ export class UsuarioTabla {
   usuarios: any[] = [];
   cargando = true;
   usuarioSeleccionado?: any;
-  mostrarModalAgregar = false; 
+  mostrarModalAgregar = false;
   mostrarModalEditar = false;
+  //bool validaciones
+  errorNombre: boolean = false;
+  errorApellido: boolean = false;
+  errorEmail: boolean = false;
+  errorPass: boolean = false;
+  errorDni: boolean = false;
+  errorBackendDni: string = '';
+  errorBackendEmail: string = '';
+
+  //bool validaciones
 
   nuevoUsuario = {
     nombre: '',
     apellido: '',
     email: '',
     passwordHash: '',
-    dni: '',
+    dni: 0,
     TipoUsuario: ''
   };
 
- usuarioEditando: any = {
+  usuarioEditando: any = {
     idUsuario: 0,
     nombre: '',
     apellido: '',
     email: '',
-    dni: ''
+    dni: 0
   };
 
 
-  constructor(private UsuarioServicio: UsuarioServicio) { }
+  constructor(private UsuarioServicio: UsuarioServicio, private validation: Validation) { }
 
 
   ngOnInit() {
@@ -52,56 +63,89 @@ export class UsuarioTabla {
     )
   }
 
-  altaUser()
-  {
+
+
+  altaUser() {
+
+    if (!this.validation.validarNombre(this.nuevoUsuario.nombre)) {
+      this.errorNombre = true;
+      return
+    }
+
+    if (!this.validation.validarApellido(this.nuevoUsuario.apellido)) {
+      this.errorApellido = true;
+      return
+    }
+
+    if (!this.validation.validarEmail(this.nuevoUsuario.email)) {
+      this.errorEmail = true;
+      return
+    }
+
+    if (!this.validation.validarDni(this.nuevoUsuario.dni)) {
+      this.errorDni = true;
+      return
+    }
+
     const users = {
-    Nombre: this.nuevoUsuario.nombre,
-    Apellido: this.nuevoUsuario.apellido,
-    Email: this.nuevoUsuario.email,
-    PasswordHash: this.nuevoUsuario.passwordHash,
-    Dni: this.nuevoUsuario.dni,
-    IdTipoUsuario: this.nuevoUsuario.TipoUsuario
-  };
+      Nombre: this.nuevoUsuario.nombre,
+      Apellido: this.nuevoUsuario.apellido,
+      Email: this.nuevoUsuario.email,
+      PasswordHash: this.nuevoUsuario.passwordHash,
+      Dni: this.nuevoUsuario.dni,
+      IdTipoUsuario: this.nuevoUsuario.TipoUsuario
+    };
 
     this.UsuarioServicio.createUser(users).subscribe({
       next: (respuesta) => {
         console.log('Usuario Creado:', respuesta)
+        if (respuesta.mensajeDni) {
+          this.errorBackendDni = respuesta.mensajeDni;
+        }
+        if (respuesta.mensajeEmail) {
+          this.errorBackendEmail = respuesta.mensajeEmail;
+        }
+
+        // Si no hay errores, limpiar el formulario
+        if (!respuesta.mensajeDni && !respuesta.mensajeEmail) {
+          this.limpiarModal();
+        }
         this.nuevoUsuario = {
           nombre: '',
           apellido: '',
           email: '',
           passwordHash: '',
-          dni: '',
+          dni: 0,
           TipoUsuario: ''
-        }
+        };
+        this.limpiarErrores();
       },
       error: (err) => {
         console.error('Error al crear usuario:', err);
-        alert('Hubo un error al crear el usuario.');
+
       }
     })
   }
 
-  abrirModalEliminar(usuario: any)
-  {
+  abrirModalEliminar(usuario: any) {
     this.usuarioSeleccionado = usuario
     const modalElement = document.getElementById('confirmDeleteModal')
     const modal = new bootstrap.Modal(modalElement!)
     modal.show();
   }
 
-  abrirModalEditar(usuario: any){
+  abrirModalEditar(usuario: any) {
     console.log(usuario)
     this.usuarioEditando = usuario
     this.mostrarModalEditar = true;
   }
 
-  cerrarModalEditar(){
+  cerrarModalEditar() {
     this.mostrarModalEditar = false;
   }
 
 
-   guardarCambios() {
+  guardarCambios() {
     const users = {
       IdUsuario: this.usuarioEditando.idUsuario,
       Nombre: this.usuarioEditando.nombre,
@@ -127,14 +171,7 @@ export class UsuarioTabla {
     });
   }
 
-  
-  
-
-
-
-  
-
- confirmarEliminar() {
+  confirmarEliminar() {
     if (!this.usuarioSeleccionado) return;
 
     this.UsuarioServicio.deleteUser(this.usuarioSeleccionado.idUsuario).subscribe({
@@ -151,14 +188,36 @@ export class UsuarioTabla {
     });
   }
 
-  abrirModalAgregar()
-  {
-    this.usuarioSeleccionado= {};
+  abrirModalAgregar() {
+    this.usuarioSeleccionado = {};
     this.mostrarModalAgregar = true;
+    this.limpiarErrores();
+    this.limpiarModal();
   }
 
   cerrarModalAgregar() {
     this.mostrarModalAgregar = false;
   }
 
+  limpiarErrores() {
+    this.errorNombre = false;
+    this.errorApellido = false;
+    this.errorEmail = false;
+    this.errorDni = false;
+    this.errorBackendEmail = '';
+    this.errorBackendDni = '';
+  }
+
+
+  limpiarModal() {
+    // Limpiar los campos del formulario
+    this.nuevoUsuario = {
+      nombre: '',
+      apellido: '',
+      email: '',
+      passwordHash: '',
+      dni: 0,
+      TipoUsuario: ''
+    };
+  }
 }
