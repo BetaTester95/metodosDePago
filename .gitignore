@@ -24,5 +24,5 @@ dist/
 .angular/
 
 # Ignorar configuraciones locales
-appsettings.json
-appsettings.*.json
+**/appsettings.json
+**/appsettings.*.json
