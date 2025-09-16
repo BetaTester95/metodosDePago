@@ -47,7 +47,7 @@ public class AppMp
 
     public async Task<Billetera> CrearCuentaMercadoPago(int dni)//ok
     {
-        if (_validador.validarDNI(dni)) throw new Exception("DNI debe ser mayor que cero y hasta 8 digitos");     
+        if (!_validador.validarDNI(dni)) throw new Exception("DNI debe ser mayor que cero y hasta 8 digitos");     
 
         var usuario = await _context.Usuarios.Include(u => u.Billeteras).FirstOrDefaultAsync(u => u.Dni == dni);
         

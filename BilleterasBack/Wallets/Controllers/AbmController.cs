@@ -28,6 +28,15 @@ namespace BilleterasBack.Wallets.Controllers
                 var resultado = await _usuarioServicios.crearUsuario(nuevoUsuario);
                 if (resultado == null)
                     return BadRequest(new { mensaje = "Error al crear el usuario." });
+
+                // Extraer el mensaje
+                var mensaje = resultado.GetType().GetProperty("mensaje")?.GetValue(resultado)?.ToString();
+
+                // Si contiene "ya existe", es un error de conflicto
+                if (mensaje != null && mensaje.Contains("ya existe"))
+                {
+                    return Conflict(resultado); // HTTP 409 - Angular lo recibe en el bloque error
+                }
                 return Ok(resultado);
             }
             catch (Exception ex)
@@ -44,6 +53,14 @@ namespace BilleterasBack.Wallets.Controllers
                 var resultado = await _usuarioServicios.editarUsuario(id, usuarioActualizado);
                 if (resultado == null)
                     return BadRequest(new { mensaje = "Error al actualizar el usuario." });
+
+                // Solución: Usar reflexión para obtener la propiedad "error" del objeto resultado
+                var errorProp = resultado.GetType().GetProperty("error");
+                var errorValue = errorProp?.GetValue(resultado)?.ToString();
+
+                if (errorValue == "email" || errorValue == "dni")
+                    return Conflict(resultado); // 409
+
                 return Ok(resultado);
             }
             catch (Exception ex)

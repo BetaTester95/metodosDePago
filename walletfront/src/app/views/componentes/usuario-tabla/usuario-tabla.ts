@@ -5,6 +5,7 @@ import { Observable } from 'rxjs';
 declare var bootstrap: any;
 import { UsuarioServicio } from 'src/app/servicios/usuario-servicio';
 import { Validation } from 'src/app/utils/validation';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-usuario-tabla',
@@ -28,13 +29,12 @@ export class UsuarioTabla {
   errorBackendEmail: string = '';
 
   //bool validaciones
-
   nuevoUsuario = {
     nombre: '',
     apellido: '',
     email: '',
     passwordHash: '',
-    dni: 0,
+    dni: undefined,
     TipoUsuario: ''
   };
 
@@ -43,7 +43,7 @@ export class UsuarioTabla {
     nombre: '',
     apellido: '',
     email: '',
-    dni: 0
+    dni: undefined
   };
 
 
@@ -62,7 +62,6 @@ export class UsuarioTabla {
       }
     )
   }
-
 
 
   altaUser() {
@@ -98,30 +97,26 @@ export class UsuarioTabla {
 
     this.UsuarioServicio.createUser(users).subscribe({
       next: (respuesta) => {
-        console.log('Usuario Creado:', respuesta)
-        if (respuesta.mensajeDni) {
-          this.errorBackendDni = respuesta.mensajeDni;
-        }
-        if (respuesta.mensajeEmail) {
-          this.errorBackendEmail = respuesta.mensajeEmail;
-        }
+        console.log('SUCCESS: Usuario creado correctamente');
+        this.cargarUsuarios();
+        this.alertSuces();
+        this.limpiarModal();
 
-        // Si no hay errores, limpiar el formulario
-        if (!respuesta.mensajeDni && !respuesta.mensajeEmail) {
-          this.limpiarModal();
-        }
-        this.nuevoUsuario = {
-          nombre: '',
-          apellido: '',
-          email: '',
-          passwordHash: '',
-          dni: 0,
-          TipoUsuario: ''
-        };
-        this.limpiarErrores();
       },
       error: (err) => {
-        console.error('Error al crear usuario:', err);
+        console.log('Error del backend:', err);
+
+        if (err.status === 409) { // Conflict - duplicados
+          const mensaje = err.error?.mensaje || '';
+
+          if (mensaje.toLowerCase().includes('email')) {
+            this.errorBackendEmail = mensaje;
+          } else if (mensaje.toLowerCase().includes('dni')) {
+            this.errorBackendDni = mensaje;
+          }
+        } else {
+          console.error('Error del servidor:', err);
+        }
 
       }
     })
@@ -142,12 +137,34 @@ export class UsuarioTabla {
 
   cerrarModalEditar() {
     this.mostrarModalEditar = false;
+    this.limpiarErrores()
+    this.cargarUsuarios()
   }
 
 
   guardarCambios() {
+
+    if (!this.validation.validarNombre(this.usuarioEditando.nombre)) {
+      this.errorNombre = true;
+      return
+    }
+
+    if (!this.validation.validarApellido(this.usuarioEditando.apellido)) {
+      this.errorApellido = true;
+      return
+    }
+
+    if (!this.validation.validarEmail(this.usuarioEditando.email)) {
+      this.errorEmail = true;
+      return
+    }
+
+    if (!this.validation.validarDni(this.usuarioEditando.dni)) {
+      this.errorDni = true;
+      return
+    }
     const users = {
-      IdUsuario: this.usuarioEditando.idUsuario,
+      idUsuario: this.usuarioEditando.idUsuario,
       Nombre: this.usuarioEditando.nombre,
       Apellido: this.usuarioEditando.apellido,
       Email: this.usuarioEditando.email,
@@ -156,18 +173,20 @@ export class UsuarioTabla {
 
     this.UsuarioServicio.ediUser(users).subscribe({
       next: (respuesta) => {
-        console.log('Usuario actualizado', respuesta);
-        alert('Usuario actualizado con éxito');
-        this.cerrarModalEditar();
 
-        // refrescar lista si hace falta
-        this.cargarUsuarios();
+      // Todo ok
+      console.log('Usuario actualizado:', respuesta);
+      alert(respuesta.mensaje || 'Usuario actualizado con éxito');
+      this.cerrarModalEditar();
+      this.cargarUsuarios();
+      this.limpiarErrores();
+  
       },
+      
       error: (err) => {
-        console.log(users)
-        console.error('Error al actualizar usuario:', err);
-        alert('No se pudo actualizar el usuario.');
-      }
+      console.error('Error al actualizar usuario:', err);
+      alert('Error en el servidor, intente nuevamente.');
+    }
     });
   }
 
@@ -176,7 +195,7 @@ export class UsuarioTabla {
 
     this.UsuarioServicio.deleteUser(this.usuarioSeleccionado.idUsuario).subscribe({
       next: () => {
-        this.cargarUsuarios();  // recargamos la tabla
+        this.cargarUsuarios();
         this.usuarioSeleccionado = undefined;
 
         // Cerramos modal
@@ -216,8 +235,21 @@ export class UsuarioTabla {
       apellido: '',
       email: '',
       passwordHash: '',
-      dni: 0,
+      dni: undefined,
       TipoUsuario: ''
     };
+    this.limpiarErrores();
   }
+
+  alertSuces() { //alerta ok
+    Swal.fire({
+      position: "top-end",
+      icon: "success",
+      title: "Usuario creado",
+      showConfirmButton: false,
+      timer: 1600
+    });
+  }
+
+
 }

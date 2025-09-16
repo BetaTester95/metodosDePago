@@ -68,14 +68,14 @@ namespace BilleterasBack.Wallets.Servicios
             {
                 var emailExiste = await _context.Usuarios.AnyAsync(u => u.Email == usuarioActualizado.Email && u.IdUsuario != id);
                 if (emailExiste)
-                    return new { mensaje = "El email ya existe" };
+                    return new { error = "email", mensaje = "El email ya existe" };
             }
 
             if (usuario.Dni != usuarioActualizado.Dni)
             {
                 var dniExiste = await _context.Usuarios.AnyAsync(u => u.Dni == usuarioActualizado.Dni && u.IdUsuario != id);
                 if (dniExiste)
-                    return new { mensaje = "El DNI ya existe" };
+                    return new { error = "dni", mensaje = "El DNI ya existe" };
             }
 
             usuario.Nombre = usuarioActualizado.Nombre;

@@ -8,7 +8,7 @@
                     <button class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="class-body">
-                    Estás seguro de eliminar a {{ usuarioSeleccionado?.idUsuario }}?
+                    <span>Estás seguro de eliminar a {{ usuarioSeleccionado?.nombre }}?</span>
                 </div>
 
                 <div class="modal-footer">
@@ -42,7 +42,7 @@
                             <input type="text" id="nombre" class="form-control" [(ngModel)]="nuevoUsuario.nombre"
                                 name="nombre" required>
                             @if (errorNombre) {
-                                <p style="color: red;">error al validar nombre</p>
+                            <p style="color: red;">Error al validar nombre</p>
                             }
                         </div>
 
@@ -50,8 +50,8 @@
                             <label for="apellido">Apellido</label>
                             <input type="text" id="apellido" class="form-control" [(ngModel)]="nuevoUsuario.apellido"
                                 name="apellido" required>
-                                 @if (errorApellido) {
-                                <p style="color: red;">error al validar nombre</p>
+                            @if (errorApellido) {
+                            <p style="color: red;">Error al validar apellido</p>
                             }
                         </div>
 
@@ -59,12 +59,12 @@
                             <label for="email">Email</label>
                             <input type="email" id="email" class="form-control" [(ngModel)]="nuevoUsuario.email"
                                 name="email" required>
-                                  @if (errorEmail) {
-                                <p style="color: red;">error al validar nombre</p>
+                            @if (errorEmail) {
+                            <p style="color: red;">Error al validar email</p>
                             }
                             @if (errorBackendEmail){
-                                    <p>{{ errorBackendEmail }}</p>
-                                }
+                            <p style="color: red;">{{ errorBackendEmail }}</p>
+                            }
                         </div>
 
                         <div class="mb-3">
@@ -77,12 +77,12 @@
                             <label for="dni">DNI</label>
                             <input type="number" id="dni" class="form-control" [(ngModel)]="nuevoUsuario.dni" name="dni"
                                 required>
-                                  @if (errorDni) {
-                                <p style="color: red;">error al validar dni</p>
+                            @if (errorDni) {
+                            <p style="color: red;">error al validar dni</p>
                             }
-                                @if (errorDni){
-                                    <p>{{ errorDni }}</p>
-                                }
+                            @if (errorBackendDni){
+                            <p style="color: red;">{{ errorBackendDni }}</p>
+                            }
                         </div>
 
                         <div class="mb-3">
@@ -113,58 +113,73 @@
     <!-- FIN INICIO MODAL CREAR USUARIOS -->
 
     <!-- INICIO MODAL EDITAR -->
-@if (mostrarModalEditar) {
-  <div class="modal fade show d-block">
-    <div class="modal-dialog">
-      <div class="modal-content">
+    @if (mostrarModalEditar) {
+    <div class="modal fade show d-block">
+        <div class="modal-dialog">
+            <div class="modal-content">
 
-        <div class="modal-header">
-          <h5 class="modal-title">Editar Usuario</h5>
-          <button type="button" class="btn-close" (click)="cerrarModalEditar()"></button>
+                <div class="modal-header">
+                    <h5 class="modal-title">Editar Usuario</h5>
+                    <button type="button" class="btn-close" (click)="cerrarModalEditar()"></button>
+                </div>
+
+                <div class="modal-body">
+                    <form (ngSubmit)="guardarCambios()" #editForm="ngForm">
+                        <div class="mb-3">
+                            <label>Nombre</label>
+                            <input type="text" class="form-control" [(ngModel)]="usuarioEditando.nombre"
+                                name="editNombre" required>
+                            @if(errorNombre){
+                            <p style="color: red;">Error al editar el nombre</p>
+                            }
+                        </div>
+
+                        <div class="mb-3">
+                            <label>Apellido</label>
+                            <input type="text" class="form-control" [(ngModel)]="usuarioEditando.apellido"
+                                name="editApellido" required>
+                            @if (errorApellido) {
+                            <p style="color: red;">Error al validar apellido/p>
+                                }
+                        </div>
+
+                        <div class="mb-3">
+                            <label>Email</label>
+                            <input type="email" class="form-control" [(ngModel)]="usuarioEditando.email"
+                                name="editEmail" required>
+                            @if (errorEmail) {
+                            <p style="color: red;">Error al validar el email</p>
+                            }
+                            @if (errorBackendEmail) {
+                            <p style="color: red;">{{errorBackendEmail}}</p>
+                            }
+                        </div>
+
+                        <div class="mb-3">
+                            <label>DNI</label>
+                            <input type="text" class="form-control" [(ngModel)]="usuarioEditando.dni" name="editDni"
+                                required>
+                            @if (errorDni) {
+                            <p style="color: red;">Error al validar dni</p>
+                            }
+                            @if (errorBackendDni) {
+                            <p style="color: red;">{{errorBackendDni}}</p>
+                            }
+                        </div>
+
+                        <div class="modal-footer">
+                            <button type="submit" class="btn btn-success">Guardar</button>
+                            <button type="button" class="btn btn-secondary"
+                                (click)="cerrarModalEditar()">Cancelar</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
         </div>
-
-        <div class="modal-body">
-          <form (ngSubmit)="guardarCambios()" #editForm="ngForm">
-            <div class="mb-3">
-              <label>Nombre</label>
-              <input type="text" class="form-control"
-                     [(ngModel)]="usuarioEditando.nombre"
-                     name="editNombre" required>
-            </div>
-
-            <div class="mb-3">
-              <label>Apellido</label>
-              <input type="text" class="form-control"
-                     [(ngModel)]="usuarioEditando.apellido"
-                     name="editApellido" required>
-            </div>
-
-            <div class="mb-3">
-              <label>Email</label>
-              <input type="email" class="form-control"
-                     [(ngModel)]="usuarioEditando.email"
-                     name="editEmail" required>
-            </div>
-
-            <div class="mb-3">
-              <label>DNI</label>
-              <input type="text" class="form-control"
-                     [(ngModel)]="usuarioEditando.dni"
-                     name="editDni" required>
-            </div>
-
-            <div class="modal-footer">
-              <button type="submit" class="btn btn-success">Guardar</button>
-              <button type="button" class="btn btn-secondary" (click)="cerrarModalEditar()">Cancelar</button>
-            </div>
-          </form>
-        </div>
-      </div>
     </div>
-  </div>
 
-  <div class="modal-backdrop fade show" (click)="cerrarModalEditar()"></div>
-}
+    <div class="modal-backdrop fade show" (click)="cerrarModalEditar()"></div>
+    }
 
     <!-- FIN MODAL EDITAR -->
 
