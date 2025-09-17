@@ -1,6 +1,7 @@
 ﻿using BilleterasBack.Wallets.Data;
 using BilleterasBack.Wallets.Dtos;
 using BilleterasBack.Wallets.Models;
+using BilleterasBack.Wallets.Validaciones;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
 
@@ -14,19 +15,26 @@ namespace BilleterasBack.Wallets.Servicios
             _context = context;
         }
 
-        public async Task<object> crearUsuario(Usuario crearUsuario) //crear usuario
+        public async Task<Resultado<Usuario>> crearUsuario(Usuario nuevoUsuario) //crear usuario
         {
-            var emailExiste = await _context.Usuarios.AnyAsync(u => u.Email == crearUsuario.Email);
+            var emailExiste = await _context.Usuarios.AnyAsync(u => u.Email == nuevoUsuario.Email);
             if (emailExiste)
-                return new { mensaje = "El email ya existe" };
+                return Resultado<Usuario>.Failure("El email ya esta registrado.");
 
-            var dniExiste = await _context.Usuarios.AnyAsync(u => u.Dni == crearUsuario.Dni);
+            var dniExiste = await _context.Usuarios.AnyAsync(u => u.Dni == nuevoUsuario.Dni);
             if (dniExiste)
-                return new { mensaje = "El DNI ya existe" };
+                return Resultado<Usuario>.Failure("El dni ya esta registrados");
 
-            _context.Usuarios.Add(crearUsuario);
-            await _context.SaveChangesAsync();
-            return new { mensaje = "Usuario creado" };
+            try
+            {
+                _context.Usuarios.Add(nuevoUsuario);
+                await _context.SaveChangesAsync();
+                return Resultado<Usuario>.Success(nuevoUsuario);
+            }
+            catch(Exception ex)
+            {
+                return Resultado<Usuario>.Failure("Error al crear un usuario: " + ex.Message);
+            }
         }
 
         public async Task<object> mostrarUsuarios() //mostrar usuarios

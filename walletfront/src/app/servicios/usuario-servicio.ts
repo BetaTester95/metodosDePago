@@ -41,10 +41,10 @@ export class UsuarioServicio {
         return this.http.delete<void>(`${this.eliminarUserUrl}/${idUsuario}`)
     }
 
-    loginUsuario(usuarioLogin: any): Observable<any>
-    {
-        return this.http.post<any>(this.apiUrlLogin, usuarioLogin) //usuario login
-    }
+     loginUsuario(usuarioLogin: any): Observable<any>
+     {
+         return this.http.post<any>(this.apiUrlLogin, usuarioLogin) //usuario login
+     }
 
 
 }

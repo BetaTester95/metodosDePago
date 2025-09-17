@@ -1,1 +1,15 @@
-/* You can add global styles to this file, and also import other style files */
+*, ::after, ::before{
+margin: 0;
+box-sizing:  border-box;
+}
+
+body{
+    font-family: "Plus Jakarta Sans", sans-serif;
+    height: 100vh;
+    background-size: cover;
+    background-image: linear-gradient(#6dddec, #50a6fb);
+
+    /* display: flex;
+    align-items: center; */
+    
+}

@@ -4,6 +4,7 @@ using BilleterasBack.Wallets.CuentaDni;
 using BilleterasBack.Wallets.Data;
 using BilleterasBack.Wallets.Models;
 using BilleterasBack.Wallets.PayPal;
+using BilleterasBack.Wallets.Collector;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -16,7 +17,6 @@ namespace BilleterasBack.Wallets.Controllers
     [Route("api/[controller]")]
     public class BilleteraController : ControllerBase
     {
-
         private readonly AppDbContext _context;
         private readonly AppMp _appMp;
         private readonly CuentaDniServicio _cuentaDni;
@@ -34,102 +34,78 @@ namespace BilleterasBack.Wallets.Controllers
         [HttpPost("crear/mercadopago")]
         public async Task<IActionResult> CrearMercadoPago(int dni)
         {
-            try
-            {
                 var billetera = await _appMp.CrearCuentaMercadoPago(dni);
-                return Ok(new
+                if (!billetera.IsSuccess)
+                {
+                    return BadRequest(new
+                    {
+                        mensaje = billetera.ErrorMessage
+                    });
+                }
+               return Ok(new
                 {
                     mensaje = "Billetera de MercadoPago creada exitosamente.",
-                    datos = new
-                    {
-                        idBilletera = billetera.IdBilletera,
-                        idUsuario = billetera.IdUsuario,
-                        tipo = billetera.Tipo,
-                        cvu = billetera.Cvu,
-                        saldo = billetera.Saldo
-                    }
-                });
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(new
-                {
-                    mensaje = ex.Message,
-                });
-            }
+                    datos = billetera.Data
+                });               
         }
 
         [HttpPost("crear/cuentadni")]
         public async Task<IActionResult> CrearCuentaDNI(int dni)
         {
-            try
-            {
-                var billetera = await _cuentaDni.CrearCuentaDni(dni);
+            var billetera = await _cuentaDni.CrearCuentaDni(dni);
+
+                if (!billetera.IsSuccess)
+                {
+                    return BadRequest(new
+                    {
+                        mensaje = billetera.ErrorMessage
+                    });
+                }
                 return Ok(new
                 {
                     mensaje = "Billetera de CuentaDni creada exitosamente.",
-                    datos = billetera
+                    datos = billetera.Data,
                 });
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(new
-                {
-                    mensaje = "Error al crear la billetera.",
-                    detalle = ex.Message
-                });
-            }
         }
+        
 
         [HttpPost("crear/paypal")]
         public async Task<IActionResult> CrearCuentaPaypal(string mail)
         {
-            try
-            {
-                var billetera = await _payPal.CrearCuentaPayPal(mail);
+            var billetera = await _payPal.CrearCuentaPayPal(mail);
 
-                if (billetera == null)
-                    return NotFound("Billetera de PayPal no encontrada.");
-
-                return Ok(new
-                {
-                    mensaje = "Billetera de PayPal creada exitosamente.",
-                    datos = billetera
-                });
-            }
-            catch (Exception ex)
+            if (!billetera.IsSuccess)
             {
                 return BadRequest(new
                 {
-                    mensaje = "Error al crear la billetera.",
-                    detalle = ex.Message
+                    mensaje = billetera.ErrorMessage
                 });
             }
+            return Ok(new
+            {
+                mensaje = "Billetera de PayPal creada exitosamente.",
+                datos = billetera.Data
+            });
         }
 
         [HttpPost("crear/cobrador")]
         public async Task<IActionResult> CrearCobrador(int dni)
         {
-            try
-            {
-                var usuario = await _context.Usuarios.FirstOrDefaultAsync(u => u.Dni == dni);
-                if (usuario == null) return NotFound("Usuario no encontrado");
-                var billetera = await _cobrador.CrearCuentaCobrador(usuario);
+            var usuario = await _cobrador.CrearCuentaCobrador(dni);
+
+                if(!usuario.IsSuccess)
+                {
+                    return BadRequest(new
+                    {
+                        mensaje = usuario.ErrorMessage
+                    });
+                }
 
                 return Ok(new
                 {
                     mensaje = "Billetera de Cobrador creada exitosamente.",
-                    datos = billetera
-                });
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(new
-                {
-                    mensaje = "Error al crear la billetera.",
-                    detalle = ex.Message
-                });
-            }
+                    datos = usuario.Data
+                });       
         }
     }
 }

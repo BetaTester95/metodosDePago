@@ -5,10 +5,11 @@ import { Login } from './componentes/login/login';
 import { Dashboard } from './componentes/dashboard/dashboard';
 import { UsuarioTabla } from './views/componentes/usuario-tabla/usuario-tabla';
 import { WalletCreator } from './views/componentes/wallet-creator/wallet-creator';
+import { Navbar } from './componentes/navbar/navbar';
 
 @Component({
   selector: 'app-root',
-  imports: [UsuarioTabla, WalletCreator],
+  imports: [RouterOutlet, Navbar],
   templateUrl: './app.html',
   styleUrl: './app.css'
 })

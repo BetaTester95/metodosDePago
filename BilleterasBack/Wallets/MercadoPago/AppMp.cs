@@ -45,31 +45,42 @@ public class AppMp
         return true;
     }
 
-    public async Task<Billetera> CrearCuentaMercadoPago(int dni)//ok
+    public async Task<Resultado<Billetera>> CrearCuentaMercadoPago(int dni)//ok
     {
-        if (!_validador.validarDNI(dni)) throw new Exception("DNI debe ser mayor que cero y hasta 8 digitos");     
-
-        var usuario = await _context.Usuarios.Include(u => u.Billeteras).FirstOrDefaultAsync(u => u.Dni == dni);
         
-        if (usuario == null) throw new Exception("Usuario no encontrado");
+            if (!_validador.validarDNI(dni)) 
+                return Resultado<Billetera>.Failure("DNI debe ser mayor que cero y hasta 8 digitos");
+ 
+            var usuario = await _context.Usuarios.Include(u => u.Billeteras).Include
+            (u => u.TipoUsuario).FirstOrDefaultAsync(u => u.Dni == dni);
 
-        bool existeBilletera = usuario.Billeteras.Any(b => b.Tipo == "MercadoPago");
-        if (existeBilletera) throw new Exception("Ya existe una billetera de MercadoPago para este usuario.");
-        
+            if (usuario == null) 
+                return Resultado<Billetera>.Failure("Usuario no encontrado.");
 
-        bool existeCobrador = usuario.Billeteras.Any(b => b.Tipo == "Cobrador");
-        if (existeCobrador) throw new Exception("No se puede crear una billetera de MercadoPago para un usuario que es Cobrador.");
-        
-        var billetera = new Billetera
+            if(usuario.IdTipoUsuario == 1)
+                return Resultado<Billetera>.Failure("No se puede crear una billetera de MercadoPago para un usuario Cobrador.");
+
+            bool existeBilletera = usuario.Billeteras.Any(b => b.Tipo == "MercadoPago");
+                if (existeBilletera) 
+                return Resultado<Billetera>.Failure("Ya existe una billetera de MercadoPago para este usuario.");
+
+        try
         {
-            IdUsuario = usuario.IdUsuario,
-            Tipo = "MercadoPago",
-            Cvu = GenerarNumeroCbu(),
-            Saldo = 0.0m
-        };
-        _context.Billeteras.Add(billetera);
-        await _context.SaveChangesAsync();
-        return billetera;
+            var billetera = new Billetera
+            {
+                IdUsuario = usuario.IdUsuario,
+                Tipo = "MercadoPago",
+                Cvu = GenerarNumeroCbu(),
+                Saldo = 0.0m
+            };
+            _context.Billeteras.Add(billetera);
+            await _context.SaveChangesAsync();
+            return Resultado<Billetera>.Success(billetera);
+        }
+        catch (Exception ex)
+        {
+            return Resultado<Billetera>.Failure($"Error en el servidor: {ex.Message}");
+        }
     }
     private string GenerarNumeroCbu()
     {

@@ -24,27 +24,7 @@ public class UsuariosController : ControllerBase
     [HttpPost("registrar")]
     public async Task<IActionResult> GuardarUsuarios(Usuario usuario)
     {
-        if(!_validador.validarNombre(usuario.Nombre) || !_validador.validarApellido(usuario.Apellido))
-        {
-            return BadRequest(new
-            {
-                error = "NOMBRE_APELLIDO_INVALIDO",
-                message = "El nombre o apellido no puede estar vacio",
-                field = "nombre, apellido"
-            });
-        }
-
-
-        if (!_validador.validarDNI(usuario.Dni))
-        {
-            return BadRequest(new
-            {
-                error = "DNI_INVALIDO",
-                message = "El DNIdebe tener hasta 8 digitos",
-                field = "dni"
-            });
-        }
-
+        
         try
         {
             bool maiLExiste = await _context.Usuarios.AnyAsync(u => u.Email == usuario.Email);

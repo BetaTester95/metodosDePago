@@ -23,26 +23,16 @@ namespace BilleterasBack.Wallets.Controllers
         [HttpPost("crear/usuario")] //crear
         public async Task<IActionResult> crearUsuario([FromBody] Usuario nuevoUsuario)
         {
-            try
-            {
-                var resultado = await _usuarioServicios.crearUsuario(nuevoUsuario);
-                if (resultado == null)
-                    return BadRequest(new { mensaje = "Error al crear el usuario." });
-
-                // Extraer el mensaje
-                var mensaje = resultado.GetType().GetProperty("mensaje")?.GetValue(resultado)?.ToString();
-
-                // Si contiene "ya existe", es un error de conflicto
-                if (mensaje != null && mensaje.Contains("ya existe"))
+            
+            var resultado = await _usuarioServicios.crearUsuario(nuevoUsuario);
+                if (!resultado.IsSuccess)
                 {
-                    return Conflict(resultado); // HTTP 409 - Angular lo recibe en el bloque error
-                }
-                return Ok(resultado);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(new { mensaje = "Error al crear el usuario.", msg = ex.Message });
-            }
+                    return BadRequest(new
+                    {
+                        resultado.ErrorMessage
+                    });
+                }      
+            return Ok(resultado);       
         }
 
         [HttpPut("editar/usuario/{id}")] //editar
