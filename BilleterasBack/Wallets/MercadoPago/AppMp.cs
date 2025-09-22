@@ -46,8 +46,7 @@ public class AppMp
     }
 
     public async Task<Resultado<Billetera>> CrearCuentaMercadoPago(int dni)//ok
-    {
-        
+    {        
             if (!_validador.validarDNI(dni)) 
                 return Resultado<Billetera>.Failure("DNI debe ser mayor que cero y hasta 8 digitos");
  

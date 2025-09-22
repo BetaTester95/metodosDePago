@@ -21,26 +21,22 @@ namespace BilleterasBack.Wallets.PayPal
         {
             _context = context;
         }
-        public async Task<Resultado<Billetera>> CrearCuentaPayPal(string mail)
+        public async Task<Resultado<Billetera>> CrearCuentaPayPal(string email)
         {     
-            if(!_validador.mailValidar(mail))           
+            if(!_validador.mailValidar(email))           
                     return Resultado<Billetera>.Failure("Correo electrónico no válido.");
             
-
-            var usuario = await _context.Usuarios.Include(u=> u.Billeteras).FirstOrDefaultAsync(u => u.Email == mail);
+            var usuario = await _context.Usuarios.Include(u=> u.Billeteras).FirstOrDefaultAsync(u => u.Email == email);
                 if (usuario == null)
-                    return Resultado<Billetera>.Failure("Usuario no encontrado.");
-            
-            
+                    return Resultado<Billetera>.Failure("Email no encontrado.");
+                      
                 if (usuario.IdTipoUsuario == 1)
                     return Resultado<Billetera>.Failure("El usuario tiene una billetera tipo 'Cobrador' y no puede crear billetera PayPal.");
-
 
             bool existeBilletera = usuario.Billeteras.Any(b => b.Tipo == "PayPal");
                 if (existeBilletera) 
                     return Resultado<Billetera>.Failure("El usuario ya esta registrado.");
                 
-
                 if(usuario.Email == null)
                     return Resultado<Billetera>.Failure("El usuario no tiene un correo electrónico asociado.");
 

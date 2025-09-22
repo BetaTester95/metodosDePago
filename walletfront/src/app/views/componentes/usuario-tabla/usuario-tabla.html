@@ -21,7 +21,6 @@
     </div>
     <!-- FIN MODAL ELIMINAR -->
     <!-- INICIO MODAL CREAR USUARIO -->
-
     @if(mostrarModalAgregar) {
     <div class="modal fade show d-block">
         <div class="modal-dialog">
@@ -36,7 +35,6 @@
                 <!-- Body -->
                 <div class="modal-body">
                     <form (ngSubmit)="altaUser()" #usuarioForm="ngForm">
-
                         <div class="mb-3">
                             <label for="nombre">Nombre</label>
                             <input type="text" id="nombre" class="form-control" [(ngModel)]="nuevoUsuario.nombre"
@@ -182,7 +180,6 @@
     }
 
     <!-- FIN MODAL EDITAR -->
-
     <h2 class="mb-3">Lista de Usuarios</h2>
 
     <!-- Loading -->

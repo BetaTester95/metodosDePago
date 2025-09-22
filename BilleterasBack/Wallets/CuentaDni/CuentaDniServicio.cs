@@ -23,43 +23,39 @@ namespace BilleterasBack.Wallets.CuentaDni
         {
             _context = context;
         }
-        public async Task<Resultado<Billetera>> CrearCuentaDni(int dni)
-        {            
-            if (!_validador.validarDNI(dni))
-            return Resultado<Billetera>.Failure("DNI debe ser mayor que cero y hasta 8 digitos");
-
-            var usuario = await _context.Usuarios.Include(u => u.Billeteras)
-                                                 .FirstOrDefaultAsync(u => u.Dni == dni);
-            if (usuario == null)
+        public async Task<Resultado<Billetera>> CrearCuentaDni(int dni) //crear billetera
+        {
+            try
             {
-                return Resultado<Billetera>.Failure("Usuario no encontrado.");
-            }
+                if (!_validador.validarDNI(dni))
+                    return Resultado<Billetera>.Failure("DNI debe ser mayor que cero y hasta 8 digitos");
 
-            if (usuario.IdTipoUsuario == 1)
-            {
-                return Resultado<Billetera>.Failure("El usuario tiene una billetera tipo 'Cobrador' y no puede crear billetera CuentaDni.");
-            }
-            bool existeBilletera = usuario.Billeteras.Any(b => b.Tipo == "CuentaDni");
-            if (existeBilletera)
-            {
-                return Resultado<Billetera>.Failure("El usuario ya tiene una billetera de tipo CuentaDni.");
-            }
-
-            try {
-                var billetera = new Billetera
-                {
-                    IdUsuario = usuario.IdUsuario,
-                    Tipo = "CuentaDni",
-                    Cvu = GenerarNumeroCvu(),
-                    Saldo = 0.0m
-                };
-                _context.Billeteras.Add(billetera);
-                await _context.SaveChangesAsync();
-                return Resultado<Billetera>.Success(billetera);
+                var usuario = await _context.Usuarios.Include(u => u.Billeteras)
+                                                     .FirstOrDefaultAsync(u => u.Dni == dni);
+                if (usuario == null)           
+                    return Resultado<Billetera>.Failure("Usuario no encontrado.");
+           
+                if (usuario.IdTipoUsuario == 1)           
+                    return Resultado<Billetera>.Failure("El usuario tiene una billetera tipo 'Cobrador' y no puede crear billetera CuentaDni.");
+            
+                bool existeBilletera = usuario.Billeteras.Any(b => b.Tipo == "CuentaDni");
+                if (existeBilletera)
+                    return Resultado<Billetera>.Failure("El usuario ya tiene una billetera de tipo CuentaDni.");
+                     
+                    var billetera = new Billetera
+                    {
+                        IdUsuario = usuario.IdUsuario,
+                        Tipo = "CuentaDni",
+                        Cvu = GenerarNumeroCvu(),
+                        Saldo = 0.0m
+                    };
+                    _context.Billeteras.Add(billetera);
+                    await _context.SaveChangesAsync();
+                    return Resultado<Billetera>.Success(billetera);
             }
             catch(Exception ex)
             {
-                return Resultado<Billetera>.Failure($"Error al crear la billetera: {ex.Message}");
+                   return Resultado<Billetera>.Failure($"Error al crear la billetera: {ex.Message}");
             }
         }
 

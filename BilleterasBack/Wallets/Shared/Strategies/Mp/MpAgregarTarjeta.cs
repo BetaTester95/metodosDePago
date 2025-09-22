@@ -16,11 +16,10 @@ namespace BilleterasBack.Wallets.Shared.Strategies.Mp
     {
         private readonly AppDbContext _context;
         //agregar logger
-        private readonly ILogger<MpAgregarTarjeta> _logger;
-        public MpAgregarTarjeta(AppDbContext context, ILogger<MpAgregarTarjeta> logger)
+
+        public MpAgregarTarjeta(AppDbContext context)
         {
-           _context = context;
-           _logger = logger;
+           _context = context;         
         }
 
         public bool AgregarTarjeta(string numTarjeta, string nombre, string apellido, int dni, DateTime fechaVenc, int cod)
@@ -32,13 +31,10 @@ namespace BilleterasBack.Wallets.Shared.Strategies.Mp
                 var billetera = _context.Billeteras
                     .Include(b => b.Usuario)
                     .FirstOrDefault(b => b.Usuario.Dni == dni && b.Tipo == "MercadoPago");  
-                if (billetera == null) {
-
-                    _logger.LogWarning(message: "DEBUG: Billetera no encontrada para usuario:{dni} ", dni);
+                if (billetera == null) {               
                     return false;
                 }
-                _logger.LogInformation("DEBUG: Billetera encontrada, creando tarjeta...");
-
+               
                 var tarjeta = new Tarjeta
                 {
                     NumeroTarjeta = numTarjeta,
@@ -53,7 +49,7 @@ namespace BilleterasBack.Wallets.Shared.Strategies.Mp
             }
             catch(Exception ex)
             {
-                _logger.LogError(ex, "ERROR: Falló al guardar la tarjeta");
+                
                 return false;
             }
         }

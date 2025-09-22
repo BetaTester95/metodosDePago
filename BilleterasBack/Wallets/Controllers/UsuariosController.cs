@@ -15,7 +15,7 @@ using BilleterasBack.Wallets.Data;
 public class UsuariosController : ControllerBase
 {
     private readonly AppDbContext _context;
-    private readonly Validador _validador = new Validador();
+
     public UsuariosController(AppDbContext context)
     {
         _context = context;
@@ -23,8 +23,7 @@ public class UsuariosController : ControllerBase
 
     [HttpPost("registrar")]
     public async Task<IActionResult> GuardarUsuarios(Usuario usuario)
-    {
-        
+    {       
         try
         {
             bool maiLExiste = await _context.Usuarios.AnyAsync(u => u.Email == usuario.Email);
