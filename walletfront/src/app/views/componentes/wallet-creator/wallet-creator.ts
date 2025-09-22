@@ -14,6 +14,7 @@ import Swal from 'sweetalert2';
 })
 export class WalletCreator {
   dni: number | null = null;
+  email: string = '';
   error: string = '';
   successMessage: string = '';
   mensaje: string = '';
@@ -32,22 +33,88 @@ export class WalletCreator {
   ];
   tipoBilletera: 'mercadopago' | 'cuentadni' | 'paypal' | null = null;
 
-  
   constructor(private CrearBileterasServicios: BileterasServicios, private _validation: Validation) {
   }
 
+
+  // Métodos para manejar el input dinámico
+  getLabelText(): string {
+    return this.tipoBilletera === 'paypal' ? 'Email' : 'DNI';
+  }
+
+  getInputType(): string {
+    return this.tipoBilletera === 'paypal' ? 'email' : 'number';
+  }
+
+  getPlaceholderText(): string {
+    return this.tipoBilletera === 'paypal' ? 'Ingrese email' : 'Ingrese DNI';
+  }
+
+  getInputValue(): string | number | null {
+    return this.tipoBilletera === 'paypal' ? this.email : this.dni;
+  }
+
+  updateInputValue(value: any): void {
+    if (this.tipoBilletera === 'paypal') {
+      this.email = value;
+    } else {
+      this.dni = value;
+    }
+  }
+
+  onTipoBilleteraChange(newValue: any): void {
+    console.log('Cambio de tipo:', newValue);
+    this.tipoBilletera = newValue;
+    // Limpiar los valores cuando cambie el tipo
+    this.dni = null;
+    this.email = '';
+    this.mensajeError = '';
+    console.log('Valores después del cambio - dni:', this.dni, 'email:', this.email); // Debug temporal
+
+  }
+
   crearWallet(): void {
-    if (!this.dni || !this.tipoBilletera) {
-      this.mensajeError = 'Completa el DNI y selecciona un tipo de billetera'
+
+    console.log('tipoBilletera:', this.tipoBilletera);
+    console.log('dni:', this.dni);
+    console.log('email:', this.email);
+    console.log('typeof tipoBilletera:', typeof this.tipoBilletera);
+    this.mensajeError = '';
+
+    if (!this.tipoBilletera) {
+      this.mensajeError = 'seleccionar un tipo de billetera para crear'
       return
     }
 
-    if (!this._validation.validarDni(this.dni)) {
-      this.mensajeError = "El dni debe ser mayor a 8 digitos."
-      return
+    if (this.tipoBilletera == 'paypal') {
+      let debugg = 'paypal'
+      console.log(debugg)
+      if (!this._validation.validarEmail(this.email)) {
+        console.log('error entre al if validar')
+        this.mensajeError = 'Erro al validar el email'
+        return
+      }
+    } else {
+
+      if (!this.dni) {
+        this.mensajeError = 'Error al validar el dni'
+        return
+      }
+
+      if (!this._validation.validarDni(this.dni)) {
+        this.mensajeError = "El dni debe ser mayor a 8 digitos."
+        return
+      }
     }
 
-    this.CrearBileterasServicios.crearBilletera(this.tipoBilletera, this.dni).subscribe({
+    const identificador = this.tipoBilletera == 'paypal' ? this.email : this.dni
+    if(!identificador){
+      this.mensajeError = this.tipoBilletera === 'paypal' ? 'El email es requerido' : 'El DNI es requerido';
+      return;
+    }
+
+
+    this.CrearBileterasServicios.crearBilletera(this.tipoBilletera, identificador).subscribe({
       next: (respuesta) => {
         console.log(respuesta);
 

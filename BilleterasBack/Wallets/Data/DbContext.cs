@@ -12,7 +12,6 @@ namespace BilleterasBack.Wallets.Data
         public DbSet<TipoUsuario> TiposUsuario { get; set; }
         public DbSet<Billetera> Billeteras { get; set; }
         public DbSet<Tarjeta> Tarjetas { get; set; }
-
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             // Índices únicos

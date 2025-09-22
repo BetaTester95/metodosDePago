@@ -27,16 +27,14 @@ namespace BilleterasBack.Wallets.Collector.Cobrador
 
         public async Task<Resultado<Billetera>> CrearCuentaCobrador(int dni)
         {
-            if (_validador.validarDNI(dni))
+            if (!_validador.validarDNI(dni))
                 return Resultado<Billetera>.Failure("DNI debe ser mayor que cero y hasta 8 digitos");
 
             var usuarioCobrador = await _context.Usuarios.Include(u=> u.Billeteras).FirstOrDefaultAsync(u=> u.Dni == dni);
 
             if (usuarioCobrador == null)
-            {
                 return Resultado<Billetera>.Failure("Usuario no encontrado.");
-            }
-
+            
             if (usuarioCobrador.IdTipoUsuario != 2)
                 return Resultado<Billetera>.Failure("El usuario no es de tipo 'Cobrador'.");
 
@@ -68,22 +66,22 @@ namespace BilleterasBack.Wallets.Collector.Cobrador
                 return 0;
             }
 
-            public string retornarMail()
+        public string retornarMail()
             {
                 return "";
             }
 
-            public decimal cobrarMonto(decimal monto)
+        public decimal cobrarMonto(decimal monto)
             {
                 return 0;
             }
 
-            public string retornarCbuCobrador()
+        public string retornarCbuCobrador()
             {
                 return "";
             }
            
-            private string GenerarNumeroCbu()
+        private string GenerarNumeroCbu()
             {
                 Random random = new Random();
                 string numero = "";

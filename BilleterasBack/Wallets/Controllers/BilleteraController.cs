@@ -70,9 +70,9 @@ namespace BilleterasBack.Wallets.Controllers
         
 
         [HttpPost("crear/paypal")]
-        public async Task<IActionResult> CrearCuentaPaypal(string mail)
+        public async Task<IActionResult> CrearCuentaPaypal(string email)
         {
-            var billetera = await _payPal.CrearCuentaPayPal(mail);
+            var billetera = await _payPal.CrearCuentaPayPal(email);
 
             if (!billetera.IsSuccess)
             {

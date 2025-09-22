@@ -18,9 +18,16 @@ export class BileterasServicios {
 
     constructor(private http: HttpClient){}
 
-    crearBilletera(tipo: 'mercadopago' | 'cuentadni' | 'paypal', dni: number): Observable<any> {
+    crearBilletera(tipo: 'mercadopago' | 'cuentadni' | 'paypal', identificador: number | string): Observable<any> {
     const url = this.walletUrls[tipo];
-    const params = new HttpParams().set('dni', dni.toString());
+    let params = new HttpParams();
+
+    if(tipo == 'paypal'){
+      params = params.set('email', identificador.toString());
+    }else{
+      params = params.set('dni', identificador.toString());
+    }
+
     return this.http.post(url, null, { params });
   }
 }

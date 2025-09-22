@@ -15,7 +15,7 @@ using BilleterasBack.Wallets.Data;
 public class UsuariosController : ControllerBase
 {
     private readonly AppDbContext _context;
-    private readonly Validador _validador = new Validador();
+
     public UsuariosController(AppDbContext context)
     {
         _context = context;

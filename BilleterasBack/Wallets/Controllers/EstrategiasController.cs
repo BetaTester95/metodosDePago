@@ -42,13 +42,59 @@ namespace BilleterasBack.Wallets.Controllers
                 var tipoMetodoPagoRecibido = tipoMetodoPago;
                 var tipoMetodoPagoStr = tipoMetodoPago.ToString();
 
-                IAgregarCard estrategia = tipoMetodoPago switch
-                {
-                    TipoMetodoPago.MercadoPago => new MpAgregarTarjeta(_context, _validaciones),
-                    TipoMetodoPago.CuentaDni => new ctAgregarTarjeta(_context, _validaciones),
-                    TipoMetodoPago.PayPal => new paypAgregarTarjeta(_context),
-                    _ => throw new NotImplementedException($"Estrategia no implementada para el tipo de pago: {tipoMetodoPago}")
-                };
+            DateTime fechaHoy = DateTime.Now;
+
+            if (string.IsNullOrWhiteSpace(request.Nombre))
+                return BadRequest(new { mensaje = "El nombre no puede estar vacío." });
+
+            if (string.IsNullOrWhiteSpace(request.Apellido))
+                return BadRequest(new { mensaje = "El apellido no puede estar vacío." });
+
+            if (request.Dni <= 0)
+                return BadRequest(new { mensaje = "El DNI debe ser un numero positivo." });
+
+            if (fechaHoy > request.FechaExp)
+                return BadRequest(new { mensaje = "La fecha de expiracion no puede ser en el pasado." });
+
+            if (request.Cod < 100 || request.Cod > 999)
+                return BadRequest(new { mensaje = "El codigo de seguridad debe tener 3 digitos." });
+
+            if (string.IsNullOrWhiteSpace(request.NumeroTarjeta) || request.NumeroTarjeta.Length > 22 | !request.NumeroTarjeta.All(char.IsDigit))
+                return BadRequest(new { mensaje = "El numero de tarjeta debe tener 22 digitos." });
+
+            if (request.NumeroTarjeta.Length < 16)
+                return BadRequest(new { mensaje = "El numero de tarjeta debe tener al menos 16 digitos." });
+
+            var existeNumTarjeta = await _context.Tarjetas.AnyAsync(t => t.NumeroTarjeta == request.NumeroTarjeta);
+            if (existeNumTarjeta)
+                return BadRequest(new { mensaje = "El numero de tarjeta ya esta agregada en su cuenta." });
+
+            var billetera = await _context.Billeteras
+                .Include(b => b.Usuario)
+                .FirstOrDefaultAsync(b => b.Usuario.Dni == request.Dni && b.Tipo == tipoMetodoPago.ToString());
+
+            bool billeteraEncontrada = billetera != null;
+
+
+            if (billetera == null)
+            {
+                System.Diagnostics.Debug.WriteLine("DEBUG: Billetera no encontrada");
+                return NotFound(new { mensaje = "Billetera no encontrada para el usuario y tipo especificado" });
+            }
+
+            IAgregarCard estrategia = tipoMetodoPago switch
+            {
+                TipoMetodoPago.MercadoPago => new MpAgregarTarjeta(_context, _logger),
+                TipoMetodoPago.CuentaDni => new ctAgregarTarjeta(_context),
+                TipoMetodoPago.PayPal => new paypAgregarTarjeta(_context),
+                _ => throw new NotImplementedException($"Estrategia no implementada para el tipo de pago: {tipoMetodoPago}")
+            };
+                _ => throw new NotImplementedException($"Estrategia no implementada para el tipo de pago: {tipoMetodoPago}")
+            };
+                _ => throw new NotImplementedException($"Estrategia no implementada para el tipo de pago: {tipoMetodoPago}")
+            };
+                _ => throw new NotImplementedException($"Estrategia no implementada para el tipo de pago: {tipoMetodoPago}")
+            };
 
                 var resultado = estrategia.AgregarTarjeta(
                     request.NumeroTarjeta,
@@ -90,7 +136,6 @@ namespace BilleterasBack.Wallets.Controllers
             if(_validaciones.ValidarMonto(request.montoPagar))
                 return BadRequest(new { mensaje = "Error al ingresar el monto." });
             
-
             IpagoCardCred? estrategia = request.tipoMetodoPago switch
             {
                 TipoMetodoPago.MercadoPago => new MpPagoConTarjetaCredito(_context, logger),
@@ -116,7 +161,7 @@ namespace BilleterasBack.Wallets.Controllers
             if(_validaciones.ValidarTipoMetodoPago(TipoMetodoPago.ToString()))
                 return BadRequest(new { mensaje = "El tipo de metodo de pago no es valido." });
             
-            if (_validaciones.ValidarMonto(montoPagar))
+            if (!_validaciones.ValidarMonto(montoPagar))
                 return BadRequest(new { mensaje = "El monto a pagar debe ser mayor que cero." });
 
             if(!_validaciones.validarNumTarjeta(cbu))
