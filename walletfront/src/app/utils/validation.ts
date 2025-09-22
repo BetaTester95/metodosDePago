@@ -4,8 +4,8 @@ import { Injectable } from '@angular/core';
   providedIn: 'root'
 })
 export class Validation {
-  
- // Nombre y apellido: solo letras, mínimo 2 caracteres
+
+  // Nombre y apellido: solo letras, mínimo 2 caracteres
   validarNombre(nombre?: string): boolean {
     return /^[a-zA-Z]{2,}$/.test(nombre ?? '');
   }
@@ -27,6 +27,22 @@ export class Validation {
   // Password mínimo 6 caracteres, al menos un número y una letra
   validarPassword(password?: string): boolean {
     return /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{6,}$/.test(password ?? '');
+  }
+
+  validarFecha(fecha: string): boolean {
+    if (!fecha) return false;
+
+    const hoy = new Date();
+    hoy.setHours(0, 0, 0, 0); // resetear horas para comparar solo la fecha
+
+    const fechaIngresada = new Date(fecha);
+    return fechaIngresada >= hoy;
+  }
+
+  validarNumeroTarjeta(numero: string): boolean {
+    if (!numero) return false;
+    const regex = /^[0-9]{16,22}$/;
+    return regex.test(numero);
   }
 
 }

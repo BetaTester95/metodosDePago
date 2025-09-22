@@ -7,7 +7,6 @@ import { HttpParams } from '@angular/common/http';
     providedIn: 'root'
 })
 
-
 export class BileterasServicios {
 
   private walletUrls = 

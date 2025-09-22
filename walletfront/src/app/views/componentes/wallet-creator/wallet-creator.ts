@@ -23,7 +23,6 @@ export class WalletCreator {
   tipo: string = '';
   saldo?: number;
   nombre?: string = '';
-
   //
 
   tiposBilletera = [

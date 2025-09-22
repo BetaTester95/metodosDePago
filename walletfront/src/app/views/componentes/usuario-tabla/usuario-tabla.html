@@ -21,7 +21,6 @@
     </div>
     <!-- FIN MODAL ELIMINAR -->
     <!-- INICIO MODAL CREAR USUARIO -->
-
     @if(mostrarModalAgregar) {
     <div class="modal fade show d-block">
         <div class="modal-dialog">
@@ -62,7 +61,7 @@
                             @if (errorEmail) {
                             <p style="color: red;">Error al validar email</p>
                             }
-                            @if (errorBackendEmail){
+                            @else if (errorBackendEmail){
                             <p style="color: red;">{{ errorBackendEmail }}</p>
                             }
                         </div>
@@ -166,7 +165,9 @@
                             <p style="color: red;">{{errorBackendDni}}</p>
                             }
                         </div>
-
+                        @if (errorGeneral) {
+                            <p style="color: red;">{{errorGeneral}}</p>
+                        }
                         <div class="modal-footer">
                             <button type="submit" class="btn btn-success">Guardar</button>
                             <button type="button" class="btn btn-secondary"
@@ -209,7 +210,7 @@
                 </tr>
             </thead>
             <tbody>
-                @for (usuario of usuarios; track usuario.idUsuario; let i = $index) {
+                @for (usuario of usuarios; track usuario.idUsuario;) {
                 <tr>
                     <td>{{ usuario.idUsuario }}</td>
                     <td>{{ usuario.nombre }}</td>

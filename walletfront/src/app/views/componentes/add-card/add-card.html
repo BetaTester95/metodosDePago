@@ -1,0 +1,84 @@
+<div class="container">
+    <div class="card card-form">
+        <div class="card-body">
+            <h2 class="card-title text-center mb-4">Agregar Tarjeta</h2>
+
+            <form (ngSubmit)="guardarTarjeta()" #tarjetaForm="ngForm">
+
+                <div class="mb-3">
+                    <label for="metodoPago" class="form-label">Seleccione su billetera</label>
+                    <select class="form-select" id="metodoPago" name="tipoBilletera" [(ngModel)]="tipoBilletera"
+                        required>
+                        @for (item of tiposBilletera; track item.value) {
+                        <option [value]="item.value">{{ item.label }}</option>
+                        }
+                    </select>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="nombre" class="form-label">Nombre</label>
+                        <input type="text" class="form-control" id="nombre" name="nombre" placeholder="Juan"
+                            [(ngModel)]="nombre" required>
+                        @if(mensajeError){
+                        <div class="text-danger mt-1">{{mensajeError}}</div>
+                        }
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="apellido" class="form-label">Apellido</label>
+                        <input type="text" class="form-control" id="apellido" name="apellido" placeholder="Pérez"
+                            [(ngModel)]="apellido" required>
+                        @if(mensajeError){
+                        <div class="text-danger mt-1">{{mensajeError}}</div>
+                        }
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label for="numeroTarjeta" class="form-label">Número de Tarjeta</label>
+                    <input type="text" class="form-control" id="numeroTarjeta" name="numTarjeta"
+                        placeholder="xxxx-xxxx-xxxx-xxxx" [(ngModel)]="numTarjeta" required>
+                    @if(mensajeError){
+                    <div class="text-danger mt-1">{{mensajeError}}</div>
+                    }
+                </div>
+
+                <div class="mb-3">
+                    <label for="dni" class="form-label">DNI</label>
+                    <input type="number" class="form-control" id="dni" name="dni" placeholder="xx.xxx.xxx"
+                        [(ngModel)]="dni" required>
+                    @if(mensajeError){
+                    <div class="text-danger mt-1">{{mensajeError}}</div>
+                    }
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="fechaExp" class="form-label">Fecha de Expiración</label>
+                        <input type="date" class="form-control" id="fechaExp" name="fechaVenc" [(ngModel)]="fechaVenc"
+                            required>
+                        @if(mensajeError){
+                        <div class="text-danger mt-1">{{mensajeError}}</div>
+                        }
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="codigoSeg" class="form-label">Código de Seguridad</label>
+                        <input type="text" class="form-control" id="codigoSeg" name="cod" placeholder="CVC"
+                            [(ngModel)]="cod" required>
+                        @if(mensajeError) {
+                        <div class="text-danger mt-1">{{mensajeError}}</div>
+                        }
+                    </div>
+                </div>
+
+                <div class="d-grid gap-2">
+                    <button type="submit" class="btn btn-primary" [disabled]="!tarjetaForm.form.valid">
+                        Agregar Tarjeta
+                    </button>
+                </div>
+
+            </form>
+            
+        </div>
+    </div>
+</div>

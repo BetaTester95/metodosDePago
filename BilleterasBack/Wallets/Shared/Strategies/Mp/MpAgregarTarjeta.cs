@@ -1,5 +1,6 @@
 ﻿using Azure.Core;
 using BilleterasBack.Wallets.Data;
+using BilleterasBack.Wallets.Exceptions;
 using BilleterasBack.Wallets.Models;
 using BilleterasBack.Wallets.Shared.Interfaces;
 using Microsoft.EntityFrameworkCore;
@@ -8,54 +9,66 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-
+using BilleterasBack.Wallets.Validaciones;
 
 namespace BilleterasBack.Wallets.Shared.Strategies.Mp
 {
     public class MpAgregarTarjeta : IAgregarCard
     {
         private readonly AppDbContext _context;
-        //agregar logger
-        private readonly ILogger<MpAgregarTarjeta> _logger;
-        public MpAgregarTarjeta(AppDbContext context, ILogger<MpAgregarTarjeta> logger)
+        private readonly Validador? _validaciones;
+
+        public MpAgregarTarjeta(AppDbContext context, Validador validador)
         {
            _context = context;
-           _logger = logger;
+           _validaciones = validador;
         }
 
         public bool AgregarTarjeta(string numTarjeta, string nombre, string apellido, int dni, DateTime fechaVenc, int cod)
         {
-           try
-           {  
-                //buscar dni de usuario
-                var usuario = _context.Usuarios.FirstOrDefault(u => u.Dni == dni); 
-                var billetera = _context.Billeteras
+            DateTime ahora = DateTime.Now;
+
+            if (_validaciones == null)
+                throw new InvalidOperationException("El validador no ha sido inicializado.");
+
+            if (!_validaciones.validarNumTarjeta(numTarjeta))
+                throw new ArgumentException("El numeor de tarjeta no es valido");
+
+            if (!_validaciones.validarNombre(nombre))
+                throw new ArgumentException("El nombre no es valido");
+
+            if (!_validaciones.validarApellido(apellido))
+                throw new ArgumentException("El apellido no es valido");
+
+            if (!_validaciones.validarDNI(dni))
+                throw new ArgumentException("error al validar el dni");
+
+            if (!_validaciones.validarCod(cod))
+                throw new ArgumentException("Error al validar el cod");
+
+            var identificacionMercadoPago = _context.Billeteras
                     .Include(b => b.Usuario)
-                    .FirstOrDefault(b => b.Usuario.Dni == dni && b.Tipo == "MercadoPago");  
-                if (billetera == null) {
+                    .FirstOrDefault(b => b.Tipo == "MercadoPago" && b.Usuario!.Dni == dni);
+            if (identificacionMercadoPago == null)
+                throw new UsuarioExceptions("No se encontró una billetera PayPal para el usuario o los datos personales no coinciden.");
 
-                    _logger.LogWarning(message: "DEBUG: Billetera no encontrada para usuario:{dni} ", dni);
-                    return false;
-                }
-                _logger.LogInformation("DEBUG: Billetera encontrada, creando tarjeta...");
+            var tarjetaExistente = _context.Tarjetas
+                    .FirstOrDefault(t => t.NumeroTarjeta == numTarjeta && t.IdBilletera == identificacionMercadoPago.IdBilletera);
 
-                var tarjeta = new Tarjeta
-                {
-                    NumeroTarjeta = numTarjeta,
-                    FechaVencimiento = fechaVenc,
-                    CodigoSeguridad = cod,
-                    Saldo = 10000,
-                    IdBilletera = billetera.IdBilletera
-                };
-                _context.Tarjetas.Add(tarjeta);
-                _context.SaveChanges();
-               return true;
-            }
-            catch(Exception ex)
+            if (tarjetaExistente != null)
+                throw new BilleteraExceptions("Ya existe una tarjeta con este número en la billetera de PayPal.");
+
+            var tarjeta = new Tarjeta
             {
-                _logger.LogError(ex, "ERROR: Falló al guardar la tarjeta");
-                return false;
-            }
+                NumeroTarjeta = numTarjeta,
+                FechaVencimiento = fechaVenc,
+                CodigoSeguridad = cod,
+                Saldo = 10000,
+                IdBilletera = identificacionMercadoPago.IdBilletera
+            };
+            _context.Tarjetas.Add(tarjeta);
+            _context.SaveChanges();
+            return true;
         }
     }
 }

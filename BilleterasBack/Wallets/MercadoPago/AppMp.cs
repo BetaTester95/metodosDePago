@@ -47,7 +47,6 @@ public class AppMp
 
     public async Task<Resultado<Billetera>> CrearCuentaMercadoPago(int dni)//ok
     {
-        
             if (!_validador.validarDNI(dni)) 
                 return Resultado<Billetera>.Failure("DNI debe ser mayor que cero y hasta 8 digitos");
  
@@ -57,13 +56,12 @@ public class AppMp
             if (usuario == null) 
                 return Resultado<Billetera>.Failure("Usuario no encontrado.");
 
-            if(usuario.IdTipoUsuario == 1)
+            if(usuario.IdTipoUsuario == 2)
                 return Resultado<Billetera>.Failure("No se puede crear una billetera de MercadoPago para un usuario Cobrador.");
 
             bool existeBilletera = usuario.Billeteras.Any(b => b.Tipo == "MercadoPago");
                 if (existeBilletera) 
                 return Resultado<Billetera>.Failure("Ya existe una billetera de MercadoPago para este usuario.");
-
         try
         {
             var billetera = new Billetera

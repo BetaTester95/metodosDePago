@@ -35,7 +35,7 @@ namespace BilleterasBack.Wallets.CuentaDni
                 return Resultado<Billetera>.Failure("Usuario no encontrado.");
             }
 
-            if (usuario.IdTipoUsuario == 1)
+            if (usuario.IdTipoUsuario == 2)
             {
                 return Resultado<Billetera>.Failure("El usuario tiene una billetera tipo 'Cobrador' y no puede crear billetera CuentaDni.");
             }
@@ -62,7 +62,6 @@ namespace BilleterasBack.Wallets.CuentaDni
                 return Resultado<Billetera>.Failure($"Error al crear la billetera: {ex.Message}");
             }
         }
-
         private string GenerarNumeroCvu()
         {
             Random random = new Random();

@@ -26,13 +26,11 @@ namespace BilleterasBack.Wallets.PayPal
             if(!_validador.mailValidar(mail))           
                     return Resultado<Billetera>.Failure("Correo electrónico no válido.");
             
-
             var usuario = await _context.Usuarios.Include(u=> u.Billeteras).FirstOrDefaultAsync(u => u.Email == mail);
                 if (usuario == null)
                     return Resultado<Billetera>.Failure("Usuario no encontrado.");
             
-            
-                if (usuario.IdTipoUsuario == 1)
+                if (usuario.IdTipoUsuario == 2)
                     return Resultado<Billetera>.Failure("El usuario tiene una billetera tipo 'Cobrador' y no puede crear billetera PayPal.");
 
 

@@ -17,6 +17,7 @@ builder.Services.AddControllers();
 builder.Services.AddHttpContextAccessor(); // <--- esto es clave
 builder.Services.AddScoped<MpAgregarTarjeta>();
 builder.Services.AddScoped<UsuarioService>();
+builder.Services.AddScoped<BilleterasBack.Wallets.Validaciones.Validador>();
 
 // Configurar DbContext con la cadena de conexión
 builder.Services.AddDbContext<AppDbContext>(options =>

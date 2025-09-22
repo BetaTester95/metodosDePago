@@ -23,8 +23,7 @@ public class UsuariosController : ControllerBase
 
     [HttpPost("registrar")]
     public async Task<IActionResult> GuardarUsuarios(Usuario usuario)
-    {
-        
+    {    
         try
         {
             bool maiLExiste = await _context.Usuarios.AnyAsync(u => u.Email == usuario.Email);
