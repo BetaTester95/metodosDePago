@@ -182,25 +182,16 @@ export class UsuarioTabla {
     this.UsuarioServicio.ediUser(users).subscribe({
       next: (respuesta) => {
 
-        if (respuesta.error) {
-          const campo = respuesta.error;
-          const mensaje = respuesta.mensaje;
-
-          if (campo == 'email') {
-            this.errorBackendEmail = mensaje;
-          } else if (campo == 'dni') {
-            this.errorBackendDni = mensaje;
-          } else {
-            this.errorGeneral = mensaje || 'Ocurrió un error';
-          }
-          return; 
-        }
-
-        console.log('Usuario actualizado:', respuesta);
-        this.alertSuces("Usuario editado correctamente. ");
-        this.cerrarModalEditar();
-        this.cargarUsuarios();
-        this.limpiarErrores();
+      if (respuesta.isSuccess === true) {
+          console.log('Usuario actualizado:', respuesta);
+          this.alertSuces("Usuario editado correctamente. ");
+          this.cerrarModalEditar();
+          this.cargarUsuarios();
+          this.limpiarErrores();
+        }        
+      },
+      error: (err) => {
+        console.error('Ocurrio un error: ', err)       
       }
     });
   }

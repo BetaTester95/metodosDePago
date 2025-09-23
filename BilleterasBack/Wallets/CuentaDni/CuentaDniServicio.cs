@@ -25,10 +25,8 @@ namespace BilleterasBack.Wallets.CuentaDni
         }
         public async Task<Resultado<Billetera>> CrearCuentaDni(int dni) //crear billetera
         {
-            try
-            {
-                if (!_validador.validarDNI(dni))
-                    return Resultado<Billetera>.Failure("DNI debe ser mayor que cero y hasta 8 digitos");
+            if (!_validador.validarDNI(dni))
+                return Resultado<Billetera>.Failure("DNI debe ser mayor que cero y hasta 8 digitos");
 
             var usuario = await _context.Usuarios.Include(u => u.Billeteras)
                                                  .FirstOrDefaultAsync(u => u.Dni == dni);
@@ -47,7 +45,8 @@ namespace BilleterasBack.Wallets.CuentaDni
                 return Resultado<Billetera>.Failure("El usuario ya tiene una billetera de tipo CuentaDni.");
             }
 
-            try {
+            try
+            {
                 var billetera = new Billetera
                 {
                     IdUsuario = usuario.IdUsuario,
@@ -59,9 +58,10 @@ namespace BilleterasBack.Wallets.CuentaDni
                 await _context.SaveChangesAsync();
                 return Resultado<Billetera>.Success(billetera);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
-                   return Resultado<Billetera>.Failure($"Error al crear la billetera: {ex.Message}");
+                return Resultado<Billetera>.Failure($"Error al crear la billetera: {ex.Message}");
+
             }
         }
         private string GenerarNumeroCvu()

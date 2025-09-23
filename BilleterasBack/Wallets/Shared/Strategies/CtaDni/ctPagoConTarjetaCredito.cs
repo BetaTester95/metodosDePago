@@ -16,11 +16,9 @@ namespace BilleterasBack.Wallets.Shared.Strategies.CtaDni
         private readonly AppDbContext _context;
         private string? _cvuCobradorSeleccionado;
         private int _idDni;
-        private readonly ILogger<ctPagoConTarjetaCredito> _logger;
-        public ctPagoConTarjetaCredito(AppDbContext context, ILogger<ctPagoConTarjetaCredito> logger)
+        public ctPagoConTarjetaCredito(AppDbContext context)
         {
             _context = context;
-            _logger = logger;
         }
 
         public string CvuCobradorSeleccionado(string cvu)
@@ -44,7 +42,7 @@ namespace BilleterasBack.Wallets.Shared.Strategies.CtaDni
                 .FirstOrDefault(b => b.Tipo == "Cobrador" && b.Cvu == cvuCobrador);
             if (billeteraCobrador == null || billeteraCobrador.Tipo == null)
             {
-                _logger.LogWarning("El cobrador con CVU: {cvuCobrador} no existe.", cvuCobrador);
+                //_logger.LogWarning("El cobrador con CVU: {cvuCobrador} no existe.", cvuCobrador);
                 return false;
             }
 
@@ -54,7 +52,7 @@ namespace BilleterasBack.Wallets.Shared.Strategies.CtaDni
 
             if (tarjetaUsuario == null)
             {
-                _logger.LogWarning("La tarjeta asociada al DNI: {idDni} no existe.", idDni);
+                //_logger.LogWarning("La tarjeta asociada al DNI: {idDni} no existe.", idDni);
                 return false;
             }
 
@@ -65,7 +63,7 @@ namespace BilleterasBack.Wallets.Shared.Strategies.CtaDni
 
             if (montoPagar > tarjetaUsuario.Saldo)
             {
-                _logger.LogWarning("Saldo insuficiente en Cuenta DNI.");
+                //_logger.LogWarning("Saldo insuficiente en Cuenta DNI.");
                 return false;
             }
 

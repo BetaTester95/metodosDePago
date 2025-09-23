@@ -66,32 +66,39 @@ namespace BilleterasBack.Wallets.Servicios
             return new { mensaje = "Usuario eliminado" };
         }
 
-        public async Task<object> editarUsuario(int id, UserDto usuarioActualizado) //editar usuario
+        public async Task<Resultado<UserDto>> editarUsuario(int id, UserDto usuarioActualizado)
         {
             var usuario = await _context.Usuarios.FindAsync(id);
             if (usuario == null)
-                return new { mensaje = "Usuario no encontrado" };
+                return Resultado<UserDto>.Failure("No existe el usuario que desea editar. ");
 
             if (usuario.Email != usuarioActualizado.Email)
             {
                 var emailExiste = await _context.Usuarios.AnyAsync(u => u.Email == usuarioActualizado.Email && u.IdUsuario != id);
                 if (emailExiste)
-                    return new { error = "email", mensaje = "El email ya existe" };
+                    return Resultado<UserDto>.Failure("El email ya esta siendo usado. ");
             }
 
             if (usuario.Dni != usuarioActualizado.Dni)
             {
                 var dniExiste = await _context.Usuarios.AnyAsync(u => u.Dni == usuarioActualizado.Dni && u.IdUsuario != id);
                 if (dniExiste)
-                    return new { error = "dni", mensaje = "El DNI ya existe" };
+                    return Resultado<UserDto>.Failure("El dni ya esta siendo usado. ");
             }
+            var dataTemp= new UserDto
+            {
+                Nombre = usuarioActualizado.Nombre,
+                Apellido = usuarioActualizado.Apellido,
+                Email = usuarioActualizado.Email,
+                Dni = usuarioActualizado.Dni
+            };
 
             usuario.Nombre = usuarioActualizado.Nombre;
             usuario.Apellido = usuarioActualizado.Apellido;
             usuario.Email = usuarioActualizado.Email;
             usuario.Dni = usuarioActualizado.Dni;
             await _context.SaveChangesAsync();
-            return new { mensaje = "Usuario actualizado" };
+            return Resultado<UserDto>.Success(dataTemp);
         }
     }
 }

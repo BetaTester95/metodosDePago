@@ -19,10 +19,9 @@ namespace BilleterasBack.Wallets.Shared.Strategies.Mp
         private readonly ILogger<MpPagoConTarjetaCredito> _logger;
         private int _idDni;
         private decimal resultado;
-        public MpPagoConTarjetaCredito(AppDbContext context, ILogger<MpPagoConTarjetaCredito> logger)
+        public MpPagoConTarjetaCredito(AppDbContext context)
         {
-            _context = context;
-            _logger = logger;
+            _context = context;   
         }
   
         public bool PagoConTarjetaCredito(decimal montoPagar, int cantCuotas)

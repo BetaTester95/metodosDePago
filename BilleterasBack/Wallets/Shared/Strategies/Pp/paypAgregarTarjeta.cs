@@ -18,8 +18,7 @@ namespace BilleterasBack.Wallets.Shared.Strategies.Pp
         
         public paypAgregarTarjeta(AppDbContext context)
         {
-            _context = context;
-            
+            _context = context;           
         }
 
         public bool AgregarTarjeta(string numTarjeta, string nombre, string apellido, int dni, DateTime fechaVenc, int cod)

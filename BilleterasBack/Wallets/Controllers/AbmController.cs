@@ -19,11 +19,9 @@ namespace BilleterasBack.Wallets.Controllers
             _usuarioServicios = usuarioServicios;
         }
 
-
         [HttpPost("crear/usuario")] //crear
         public async Task<IActionResult> crearUsuario([FromBody] Usuario nuevoUsuario)
-        {
-            
+        {        
             var resultado = await _usuarioServicios.crearUsuario(nuevoUsuario);
                 if (!resultado.IsSuccess)
                 {
@@ -41,16 +39,14 @@ namespace BilleterasBack.Wallets.Controllers
             try
             {
                 var resultado = await _usuarioServicios.editarUsuario(id, usuarioActualizado);
-                if (resultado == null)
-                    return BadRequest(new { mensaje = "Error al actualizar el usuario." });
-
-                // Solución: Usar reflexión para obtener la propiedad "error" del objeto resultado
-                var errorProp = resultado.GetType().GetProperty("error");
-                var errorValue = errorProp?.GetValue(resultado)?.ToString();
-
-                if (errorValue == "email" || errorValue == "dni")
-                    return Conflict(resultado); // 409
-
+                if (!resultado.IsSuccess)
+                {
+                    return Ok(new
+                    {
+                        success = false,
+                        mensaje = resultado.ErrorMessage
+                    });
+                }      
                 return Ok(resultado);
             }
             catch (Exception ex)

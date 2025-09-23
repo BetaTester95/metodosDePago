@@ -26,7 +26,7 @@ namespace BilleterasBack.Wallets.Controllers
     {
         private readonly AppDbContext _context;
         public readonly TipoMetodoPago _tipoDePago;
-        private readonly Validador _validaciones;
+        private readonly Validador? _validaciones;
 
         public EstrategiasController(AppDbContext context, Validador validador)
         {
@@ -84,18 +84,12 @@ namespace BilleterasBack.Wallets.Controllers
 
             IAgregarCard estrategia = tipoMetodoPago switch
             {
-                TipoMetodoPago.MercadoPago => new MpAgregarTarjeta(_context, _logger),
-                TipoMetodoPago.CuentaDni => new ctAgregarTarjeta(_context),
+                TipoMetodoPago.MercadoPago => new MpAgregarTarjeta(_context, _validaciones),
+                TipoMetodoPago.CuentaDni => new ctAgregarTarjeta(_context, _validaciones),
                 TipoMetodoPago.PayPal => new paypAgregarTarjeta(_context),
                 _ => throw new NotImplementedException($"Estrategia no implementada para el tipo de pago: {tipoMetodoPago}")
             };
-                _ => throw new NotImplementedException($"Estrategia no implementada para el tipo de pago: {tipoMetodoPago}")
-            };
-                _ => throw new NotImplementedException($"Estrategia no implementada para el tipo de pago: {tipoMetodoPago}")
-            };
-                _ => throw new NotImplementedException($"Estrategia no implementada para el tipo de pago: {tipoMetodoPago}")
-            };
-
+                
                 var resultado = estrategia.AgregarTarjeta(
                     request.NumeroTarjeta,
                     request.Nombre,
@@ -130,16 +124,14 @@ namespace BilleterasBack.Wallets.Controllers
         [HttpPost("pagarcontarjeta")]
         public async Task<IActionResult> PagarConTarjeta([FromBody] PagoTarjetaRequest request)
         {
-            var logger = HttpContext.RequestServices.GetRequiredService<ILogger<MpPagoConTarjetaCredito>>();
-            var logger2 = HttpContext.RequestServices.GetRequiredService<ILogger<ctPagoConTarjetaCredito>>();
 
             if(_validaciones.ValidarMonto(request.montoPagar))
                 return BadRequest(new { mensaje = "Error al ingresar el monto." });
             
             IpagoCardCred? estrategia = request.tipoMetodoPago switch
             {
-                TipoMetodoPago.MercadoPago => new MpPagoConTarjetaCredito(_context, logger),
-                TipoMetodoPago.CuentaDni => new ctPagoConTarjetaCredito(_context, logger2),
+                TipoMetodoPago.MercadoPago => new MpPagoConTarjetaCredito(_context),
+                TipoMetodoPago.CuentaDni => new ctPagoConTarjetaCredito(_context),
                 TipoMetodoPago.PayPal => new paypPagoConTarjetaCredito(_context),
                 _ => null
             };
