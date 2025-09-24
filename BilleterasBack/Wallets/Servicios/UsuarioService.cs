@@ -48,7 +48,7 @@ namespace BilleterasBack.Wallets.Servicios
                 u.Dni,
                 u.FechaRegistro,
                 u.Estado,
-                u.TipoUsuario.NombreTipo
+                u.TipoUsuario!.NombreTipo
             }).ToListAsync();
 
             if (listarUsuarios == null)

@@ -101,31 +101,23 @@ export class UsuarioTabla {
 
     this.UsuarioServicio.createUser(users).subscribe({
       next: (respuesta) => {
+
+        if(respuesta.isSuccess === true){
+        console.log('next: ', respuesta)
         this.cargarUsuarios();
         this.alertSuces("Usuario creado correctamente. ");
         this.limpiarModal();
-      },
-
-      error: (err) => {
-        const mensaje = err.error?.errorMessage;
-
-        if (err.status == 400) {
-          this.errorBackendEmail = err.error?.errorMessage || 'error en la validacion'
-        }
-
-        if (mensaje) {
-          if (mensaje.toLowerCase().includes('email')) {
-            this.errorBackendEmail = mensaje;
-          } else if (mensaje.toLowerCase().includes('dni')) {
-            this.errorBackendDni = mensaje;
-          } else {
-            this.errorGeneral = mensaje;
+        }else{
+          if(respuesta.mensaje.includes('dni')){
+            this.errorBackendDni = respuesta.mensaje
+          }else{
+            this.errorBackendEmail = respuesta.mensaje
           }
-        } else {
-          this.errorGeneral = 'Ocurrió un error inesperado';
         }
+      },
+      error: (err) => {
+        console.error('Ocurrio un error: ', err)
       }
-
     })
   }
 
@@ -181,17 +173,25 @@ export class UsuarioTabla {
 
     this.UsuarioServicio.ediUser(users).subscribe({
       next: (respuesta) => {
-
+        console.log('next antes de llegar al if', respuesta)
       if (respuesta.isSuccess === true) {
           console.log('Usuario actualizado:', respuesta);
           this.alertSuces("Usuario editado correctamente. ");
           this.cerrarModalEditar();
           this.cargarUsuarios();
           this.limpiarErrores();
+        }else{
+          console.log('Error al actualizar: ', respuesta)
+          if(respuesta.mensaje.includes('dni')){
+            this.errorBackendDni = respuesta.mensaje
+          }else{
+            this.errorBackendEmail = respuesta.mensaje
+          }
         }        
       },
       error: (err) => {
         console.error('Ocurrio un error: ', err)       
+        console.log('eror al actualiar', err)
       }
     });
   }
@@ -223,6 +223,7 @@ export class UsuarioTabla {
   cerrarModalAgregar() {
     this.mostrarModalAgregar = false;
   }
+
 
   limpiarErrores() {
     this.errorNombre = false;

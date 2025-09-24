@@ -39,85 +39,54 @@ namespace BilleterasBack.Wallets.Controllers
         {
             try
             {
-                var tipoMetodoPagoRecibido = tipoMetodoPago;
-                var tipoMetodoPagoStr = tipoMetodoPago.ToString();
+                var existeNumTarjeta = await _context.Tarjetas.AnyAsync(t => t.NumeroTarjeta == request.NumeroTarjeta);
+                if (existeNumTarjeta)
+                    return Ok(new { successs = false, messagge = "El numero de tarjeta ya esta agregada en su cuenta." });
 
-            DateTime fechaHoy = DateTime.Now;
+                var billetera = await _context.Billeteras
+                    .Include(b => b.Usuario)
+                    .FirstOrDefaultAsync(b => b.Usuario.Dni == request.Dni && b.Tipo == tipoMetodoPago.ToString());
 
-            if (string.IsNullOrWhiteSpace(request.Nombre))
-                return BadRequest(new { mensaje = "El nombre no puede estar vacío." });
+                if (billetera == null)
+                {
+                    return NotFound(new { mensaje = "Billetera no encontrada para el usuario y tipo especificado" });
+                }
 
-            if (string.IsNullOrWhiteSpace(request.Apellido))
-                return BadRequest(new { mensaje = "El apellido no puede estar vacío." });
-
-            if (request.Dni <= 0)
-                return BadRequest(new { mensaje = "El DNI debe ser un numero positivo." });
-
-            if (fechaHoy > request.FechaExp)
-                return BadRequest(new { mensaje = "La fecha de expiracion no puede ser en el pasado." });
-
-            if (request.Cod < 100 || request.Cod > 999)
-                return BadRequest(new { mensaje = "El codigo de seguridad debe tener 3 digitos." });
-
-            if (string.IsNullOrWhiteSpace(request.NumeroTarjeta) || request.NumeroTarjeta.Length > 22 | !request.NumeroTarjeta.All(char.IsDigit))
-                return BadRequest(new { mensaje = "El numero de tarjeta debe tener 22 digitos." });
-
-            if (request.NumeroTarjeta.Length < 16)
-                return BadRequest(new { mensaje = "El numero de tarjeta debe tener al menos 16 digitos." });
-
-            var existeNumTarjeta = await _context.Tarjetas.AnyAsync(t => t.NumeroTarjeta == request.NumeroTarjeta);
-            if (existeNumTarjeta)
-                return BadRequest(new { mensaje = "El numero de tarjeta ya esta agregada en su cuenta." });
-
-            var billetera = await _context.Billeteras
-                .Include(b => b.Usuario)
-                .FirstOrDefaultAsync(b => b.Usuario.Dni == request.Dni && b.Tipo == tipoMetodoPago.ToString());
-
-            bool billeteraEncontrada = billetera != null;
-
-
-            if (billetera == null)
-            {
-                System.Diagnostics.Debug.WriteLine("DEBUG: Billetera no encontrada");
-                return NotFound(new { mensaje = "Billetera no encontrada para el usuario y tipo especificado" });
-            }
-
-            IAgregarCard estrategia = tipoMetodoPago switch
-            {
-                TipoMetodoPago.MercadoPago => new MpAgregarTarjeta(_context, _validaciones),
-                TipoMetodoPago.CuentaDni => new ctAgregarTarjeta(_context, _validaciones),
-                TipoMetodoPago.PayPal => new paypAgregarTarjeta(_context),
-                _ => throw new NotImplementedException($"Estrategia no implementada para el tipo de pago: {tipoMetodoPago}")
-            };
-                
-                var resultado = estrategia.AgregarTarjeta(
-                    request.NumeroTarjeta,
-                    request.Nombre,
-                    request.Apellido,
-                    request.Dni,
-                    request.FechaExp,
-                    request.Cod
-                );
+                IAgregarCard estrategia = tipoMetodoPago switch
+                {
+                    TipoMetodoPago.MercadoPago => new MpAgregarTarjeta(_context, _validaciones!),
+                    TipoMetodoPago.CuentaDni => new ctAgregarTarjeta(_context, _validaciones!),
+                    TipoMetodoPago.PayPal => new paypAgregarTarjeta(_context),
+                    _=> throw new NotImplementedException($"Estrategia no implementada para el tipo de pago: {tipoMetodoPago}")
+                };           
+                    var resultado = estrategia.AgregarTarjeta(
+                        request.NumeroTarjeta,
+                        request.Nombre,
+                        request.Apellido,
+                        request.Dni,
+                        request.FechaExp,
+                        request.Cod
+                    );
              
-                return Ok(resultado);
+                    return Ok(resultado);//devuelve true
             }
             catch(ArgumentException ex)
             {
-                return BadRequest(new { mensaje = ex.Message });
+                return Ok(new {success = false, messagge = ex.Message });
             }
             catch(UsuarioExceptions ex)
             {
-                return BadRequest(new { mensaje = ex.Message });
+                return Ok(new { success = false, messagge = ex.Message });
             }
 
             catch(BilleteraExceptions ex)
             {
-                return BadRequest(new { mensaje = ex.Message });
+                return Ok(new { success = false, messagge = ex.Message });
             }
 
             catch (Exception ex)
             {
-                return StatusCode(500, new { mensaje = "Ocurrió un error inesperado en el servidor." });
+                return StatusCode(500, new { mensaje = "Ocurrió un error inesperado en el servidor." }); //corregir
             }
         }
 

@@ -32,7 +32,7 @@ namespace BilleterasBack.Wallets.Shared.Strategies.Mp
                 throw new InvalidOperationException("El validador no ha sido inicializado.");
 
             if (!_validaciones.validarNumTarjeta(numTarjeta))
-                throw new ArgumentException("El numeor de tarjeta no es valido");
+                throw new ArgumentException("El numero de tarjeta no es valido");
 
             if (!_validaciones.validarNombre(nombre))
                 throw new ArgumentException("El nombre no es valido");
@@ -50,7 +50,7 @@ namespace BilleterasBack.Wallets.Shared.Strategies.Mp
                     .Include(b => b.Usuario)
                     .FirstOrDefault(b => b.Tipo == "MercadoPago" && b.Usuario!.Dni == dni);
             if (identificacionMercadoPago == null)
-                throw new UsuarioExceptions("No se encontró una billetera PayPal para el usuario o los datos personales no coinciden.");
+                throw new UsuarioExceptions("No se encontró una billetera MercadoPago para el usuario o los datos personales no coinciden.");
 
             var tarjetaExistente = _context.Tarjetas
                     .FirstOrDefault(t => t.NumeroTarjeta == numTarjeta && t.IdBilletera == identificacionMercadoPago.IdBilletera);

@@ -20,16 +20,16 @@
                         <label for="nombre" class="form-label">Nombre</label>
                         <input type="text" class="form-control" id="nombre" name="nombre" placeholder="Juan"
                             [(ngModel)]="nombre" required>
-                        @if(mensajeError){
-                        <div class="text-danger mt-1">{{mensajeError}}</div>
+                        @if(errorNombre){
+                        <div class="text-danger mt-1">{{errorNombre}}</div>
                         }
                     </div>
                     <div class="col-md-6 mb-3">
                         <label for="apellido" class="form-label">Apellido</label>
                         <input type="text" class="form-control" id="apellido" name="apellido" placeholder="Pérez"
                             [(ngModel)]="apellido" required>
-                        @if(mensajeError){
-                        <div class="text-danger mt-1">{{mensajeError}}</div>
+                        @if(errorApellido){
+                        <div class="text-danger mt-1">{{errorApellido}}</div>
                         }
                     </div>
                 </div>
@@ -38,8 +38,8 @@
                     <label for="numeroTarjeta" class="form-label">Número de Tarjeta</label>
                     <input type="text" class="form-control" id="numeroTarjeta" name="numTarjeta"
                         placeholder="xxxx-xxxx-xxxx-xxxx" [(ngModel)]="numTarjeta" required>
-                    @if(mensajeError){
-                    <div class="text-danger mt-1">{{mensajeError}}</div>
+                    @if(errorNumTarjeta){
+                    <div class="text-danger mt-1">{{errorNumTarjeta}}</div>
                     }
                 </div>
 
@@ -47,8 +47,8 @@
                     <label for="dni" class="form-label">DNI</label>
                     <input type="number" class="form-control" id="dni" name="dni" placeholder="xx.xxx.xxx"
                         [(ngModel)]="dni" required>
-                    @if(mensajeError){
-                    <div class="text-danger mt-1">{{mensajeError}}</div>
+                    @if(errorDni){
+                    <div class="text-danger mt-1">{{errorDni}}</div>
                     }
                 </div>
 
@@ -57,8 +57,8 @@
                         <label for="fechaExp" class="form-label">Fecha de Expiración</label>
                         <input type="date" class="form-control" id="fechaExp" name="fechaVenc" [(ngModel)]="fechaVenc"
                             required>
-                        @if(mensajeError){
-                        <div class="text-danger mt-1">{{mensajeError}}</div>
+                        @if(fechaVenc){
+                        <div class="text-danger mt-1">{{fechaVenc}}</div>
                         }
                     </div>
                     <div class="col-md-6 mb-3">
@@ -76,9 +76,7 @@
                         Agregar Tarjeta
                     </button>
                 </div>
-
-            </form>
-            
+            </form>   
         </div>
     </div>
 </div>

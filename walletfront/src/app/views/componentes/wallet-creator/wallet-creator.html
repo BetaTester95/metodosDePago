@@ -3,13 +3,7 @@
 
   <div class="mb-3">
     <label class="form-label">{{ getLabelText() }}</label>
-    <input 
-      [type]="getInputType()" 
-      class="form-control" 
-      [ngModel]="getInputValue()" 
-      (ngModelChange)="updateInputValue($event)"
-      [placeholder]="getPlaceholderText()" 
-    />
+    <input [type]="getInputType()" class="form-control" [ngModel]="getInputValue()" (ngModelChange)="updateInputValue($event)"[placeholder]="getPlaceholderText()"/>
     @if(mensajeError) {
     <div class="text-danger mt-1">{{ mensajeError }}</div>
     }
@@ -17,7 +11,6 @@
 
   <div class="mb-3">
     <label class="form-label">Tipo de Billetera</label>
-
     <select class="form-select" [(ngModel)]="tipoBilletera" (ngModelChange)="onTipoBilleteraChange($event)">
       <option value="">Seleccione un tipo</option>
       @for (tipo of tiposBilletera; track tipo.value) {

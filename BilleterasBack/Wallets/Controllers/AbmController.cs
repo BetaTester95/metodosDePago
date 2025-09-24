@@ -1,10 +1,12 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using BilleterasBack.Wallets.Data;
-using Microsoft.EntityFrameworkCore;
-
-using BilleterasBack.Wallets.Servicios;
-using BilleterasBack.Wallets.Models;
+﻿using BilleterasBack.Wallets.Data;
 using BilleterasBack.Wallets.Dtos;
+using BilleterasBack.Wallets.Models;
+using BilleterasBack.Wallets.Servicios;
+using BilleterasBack.Wallets.Validaciones;
+using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.VisualBasic;
 
 namespace BilleterasBack.Wallets.Controllers
 {
@@ -19,26 +21,20 @@ namespace BilleterasBack.Wallets.Controllers
             _usuarioServicios = usuarioServicios;
         }
 
-        [HttpPost("crear/usuario")] //crear
-        public async Task<IActionResult> crearUsuario([FromBody] Usuario nuevoUsuario)
-        {        
-            var resultado = await _usuarioServicios.crearUsuario(nuevoUsuario);
-                if (!resultado.IsSuccess)
-                {
-                    return BadRequest(new
-                    {
-                        resultado.ErrorMessage
-                    });
-                }      
-            return Ok(resultado);       
+
+        private class respuestasController
+        {
+            public bool? Success { get; set; }
+            public string? Message { get; set; }
+            public object? Data { get; set; }
         }
 
-        [HttpPut("editar/usuario/{id}")] //editar
-        public async Task<IActionResult> editarUsuario(int id, [FromBody] UserDto usuarioActualizado)
+        [HttpPost("crear/usuario")] //crear
+        public async Task<IActionResult> crearUsuario([FromBody] Usuario nuevoUsuario)
         {
-            try
-            {
-                var resultado = await _usuarioServicios.editarUsuario(id, usuarioActualizado);
+       
+
+            var resultado = await _usuarioServicios.crearUsuario(nuevoUsuario);
                 if (!resultado.IsSuccess)
                 {
                     return Ok(new
@@ -47,12 +43,40 @@ namespace BilleterasBack.Wallets.Controllers
                         mensaje = resultado.ErrorMessage
                     });
                 }      
-                return Ok(resultado);
+            return Ok(resultado);       
+        }
+        //IACRESULT ?? INFO
+        [HttpPut("editar/usuario/{id}")] //editar
+        public async Task<IActionResult> editarUsuario(int id, [FromBody] UserDto usuarioActualizado)
+        {
+            var res = new respuestasController { Success = false, Message = "", Data = null };
+
+            try
+            {
+                var resultado = await _usuarioServicios.editarUsuario(id, usuarioActualizado);
+                if (resultado.IsSuccess == false)
+                {
+                    res.Success = resultado.IsSuccess;
+                    res.Message = resultado.ErrorMessage;
+                    res.Data = resultado.Data;
+                }
+                else
+                {
+                    res.Success = resultado.IsSuccess;
+                    res.Message = resultado.ErrorMessage;
+                    res.Data = resultado.Data;
+                    
+                }    
             }
             catch (Exception ex)
             {
-                return BadRequest(new { mensaje = "Error al actualizar el usuario.", msg = ex.Message });
+                res.Success = false;
+                res.Message = "Ocurrió un error: " + ex.Message;
+                
             }
+
+            return Ok(res.Data);
+
         }
 
         [HttpGet("mostrar/usuarios")]

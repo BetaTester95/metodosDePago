@@ -27,6 +27,13 @@ export class AddCard {
   fechaVenc = '';
   cod = '';
   mensajeError: string = '';
+  /*---------------------------------*/
+  errorNombre: string = ''
+  errorApellido: string = ''
+  errorNumTarjeta: string = ''
+  errorDni: string = '';
+  errorFecha: string = '';
+
 
   constructor(private agregarTarjetaService: AgregarTarjetaService, private _validaciones: Validation) { }
 
@@ -35,25 +42,24 @@ export class AddCard {
     if (!this.tipoBilletera) return
 
     if (!this._validaciones.validarNombre(this.nombre)){
-      this.mensajeError = 'Error al validar el nombre'
+      this.errorNombre = 'Error al validar el nombre'
       return
     }
 
     if (!this._validaciones.validarApellido(this.apellido)){
-      this.mensajeError = 'Erro al validar el apellido'
+      this.errorApellido = 'Erro al validar el apellido'
       return
     }
 
     if (!this._validaciones.validarDni(this.dni)){
-      this.mensajeError = 'Error al validar el dni'
+      this.errorDni = 'Error al validar el dni'
       return
     }
 
     if (!this._validaciones.validarFecha(this.fechaVenc)){
-      this.mensajeError = 'Error al validar la fecha'
+      this.errorFecha = 'Error al validar la fecha'
       return
     }
-
 
     const dataTarjeta = {
       numTarjeta: this.numTarjeta,
@@ -66,14 +72,13 @@ export class AddCard {
 
     this.agregarTarjetaService.agregarTarjeta(this.tipoBilletera, dataTarjeta).subscribe({
       next: respuesta => {
-
-        this.creadoExitoso(respuesta.mensaje)
-
+        console.log('next exitoso:', respuesta)
+        this.creadoExitoso('Tarjeta Agregada Correctamente')
       },
       error: err => {
-        console.error('Error al agregar la tarjeta', err);
+        console.error('Error al agregar la tarjeta', err.error.mensaje);
         const mensajeError = err.error.mensaje
-        console.log('mensaje de erro backend', mensajeError)
+        console.log('mensaje de error backend', mensajeError)
         if(err.error?.status == 400){
           this.mensajeError = 'Error en la validacion'
         }else{

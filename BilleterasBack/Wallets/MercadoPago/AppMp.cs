@@ -60,7 +60,7 @@ public class AppMp
                 return Resultado<Billetera>.Failure("No se puede crear una billetera de MercadoPago para un usuario Cobrador.");
 
             bool existeBilletera = usuario.Billeteras.Any(b => b.Tipo == "MercadoPago");
-                if (existeBilletera) 
+            if (existeBilletera) 
                 return Resultado<Billetera>.Failure("Ya existe una billetera de MercadoPago para este usuario.");
         try
         {

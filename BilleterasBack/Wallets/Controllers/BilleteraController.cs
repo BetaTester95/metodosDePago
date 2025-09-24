@@ -37,14 +37,15 @@ namespace BilleterasBack.Wallets.Controllers
                 var billetera = await _appMp.CrearCuentaMercadoPago(dni);
                 if (!billetera.IsSuccess)
                 {
-                    return BadRequest(new
+                    return Ok(new
                     {
-                        mensaje = billetera.ErrorMessage
+                        success = false,
+                        message = billetera.ErrorMessage
                     });
                 }
                return Ok(new
                 {
-                    mensaje = "Billetera de MercadoPago creada exitosamente.",
+                    message = "Billetera de MercadoPago creada exitosamente.",
                     datos = billetera.Data
                 });               
         }
@@ -56,14 +57,15 @@ namespace BilleterasBack.Wallets.Controllers
 
                 if (!billetera.IsSuccess)
                 {
-                    return BadRequest(new
+                    return Ok(new
                     {
-                        mensaje = billetera.ErrorMessage
+                        message = billetera.ErrorMessage,
+                        datos = billetera.Data
                     });
                 }
                 return Ok(new
                 {
-                    mensaje = "Billetera de CuentaDni creada exitosamente.",
+                    message = "Billetera de CuentaDni creada exitosamente.",
                     datos = billetera.Data,
                 });
         }
@@ -76,14 +78,15 @@ namespace BilleterasBack.Wallets.Controllers
 
             if (!billetera.IsSuccess)
             {
-                return BadRequest(new
+                return Ok(new
                 {
-                    mensaje = billetera.ErrorMessage
+                    success = true,
+                    message = billetera.ErrorMessage
                 });
             }
             return Ok(new
             {
-                mensaje = "Billetera de PayPal creada exitosamente.",
+                message = "Billetera de PayPal creada exitosamente.",
                 datos = billetera.Data
             });
         }
@@ -92,18 +95,17 @@ namespace BilleterasBack.Wallets.Controllers
         public async Task<IActionResult> CrearCobrador(int dni)
         {
             var usuario = await _cobrador.CrearCuentaCobrador(dni);
-
                 if(!usuario.IsSuccess)
                 {
-                    return BadRequest(new
-                    {
-                        mensaje = usuario.ErrorMessage
+                    return Ok(new
+                    {   
+                        success = true,
+                        message = usuario.ErrorMessage
                     });
                 }
-
                 return Ok(new
                 {
-                    mensaje = "Billetera de Cobrador creada exitosamente.",
+                    message = "Billetera de Cobrador creada exitosamente.",
                     datos = usuario.Data
                 });       
         }

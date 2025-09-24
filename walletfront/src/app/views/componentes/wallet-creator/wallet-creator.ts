@@ -37,7 +37,7 @@ export class WalletCreator {
   }
 
 
-  // Métodos para manejar el input dinámico
+  // Métodos para manejar el inputs dinamicos
   getLabelText(): string {
     return this.tipoBilletera === 'paypal' ? 'Email' : 'DNI';
   }
@@ -65,16 +65,9 @@ export class WalletCreator {
   onTipoBilleteraChange(newValue: any): void {
     console.log('Cambio de tipo:', newValue);
     this.tipoBilletera = newValue;
-    // Limpiar los valores cuando cambie el tipo
-    this.dni = null;
-    this.email = '';
-    this.mensajeError = '';
-    console.log('Valores después del cambio - dni:', this.dni, 'email:', this.email); // Debug temporal
-
   }
 
   crearWallet(): void {
-
     console.log('tipoBilletera:', this.tipoBilletera);
     console.log('dni:', this.dni);
     console.log('email:', this.email);
@@ -90,8 +83,7 @@ export class WalletCreator {
       let debugg = 'paypal'
       console.log(debugg)
       if (!this._validation.validarEmail(this.email)) {
-        console.log('error entre al if validar')
-        this.mensajeError = 'Erro al validar el email'
+        this.mensajeError = 'Error al validar el email'
         return
       }
     } else {
@@ -108,31 +100,33 @@ export class WalletCreator {
     }
 
     const identificador = this.tipoBilletera == 'paypal' ? this.email : this.dni
-    if(!identificador){
+    if (!identificador) {
       this.mensajeError = this.tipoBilletera === 'paypal' ? 'El email es requerido' : 'El DNI es requerido';
       return;
     }
 
-
     this.CrearBileterasServicios.crearBilletera(this.tipoBilletera, identificador).subscribe({
       next: (respuesta) => {
-        console.log(respuesta);
-
-        this.mensaje = respuesta.datos.mensaje
-        this.nombre = respuesta.datos.nombre
-        this.tipo = respuesta.datos.tipo;
-        this.cvu = respuesta.datos.cvu;
-        this.saldo = respuesta.datos.saldo;
-        this.creadoExitoso(respuesta.mensaje, `\nCVU: ${this.cvu}\nSaldo: ${this.saldo}`, 'success')
+        console.log('next:', respuesta)
+        if(respuesta.success === true){
+          console.log('next ok: ', respuesta)
+          this.cvu = respuesta.datos.cvu
+          this.saldo = respuesta.datos.saldo
+          this.creadoExitoso(respuesta.message, `\nCVU: ${this.cvu}\nSaldo: ${this.saldo}`, 'success')
+          
+        }else{
+          console.log('Error back:', respuesta)
+          this.mensajeError = respuesta.message
+          
+        }
       },
       error: (err) => {
         console.log('Error backend:', err);
-        console.log('Mensaje: ', err.error?.mensaje)
-        console.log(this.mensaje)
+        console.log('Mensaje: ', err.error?.message)
         if (err.error?.status == 400) {
           this.mensajeError = 'Error en la validación'
         } else {
-          this.mensajeError = err.error?.mensaje
+          this.mensajeError = err.error?.message
         }
       }
     })
