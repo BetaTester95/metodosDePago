@@ -37,22 +37,13 @@ namespace BilleterasBack.Wallets.Servicios
             }
         }
 
-        public async Task<object> mostrarUsuarios() //mostrar usuarios
+        public async Task<List<Usuario>> mostrarUsuarios() //mostrar usuarios
         {
-            var listarUsuarios = await _context.Usuarios.Include(u => u.TipoUsuario).Where(u => u.Estado == "activo").Select(u => new
-            {
-                u.IdUsuario,
-                u.Nombre,
-                u.Apellido,
-                u.Email,
-                u.Dni,
-                u.FechaRegistro,
-                u.Estado,
-                u.TipoUsuario!.NombreTipo
-            }).ToListAsync();
+            var listarUsuarios = await _context.Usuarios
+            .Include(u => u.TipoUsuario)
+            .Where(u => u.Estado == "activo")
+            .ToListAsync();
 
-            if (listarUsuarios == null)
-                return new { mensaje = "No hay usuarios para mostrar" };
             return listarUsuarios;
         }
 
@@ -61,29 +52,30 @@ namespace BilleterasBack.Wallets.Servicios
             var usuario = await _context.Usuarios.FindAsync(id);
             if (usuario == null)
                 return new { mensaje = "Usuario no encontrado" };
+
             _context.Usuarios.Remove(usuario);
             await _context.SaveChangesAsync();
             return new { mensaje = "Usuario eliminado" };
         }
 
-        public async Task<Resultado<UserDto>> editarUsuario(int id, UserDto usuarioActualizado)
-        {
+        public async Task<UserDto> editarUsuario(int id, UserDto usuarioActualizado)
+        {      
             var usuario = await _context.Usuarios.FindAsync(id);
             if (usuario == null)
-                return Resultado<UserDto>.Failure("No existe el usuario que desea editar. ");
+                return new UserDto { Message = "No se encontro ningun usuario" };
 
             if (usuario.Email != usuarioActualizado.Email)
             {
                 var emailExiste = await _context.Usuarios.AnyAsync(u => u.Email == usuarioActualizado.Email && u.IdUsuario != id);
                 if (emailExiste)
-                    return Resultado<UserDto>.Failure("El email ya esta siendo usado. ");
+                    return new UserDto { Success = false, Message="El mail existe" };
             }
 
             if (usuario.Dni != usuarioActualizado.Dni)
             {
                 var dniExiste = await _context.Usuarios.AnyAsync(u => u.Dni == usuarioActualizado.Dni && u.IdUsuario != id);
                 if (dniExiste)
-                    return Resultado<UserDto>.Failure("El dni ya esta siendo usado. ");
+                    return new UserDto { Success = false, Message = $"El dni {usuario.Dni} esta siendo usado" };
             }
             var dataTemp= new UserDto
             {
@@ -98,7 +90,7 @@ namespace BilleterasBack.Wallets.Servicios
             usuario.Email = usuarioActualizado.Email;
             usuario.Dni = usuarioActualizado.Dni;
             await _context.SaveChangesAsync();
-            return Resultado<UserDto>.Success(dataTemp);
+            return dataTemp;
         }
     }
 }

@@ -15,8 +15,7 @@ namespace BilleterasBack.Wallets.Shared.Strategies.Pp
       
         private readonly AppDbContext _context;
         private decimal saldoTarjetaCredito;
-        private string? _cvuCobradorSeleccionado;
-        private int _idDni;
+
 
         public paypPagoConTarjetaCredito(AppDbContext context)
         {

@@ -60,9 +60,11 @@ export class UsuarioTabla {
   cargarUsuarios() {
     this.UsuarioServicio.listarUsuarios().subscribe({
       next: (datos) => {
+        console.log("error listar usuarios: ", datos)
         this.usuarios = datos
       },
       error: (e) => {
+                console.log("error listar usuarios: ", e)
         console.log(e)
       }
     });
@@ -101,7 +103,7 @@ export class UsuarioTabla {
 
     this.UsuarioServicio.createUser(users).subscribe({
       next: (respuesta) => {
-
+        console.log(respuesta)
         if(respuesta.isSuccess === true){
         console.log('next: ', respuesta)
         this.cargarUsuarios();
@@ -140,7 +142,6 @@ export class UsuarioTabla {
     this.limpiarErrores()
     this.cargarUsuarios()
   }
-
 
   guardarCambios() {
 
@@ -182,10 +183,10 @@ export class UsuarioTabla {
           this.limpiarErrores();
         }else{
           console.log('Error al actualizar: ', respuesta)
-          if(respuesta.mensaje.includes('dni')){
-            this.errorBackendDni = respuesta.mensaje
+          if(respuesta.message.includes('dni')){
+            this.errorBackendDni = respuesta.message
           }else{
-            this.errorBackendEmail = respuesta.mensaje
+            this.errorBackendEmail = respuesta.message
           }
         }        
       },

@@ -6,6 +6,8 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using Microsoft.Extensions.DependencyInjection;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -30,6 +32,12 @@ builder.Services.AddScoped<ContextoPago>(serviceProvider =>
     var tipoDefault = TipoMetodoPago.MercadoPago; // o desde config
     return new ContextoPago(tipoDefault);
 });
+
+builder.Services.AddControllers()
+    .AddNewtonsoftJson(options =>
+        options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore
+    );
+
 
 builder.Services.AddAuthentication(options =>
 {

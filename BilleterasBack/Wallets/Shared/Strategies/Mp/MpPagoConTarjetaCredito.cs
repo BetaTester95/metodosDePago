@@ -15,9 +15,7 @@ namespace BilleterasBack.Wallets.Shared.Strategies.Mp
     public class MpPagoConTarjetaCredito : IpagoCardCred
     {
         private readonly AppDbContext _context;
-        private string? _cvuCobradorSeleccionado;
         private readonly ILogger<MpPagoConTarjetaCredito> _logger;
-        private int _idDni;
         private decimal resultado;
         public MpPagoConTarjetaCredito(AppDbContext context)
         {

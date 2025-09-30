@@ -15,8 +15,6 @@ namespace BilleterasBack.Wallets.Shared.Strategies.CtaDni
     public class ctPagoConTransferencia : IPagoCardTransferencia
     {
         private readonly AppDbContext _context;
-        private string? _cvuCobradorSeleccionado;
-        private int _idDni;
         private decimal descuentoTotal;
         private decimal descuentoLyM = 0.15m;
         private decimal descuentoS = 0.20m;

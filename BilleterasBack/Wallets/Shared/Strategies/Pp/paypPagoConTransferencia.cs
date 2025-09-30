@@ -15,8 +15,6 @@ namespace BilleterasBack.Wallets.Shared.Strategies.Pp
     {
         
         private readonly AppDbContext _context;
-        private string? _cvuCobradorSeleccionado;
-        private int _idDni;
         private decimal _saldoPayPal;
 
 

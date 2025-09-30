@@ -15,7 +15,6 @@ namespace BilleterasBack.Wallets.Shared.Strategies.Mp
     public class MpPagoConTransferencia : IPagoCardTransferencia
     {
         private readonly AppDbContext _context;
-        private int _idDni;
 
         public MpPagoConTransferencia(AppDbContext context)
         {
