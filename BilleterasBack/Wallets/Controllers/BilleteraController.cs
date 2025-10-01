@@ -39,14 +39,14 @@ namespace BilleterasBack.Wallets.Controllers
                 {
                     return Ok(new
                     {
-                        success = false,
-                        message = billetera.ErrorMessage
+                        Success = false,
+                        Message = billetera.ErrorMessage
                     });
                 }
                return Ok(new
                 {
-                    message = "Billetera de MercadoPago creada exitosamente.",
-                    datos = billetera.Data
+                   Message = "Billetera de MercadoPago creada exitosamente.",
+                   Datos = billetera.Data
                 });               
         }
 
@@ -72,23 +72,17 @@ namespace BilleterasBack.Wallets.Controllers
         
 
         [HttpPost("crear/paypal")]
-        public async Task<IActionResult> CrearCuentaPaypal(string email)
+        public async Task<object> CrearCuentaPaypal(string email)
         {
-            var billetera = await _payPal.CrearCuentaPayPal(email);
-
-            if (!billetera.IsSuccess)
+            try
             {
-                return Ok(new
-                {
-                    success = true,
-                    message = billetera.ErrorMessage
-                });
+                var billetera = await _payPal.CrearCuentaPayPal(email);
+                return billetera;
             }
-            return Ok(new
+            catch (Exception ex)
             {
-                message = "Billetera de PayPal creada exitosamente.",
-                datos = billetera.Data
-            });
+                return ex;
+            }
         }
 
         [HttpPost("crear/cobrador")]

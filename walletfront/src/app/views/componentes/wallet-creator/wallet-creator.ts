@@ -110,13 +110,12 @@ export class WalletCreator {
         console.log('next:', respuesta)
         if(respuesta.success === true){
           console.log('next ok: ', respuesta)
-          this.cvu = respuesta.datos.cvu
+          respuesta.datos.cvu != null ? this.cvu = respuesta.datos.cvu : this.email = respuesta.datos.email
           this.saldo = respuesta.datos.saldo
-          this.creadoExitoso(respuesta.message, `\nCVU: ${this.cvu}\nSaldo: ${this.saldo}`, 'success')
-          
+          this.creadoExitoso(respuesta.message, `\nCVU: ${this.cvu}\nSaldo: ${this.saldo}`, 'success')          
         }else{
           console.log('Error back:', respuesta)
-          this.mensajeError = respuesta.message
+          this.mensajeError = respuesta.errorMessage
           
         }
       },

@@ -1,13 +1,7 @@
-﻿using BilleterasBack.Wallets.Data;
-using BilleterasBack.Wallets.Dtos;
+﻿using BilleterasBack.Wallets.Dtos;
 using BilleterasBack.Wallets.Models;
 using BilleterasBack.Wallets.Servicios;
-using BilleterasBack.Wallets.Validaciones;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.VisualBasic;
-using System.Reflection.Metadata.Ecma335;
 
 namespace BilleterasBack.Wallets.Controllers
 {
@@ -22,20 +16,19 @@ namespace BilleterasBack.Wallets.Controllers
             _usuarioServicios = usuarioServicios;
         }
 
-        //[HttpPost("crear/usuario")] //crear
-        //public async Task<Usuario> CrearUsuario([FromBody] Usuario nuevoUsuario)
-        //{
-        //    try
-        //    {
-        //        var users = await _usuarioServicios.CrearUsuario(nuevoUsuario);
-        //        return users!;
-        //    }
-
-        //    catch (Exception) 
-        //    {
-        //        return null;
-        //    }
-        //}
+        [HttpPost("crear/usuario")] //crear
+        public async Task<object> CrearUsuario([FromBody] Usuario nuevoUsuario)
+        {
+            try
+            {
+                var users = await _usuarioServicios.CrearUsuario(nuevoUsuario);
+                return users!;
+            }
+            catch (Exception ex) 
+            {
+                return ex;
+            }
+        }
 
         //IACRESULT ?? INFO
         [HttpPut("editar/usuario/{id}")] //editar
@@ -62,7 +55,7 @@ namespace BilleterasBack.Wallets.Controllers
             }
             catch (Exception ex)
             {
-                throw new Exception(ex.Message);
+                throw new Exception(ex.Message);              
             }
         }
 
@@ -77,7 +70,6 @@ namespace BilleterasBack.Wallets.Controllers
                    Message = "Usuario eliminado exitosamente. "
                };
            }
-
            catch (Exception ex)
            {
                 return ex;

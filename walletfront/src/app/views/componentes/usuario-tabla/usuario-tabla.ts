@@ -1,7 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Observable } from 'rxjs';
 declare var bootstrap: any;
 import { UsuarioServicio } from 'src/app/servicios/usuario-servicio';
 import { Validation } from 'src/app/utils/validation';
@@ -29,6 +28,7 @@ export class UsuarioTabla {
   errorBackendDni: string = '';
   errorBackendEmail: string = '';
   errorGeneral: string = '';
+
   //bool validaciones inicio
   nuevoUsuario = {
     nombre: '',
@@ -48,7 +48,6 @@ export class UsuarioTabla {
     dni: undefined
   };
 
-
   constructor(private UsuarioServicio: UsuarioServicio, private validation: Validation) { }
 
 
@@ -60,12 +59,11 @@ export class UsuarioTabla {
   cargarUsuarios() {
     this.UsuarioServicio.listarUsuarios().subscribe({
       next: (datos) => {
-        console.log("error listar usuarios: ", datos)
+        console.log("error:", datos)
         this.usuarios = datos
       },
       error: (e) => {
-                console.log("error listar usuarios: ", e)
-        console.log(e)
+        console.log("error :", e)
       }
     });
   }
@@ -103,17 +101,18 @@ export class UsuarioTabla {
 
     this.UsuarioServicio.createUser(users).subscribe({
       next: (respuesta) => {
-        console.log(respuesta)
+        console.log("dentro de next:", respuesta)
         if(respuesta.isSuccess === true){
         console.log('next: ', respuesta)
         this.cargarUsuarios();
         this.alertSuces("Usuario creado correctamente. ");
         this.limpiarModal();
         }else{
-          if(respuesta.mensaje.includes('dni')){
-            this.errorBackendDni = respuesta.mensaje
+          console.log("respuesta dentro else:", respuesta)
+          if(respuesta.message.includes('dni')){
+            this.errorBackendDni = respuesta.message
           }else{
-            this.errorBackendEmail = respuesta.mensaje
+            this.errorBackendEmail = respuesta.message
           }
         }
       },
@@ -164,6 +163,7 @@ export class UsuarioTabla {
       this.errorDni = true;
       return
     }
+
     const users = {
       idUsuario: this.usuarioEditando.idUsuario,
       Nombre: this.usuarioEditando.nombre,

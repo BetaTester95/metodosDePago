@@ -1,14 +1,7 @@
-﻿
-using BilleterasBack.Wallets.Collector.Cobrador;
-using BilleterasBack.Wallets.Models;
-using BilleterasBack.Wallets.Shared.Strategies.Mp;
-using Microsoft.EntityFrameworkCore;
-using System;
-using BilleterasBack.Wallets.PayPal;
-using System.ComponentModel.DataAnnotations.Schema;
-using System.Text.RegularExpressions;
-using BilleterasBack.Wallets.Validaciones;
+﻿using BilleterasBack.Wallets.Validaciones;
 using BilleterasBack.Wallets.Data;
+using Microsoft.EntityFrameworkCore;
+using BilleterasBack.Wallets.Models;
 
 namespace BilleterasBack.Wallets.PayPal
 {
@@ -24,26 +17,25 @@ namespace BilleterasBack.Wallets.PayPal
         public async Task<Resultado<Billetera>> CrearCuentaPayPal(string email)
         {     
             if(!_validador.mailValidar(email))           
-                    return Resultado<Billetera>.Failure("Correo electrónico no válido.");
+                    return Resultado<Billetera>.Failed("Correo electrónico no válido.");
             
             var usuario = await _context.Usuarios.Include(u=> u.Billeteras).FirstOrDefaultAsync(u => u.Email == email);
                 if (usuario == null)
-                    return Resultado<Billetera>.Failure("Usuario no encontrado.");
+                    return Resultado<Billetera>.Failed("El email no existe en el sistema.");
             
                 if (usuario.IdTipoUsuario == 2)
-                    return Resultado<Billetera>.Failure("El usuario tiene una billetera tipo 'Cobrador' y no puede crear billetera PayPal.");
+                    return Resultado<Billetera>.Failed("El usuario tiene una billetera tipo 'Cobrador' y no puede crear billetera PayPal.");
 
             bool existeBilletera = usuario.Billeteras.Any(b => b.Tipo == "PayPal");
                 if (existeBilletera) 
-                    return Resultado<Billetera>.Failure("El usuario ya esta registrado.");
+                    return Resultado<Billetera>.Failed("El usuario ya esta registrado.");
                 
                 if(usuario.Email == null)
-                    return Resultado<Billetera>.Failure("El usuario no tiene un correo electrónico asociado.");
+                    return Resultado<Billetera>.Failed("El usuario no tiene un correo electrónico asociado.");
 
                 if (!_validador.mailValidar(usuario.Email))
-                    return Resultado<Billetera>.Failure("Correo electrónico no válido.");
-            
-            try {
+                    return Resultado<Billetera>.Failed("Correo electrónico no válido.");
+                        
                 var billetera = new Billetera
                 {
                     IdUsuario = usuario.IdUsuario,
@@ -53,12 +45,7 @@ namespace BilleterasBack.Wallets.PayPal
                 };
                 await _context.Billeteras.AddAsync(billetera);
                 await _context.SaveChangesAsync();
-                return Resultado<Billetera>.Success(billetera);
-            }
-            catch(Exception ex)
-            {
-                return Resultado<Billetera>.Failure($"Error al crear la billetera: {ex.Message}");
-            }
+                return Resultado<Billetera>.Success(billetera);  
         }
         
         public bool RealizarCobro(decimal cobro)

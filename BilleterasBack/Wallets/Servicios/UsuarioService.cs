@@ -1,8 +1,6 @@
 ﻿using BilleterasBack.Wallets.Data;
 using BilleterasBack.Wallets.Dtos;
 using BilleterasBack.Wallets.Models;
-using BilleterasBack.Wallets.Validaciones;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
 
 namespace BilleterasBack.Wallets.Servicios
@@ -14,27 +12,19 @@ namespace BilleterasBack.Wallets.Servicios
         {
             _context = context;
         }
-
-        public async Task<Resultado<Usuario>> crearUsuario(Usuario nuevoUsuario) //crear usuario
+        public async Task<object> CrearUsuario(Usuario nuevoUsuario) //crear usuario
         {
             var emailExiste = await _context.Usuarios.AnyAsync(u => u.Email == nuevoUsuario.Email);
             if (emailExiste)
-                return Resultado<Usuario>.Failure("El email ya esta registrado.");
+                return new { Success = false, Message = $"El email {nuevoUsuario.Email} ya esta en uso" };
 
             var dniExiste = await _context.Usuarios.AnyAsync(u => u.Dni == nuevoUsuario.Dni);
             if (dniExiste)
-                return Resultado<Usuario>.Failure("El dni ya esta registrados");
+                return new { Success = false, Message = $"El dni: {nuevoUsuario.Dni} ya esta en uso" };
 
-            try
-            {
-                _context.Usuarios.Add(nuevoUsuario);
+            _context.Usuarios.Add(nuevoUsuario);
                 await _context.SaveChangesAsync();
-                return Resultado<Usuario>.Success(nuevoUsuario);
-            }
-            catch(Exception ex)
-            {
-                return Resultado<Usuario>.Failure("Error al crear un usuario: " + ex.Message);
-            }
+                return nuevoUsuario;           
         }
 
         public async Task<List<Usuario>> mostrarUsuarios() //mostrar usuarios
@@ -43,7 +33,7 @@ namespace BilleterasBack.Wallets.Servicios
             .Include(u => u.TipoUsuario)
             .Where(u => u.Estado == "activo")
             .ToListAsync();
-
+    
             return listarUsuarios;
         }
 
@@ -51,11 +41,11 @@ namespace BilleterasBack.Wallets.Servicios
         {
             var usuario = await _context.Usuarios.FindAsync(id);
             if (usuario == null)
-                return new { mensaje = "Usuario no encontrado" };
+                return new { Success = false, Message = "Usuario no encontrado" };
 
             _context.Usuarios.Remove(usuario);
             await _context.SaveChangesAsync();
-            return new { mensaje = "Usuario eliminado" };
+            return new {Success = false, Message = "Usuario eliminado" };
         }
 
         public async Task<UserDto> editarUsuario(int id, UserDto usuarioActualizado)

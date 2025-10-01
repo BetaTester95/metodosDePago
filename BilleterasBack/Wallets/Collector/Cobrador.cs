@@ -28,19 +28,19 @@ namespace BilleterasBack.Wallets.Collector.Cobrador
         public async Task<Resultado<Billetera>> CrearCuentaCobrador(int dni)
         {
             if (!_validador.validarDNI(dni))
-                return Resultado<Billetera>.Failure("DNI debe ser mayor que cero y hasta 8 digitos");
+                return Resultado<Billetera>.Failed("DNI debe ser mayor que cero y hasta 8 digitos");
 
             var usuarioCobrador = await _context.Usuarios.Include(u=> u.Billeteras).FirstOrDefaultAsync(u=> u.Dni == dni);
 
             if (usuarioCobrador == null)
-                return Resultado<Billetera>.Failure("Usuario no encontrado.");
+                return Resultado<Billetera>.Failed("Usuario no encontrado.");
             
             if (usuarioCobrador.IdTipoUsuario != 2)
-                return Resultado<Billetera>.Failure("El usuario no es de tipo 'Cobrador'.");
+                return Resultado<Billetera>.Failed("El usuario no es de tipo 'Cobrador'.");
 
             bool existeCobrador = usuarioCobrador.Billeteras.Any(b => b.Tipo == "Cobrador");
             if (existeCobrador)
-                return Resultado<Billetera>.Failure("El usuario ya tiene una billetera de tipo Cobrador.");
+                return Resultado<Billetera>.Failed("El usuario ya tiene una billetera de tipo Cobrador.");
 
             try
             {
@@ -57,7 +57,7 @@ namespace BilleterasBack.Wallets.Collector.Cobrador
             }
             catch (Exception ex)
             {
-                return Resultado<Billetera>.Failure("Error al crear la billetera: " + ex.Message);
+                return Resultado<Billetera>.Failed("Error al crear la billetera: " + ex.Message);
             }      
         }
 

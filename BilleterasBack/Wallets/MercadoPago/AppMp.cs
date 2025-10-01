@@ -48,20 +48,20 @@ public class AppMp
     public async Task<Resultado<Billetera>> CrearCuentaMercadoPago(int dni)//ok
     {
             if (!_validador.validarDNI(dni)) 
-                return Resultado<Billetera>.Failure("DNI debe ser mayor que cero y hasta 8 digitos");
+                return Resultado<Billetera>.Failed("DNI debe ser mayor que cero y hasta 8 digitos");
  
             var usuario = await _context.Usuarios.Include(u => u.Billeteras).Include
             (u => u.TipoUsuario).FirstOrDefaultAsync(u => u.Dni == dni);
 
             if (usuario == null) 
-                return Resultado<Billetera>.Failure("Usuario no encontrado.");
+                return Resultado<Billetera>.Failed("Usuario no encontrado.");
 
             if(usuario.IdTipoUsuario == 2)
-                return Resultado<Billetera>.Failure("No se puede crear una billetera de MercadoPago para un usuario Cobrador.");
+                return Resultado<Billetera>.Failed("No se puede crear una billetera de MercadoPago para un usuario Cobrador.");
 
             bool existeBilletera = usuario.Billeteras.Any(b => b.Tipo == "MercadoPago");
             if (existeBilletera) 
-                return Resultado<Billetera>.Failure("Ya existe una billetera de MercadoPago para este usuario.");
+                return Resultado<Billetera>.Failed("Ya existe una billetera de MercadoPago para este usuario.");
         try
         {
             var billetera = new Billetera
@@ -77,7 +77,7 @@ public class AppMp
         }
         catch (Exception ex)
         {
-            return Resultado<Billetera>.Failure($"Error en el servidor: {ex.Message}");
+            return Resultado<Billetera>.Failed($"Error en el servidor: {ex.Message}");
         }
     }
     private string GenerarNumeroCbu()

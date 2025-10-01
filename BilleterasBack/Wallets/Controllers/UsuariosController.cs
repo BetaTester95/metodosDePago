@@ -1,12 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System.Security.Cryptography;
-using System.Text;
-using BCrypt.Net;
 using BilleterasBack.Wallets.Models;
-using BilleterasBack.Wallets.PayPal;
-using System.Text.RegularExpressions;
-using BilleterasBack.Wallets.Validaciones;
 using BilleterasBack.Wallets.Data;
 
 [ApiController]
@@ -31,9 +25,9 @@ public class UsuariosController : ControllerBase
             {
                 return BadRequest(new
                 {
-                    error = "CORREO_DUPLICADO",
-                    message = "El correo ya está registrado en el sistema",
-                    field = "correo"
+                    Error = "CORREO_DUPLICADO",
+                    Message = "El correo ya está registrado en el sistema"
+                 
                 });
             }
             bool dniExiste = await _context.Usuarios.AnyAsync(u => u.Dni == usuario.Dni);

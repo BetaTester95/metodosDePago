@@ -9,14 +9,9 @@ using BilleterasBack.Wallets.Shared.Strategies.CtaDni;
 using BilleterasBack.Wallets.Shared.Strategies.Mp;
 using BilleterasBack.Wallets.Shared.Strategies.Pp;
 using BilleterasBack.Wallets.Validaciones;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
-using System.Linq.Expressions;
-using System.Security.Claims;
-using static System.Runtime.InteropServices.JavaScript.JSType;
+
 
 namespace BilleterasBack.Wallets.Controllers
 {
