@@ -4,11 +4,11 @@ import { Observable } from 'rxjs';
 import { HttpParams } from '@angular/common/http';
 
 export interface TarjetaRequest {
-  numTarjeta: string;
+  numeroTarjeta: string;
   nombre: string;
   apellido: string;
   dni: number;
-  fechaVenc: string; // formato ISO
+  fechaVenc: string; 
   cod: string;
 }
 

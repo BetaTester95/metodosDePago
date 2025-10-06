@@ -1,8 +1,5 @@
-﻿using Azure.Core;
-using BilleterasBack.Wallets.Data;
+﻿using BilleterasBack.Wallets.Data;
 using BilleterasBack.Wallets.Dtos;
-using BilleterasBack.Wallets.Exceptions;
-using BilleterasBack.Wallets.Models;
 using BilleterasBack.Wallets.Shared;
 using BilleterasBack.Wallets.Shared.Interfaces;
 using BilleterasBack.Wallets.Shared.Strategies.CtaDni;
@@ -10,7 +7,7 @@ using BilleterasBack.Wallets.Shared.Strategies.Mp;
 using BilleterasBack.Wallets.Shared.Strategies.Pp;
 using BilleterasBack.Wallets.Validaciones;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
+using System.Globalization;
 
 
 namespace BilleterasBack.Wallets.Controllers
@@ -30,58 +27,34 @@ namespace BilleterasBack.Wallets.Controllers
         }
 
         [HttpPost("agregar-tarjeta")]
-        public async Task<IActionResult> AgregarCard(TipoMetodoPago tipoMetodoPago, [FromBody] TarjetaDTO request)
+        public async Task<object> AgregarCard(TipoMetodoPago tipoMetodoPago, [FromBody] TarjetaDTO request)
         {
             try
             {
-                var existeNumTarjeta = await _context.Tarjetas.AnyAsync(t => t.NumeroTarjeta == request.NumeroTarjeta);
-                if (existeNumTarjeta)
-                    return Ok(new { successs = false, messagge = "El numero de tarjeta ya esta agregada en su cuenta." });
-
-                var billetera = await _context.Billeteras
-                    .Include(b => b.Usuario)
-                    .FirstOrDefaultAsync(b => b.Usuario.Dni == request.Dni && b.Tipo == tipoMetodoPago.ToString());
-
-                if (billetera == null)
-                {
-                    return NotFound(new { mensaje = "Billetera no encontrada para el usuario y tipo especificado" });
-                }
+                var obb = request.fechaVenc;
 
                 IAgregarCard estrategia = tipoMetodoPago switch
                 {
                     TipoMetodoPago.MercadoPago => new MpAgregarTarjeta(_context, _validaciones!),
                     TipoMetodoPago.CuentaDni => new ctAgregarTarjeta(_context, _validaciones!),
-                    TipoMetodoPago.PayPal => new paypAgregarTarjeta(_context),
-                    _=> throw new NotImplementedException($"Estrategia no implementada para el tipo de pago: {tipoMetodoPago}")
-                };           
-                    var resultado = estrategia.AgregarTarjeta(
-                        request.NumeroTarjeta,
-                        request.Nombre,
-                        request.Apellido,
-                        request.Dni,
-                        request.FechaExp,
-                        request.Cod
-                    );
-             
-                    return Ok(resultado);//devuelve true
-            }
-            catch(ArgumentException ex)
-            {
-                return Ok(new {success = false, messagge = ex.Message });
-            }
-            catch(UsuarioExceptions ex)
-            {
-                return Ok(new { success = false, messagge = ex.Message });
-            }
+                    TipoMetodoPago.PayPal => new paypAgregarTarjeta(_context, _validaciones),
+                    _ => throw new NotImplementedException($"Estrategia no implementada para el tipo de pago: {tipoMetodoPago}")
+                };
 
-            catch(BilleteraExceptions ex)
-            {
-                return Ok(new { success = false, messagge = ex.Message });
-            }
+                var resultado = estrategia.AgregarTarjeta(
+                    request.NumeroTarjeta,
+                    request.Nombre,
+                    request.Apellido,
+                    request.Dni,
+                    request.fechaVenc,
+                    request.Cod
+                );
 
+                return Ok(new { Success = resultado ? resultado :  false, estrategia.Message });
+            }
             catch (Exception ex)
             {
-                return StatusCode(500, new { mensaje = "Ocurrió un error inesperado en el servidor." }); //corregir
+                return ex.Message;
             }
         }
 
@@ -114,7 +87,7 @@ namespace BilleterasBack.Wallets.Controllers
         [HttpPost("pagarcontransferencia")]
         public async Task<IActionResult> PagoConTransferencia(TipoMetodoPago TipoMetodoPago, decimal montoPagar, string cbu)
         {
-            if(_validaciones.ValidarTipoMetodoPago(TipoMetodoPago.ToString()))
+            if(!_validaciones.ValidarTipoMetodoPago(TipoMetodoPago.ToString()))
                 return BadRequest(new { mensaje = "El tipo de metodo de pago no es valido." });
             
             if (!_validaciones.ValidarMonto(montoPagar))

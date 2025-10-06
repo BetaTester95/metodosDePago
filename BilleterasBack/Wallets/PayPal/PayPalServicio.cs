@@ -45,7 +45,7 @@ namespace BilleterasBack.Wallets.PayPal
                 };
                 await _context.Billeteras.AddAsync(billetera);
                 await _context.SaveChangesAsync();
-                return Resultado<Billetera>.Success(billetera);  
+                return Resultado<Billetera>.Ok(billetera);  
         }
         
         public bool RealizarCobro(decimal cobro)

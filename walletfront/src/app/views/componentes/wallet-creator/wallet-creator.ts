@@ -110,33 +110,25 @@ export class WalletCreator {
         console.log('next:', respuesta)
         if(respuesta.success === true){
           console.log('next ok: ', respuesta)
-          respuesta.datos.cvu != null ? this.cvu = respuesta.datos.cvu : this.email = respuesta.datos.email
-          this.saldo = respuesta.datos.saldo
-          this.creadoExitoso(respuesta.message, `\nCVU: ${this.cvu}\nSaldo: ${this.saldo}`, 'success')          
+          this.creadoExitoso()          
         }else{
           console.log('Error back:', respuesta)
-          this.mensajeError = respuesta.errorMessage
+          this.mensajeError = respuesta.message
           
         }
       },
       error: (err) => {
         console.log('Error backend:', err);
         console.log('Mensaje: ', err.error?.message)
-        if (err.error?.status == 400) {
-          this.mensajeError = 'Error en la validación'
-        } else {
-          this.mensajeError = err.error?.message
-        }
       }
     })
   }
 
-  creadoExitoso(titulo: string, mensaje: string, tipo: 'success'): void {
+  creadoExitoso() {
     Swal.fire({
-      title: titulo,
-      text: mensaje,
-      icon: tipo,
-      draggable: true
+        title: "Billetera creada exitosamente!",
+        icon: "success",
+        draggable: true
     });
   }
 

@@ -18,7 +18,7 @@ namespace BilleterasBack.Wallets.Dtos
         public int Dni { get; set; }
 
         [JsonPropertyName("fechaVenc")]
-        public DateTime FechaExp { get; set; }
+        public DateTime fechaVenc { get; set; }
 
         [JsonPropertyName("cod")]
         public int Cod { get; set; }

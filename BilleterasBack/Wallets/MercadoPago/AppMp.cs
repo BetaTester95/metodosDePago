@@ -62,8 +62,7 @@ public class AppMp
             bool existeBilletera = usuario.Billeteras.Any(b => b.Tipo == "MercadoPago");
             if (existeBilletera) 
                 return Resultado<Billetera>.Failed("Ya existe una billetera de MercadoPago para este usuario.");
-        try
-        {
+      
             var billetera = new Billetera
             {
                 IdUsuario = usuario.IdUsuario,
@@ -73,13 +72,9 @@ public class AppMp
             };
             _context.Billeteras.Add(billetera);
             await _context.SaveChangesAsync();
-            return Resultado<Billetera>.Success(billetera);
-        }
-        catch (Exception ex)
-        {
-            return Resultado<Billetera>.Failed($"Error en el servidor: {ex.Message}");
-        }
+            return Resultado<Billetera>.Ok(billetera);
     }
+
     private string GenerarNumeroCbu()
     {
         Random random = new Random();

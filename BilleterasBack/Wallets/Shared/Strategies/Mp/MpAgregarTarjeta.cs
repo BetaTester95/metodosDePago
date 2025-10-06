@@ -1,14 +1,8 @@
 ﻿using Azure.Core;
 using BilleterasBack.Wallets.Data;
-using BilleterasBack.Wallets.Exceptions;
 using BilleterasBack.Wallets.Models;
 using BilleterasBack.Wallets.Shared.Interfaces;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using BilleterasBack.Wallets.Validaciones;
 
 namespace BilleterasBack.Wallets.Shared.Strategies.Mp
@@ -17,6 +11,7 @@ namespace BilleterasBack.Wallets.Shared.Strategies.Mp
     {
         private readonly AppDbContext _context;
         private readonly Validador? _validaciones;
+        public string Message { get; private set; } = string.Empty;
 
         public MpAgregarTarjeta(AppDbContext context, Validador validador)
         {
@@ -26,37 +21,63 @@ namespace BilleterasBack.Wallets.Shared.Strategies.Mp
 
         public bool AgregarTarjeta(string numTarjeta, string nombre, string apellido, int dni, DateTime fechaVenc, int cod)
         {
-            DateTime ahora = DateTime.Now;
-
+          
             if (_validaciones == null)
-                throw new InvalidOperationException("El validador no ha sido inicializado.");
+                return false;
 
             if (!_validaciones.validarNumTarjeta(numTarjeta))
-                throw new ArgumentException("El numero de tarjeta no es valido");
+            {
+                this.Message = "El numero de tarjeta no es valido";
+                return false;           
+            }
 
             if (!_validaciones.validarNombre(nombre))
-                throw new ArgumentException("El nombre no es valido");
+            {
+                this.Message = "El nombre no es valido";
+                return false;
+            }
 
             if (!_validaciones.validarApellido(apellido))
-                throw new ArgumentException("El apellido no es valido");
-
+            {
+                this.Message = "El apellido no es valido";
+                return false;
+            }
+            
             if (!_validaciones.validarDNI(dni))
-                throw new ArgumentException("error al validar el dni");
+            {
+                this.Message = "Error al validar el dni";
+                return false;
+            }
+
+            if(!_validaciones.EsFechaVencimientoValida(fechaVenc))
+            {
+                this.Message = "La fecha de vencimiento no es valida";
+                return false;
+            }
 
             if (!_validaciones.validarCod(cod))
-                throw new ArgumentException("Error al validar el cod");
+            {
+                this.Message = "Error al validar el cod";
+                return false;
+            }
 
             var identificacionMercadoPago = _context.Billeteras
                     .Include(b => b.Usuario)
                     .FirstOrDefault(b => b.Tipo == "MercadoPago" && b.Usuario!.Dni == dni);
             if (identificacionMercadoPago == null)
-                throw new UsuarioExceptions("No se encontró una billetera MercadoPago para el usuario o los datos personales no coinciden.");
+            {
+                this.Message = "No se encontró una billetera MercadoPago para el usuario o los datos personales no coinciden.";
+                return false;
+            }
 
             var tarjetaExistente = _context.Tarjetas
                     .FirstOrDefault(t => t.NumeroTarjeta == numTarjeta && t.IdBilletera == identificacionMercadoPago.IdBilletera);
 
             if (tarjetaExistente != null)
-                throw new BilleteraExceptions("Ya existe una tarjeta con este número en la billetera de PayPal.");
+            {
+                this.Message = "Ya existe una tarjeta con este número en la billetera de MercadoPago.";
+                return false;
+            }
 
             var tarjeta = new Tarjeta
             {

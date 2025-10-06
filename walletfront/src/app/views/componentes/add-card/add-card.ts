@@ -1,6 +1,7 @@
-import { CommonModule } from '@angular/common';
+import { CommonModule, DatePipe } from '@angular/common';
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { from } from 'rxjs';
 import { AgregarTarjetaService, TarjetaRequest } from 'src/app/servicios/agregar-tarjeta.servicios';
 import { Validation } from 'src/app/utils/validation';
 import Swal from 'sweetalert2';
@@ -12,6 +13,7 @@ import Swal from 'sweetalert2';
   templateUrl: './add-card.html',
   styleUrl: './add-card.css'
 })
+
 export class AddCard {
   tiposBilletera = [
     { label: 'Mercado Pago', value: 'mercadopago' },
@@ -20,13 +22,16 @@ export class AddCard {
   ];
   tipoBilletera: 'mercadopago' | 'cuentadni' | 'paypal' | null = null;
 
+
   nombre = '';
   apellido = '';
-  numTarjeta = '';
+  numeroTarjeta = '';
   dni!: number;
-  fechaVenc = '';
+  fechaVenc!: Date;
   cod = '';
   mensajeError: string = '';
+
+
   /*---------------------------------*/
   errorNombre: string = ''
   errorApellido: string = ''
@@ -35,9 +40,10 @@ export class AddCard {
   errorFecha: string = '';
 
 
-  constructor(private agregarTarjetaService: AgregarTarjetaService, private _validaciones: Validation) { }
+  constructor(private agregarTarjetaService: AgregarTarjetaService, private _validaciones: Validation, private datePipe: DatePipe) { }
 
   guardarTarjeta() {
+  console.log('1️⃣ Fecha seleccionada en el input:', this.fechaVenc);
 
     if (!this.tipoBilletera) return
 
@@ -61,29 +67,32 @@ export class AddCard {
       return
     }
 
+
+
+    console.log("antes de entrrar al objeto:", this.fechaVenc)
     const dataTarjeta = {
-      numTarjeta: this.numTarjeta,
+      numeroTarjeta: this.numeroTarjeta,
       nombre: this.nombre,
       apellido: this.apellido,
       dni: this.dni,
-      fechaVenc: this.fechaVenc,
+      fechaVenc: this.fechaVenc.toISOString(),
       cod: this.cod
     }
 
+    
+
     this.agregarTarjetaService.agregarTarjeta(this.tipoBilletera, dataTarjeta).subscribe({
       next: respuesta => {
-        console.log('next exitoso:', respuesta)
-        this.creadoExitoso('Tarjeta Agregada Correctamente')
+        console.log('next:', respuesta)
+        if(respuesta.success === true){
+          this.creadoExitoso("Tarjeta agregada correctamente. ");
+        }else{
+          console.log(respuesta);
+          this.creadoError(respuesta.message);
+        }
       },
       error: err => {
-        console.error('Error al agregar la tarjeta', err.error.mensaje);
-        const mensajeError = err.error.mensaje
-        console.log('mensaje de error backend', mensajeError)
-        if(err.error?.status == 400){
-          this.mensajeError = 'Error en la validacion'
-        }else{
-          this.mensajeError = err.error?.mensaje
-        }
+        console.error('Hubo error intentar mas tarde:', err);
       }
     })
   }
@@ -94,6 +103,16 @@ export class AddCard {
       icon: "success",
       draggable: true
     });
+  }
+
+  creadoError(titulo: string){
+    Swal.fire({
+    position: "top-end",
+    icon: "error",
+    title: titulo,
+    showConfirmButton: false,
+    timer: 3000
+  });
   }
 
 }

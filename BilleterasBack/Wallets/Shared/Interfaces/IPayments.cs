@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace BilleterasBack.Wallets.Shared.Interfaces
 {
-
+                
     public interface IPagoCardTransferencia
     {
         bool PagoConTransferencia(decimal montoPagar, string cbu);
@@ -14,8 +14,11 @@ namespace BilleterasBack.Wallets.Shared.Interfaces
 
     public interface IAgregarCard //AGREGAR TARJETA 
     {
+        string Message { get; }
         bool AgregarTarjeta(string numTarjeta, string nombre, string apellido, int dni, DateTime fechaVenc, int cod);
     }
+     
+
 
     public interface IpagoCardCred //PARA PAGAR CON TARJETA DE CREDITO O DEBITO
     {

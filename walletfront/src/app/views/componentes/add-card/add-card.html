@@ -37,7 +37,7 @@
                 <div class="mb-3">
                     <label for="numeroTarjeta" class="form-label">Número de Tarjeta</label>
                     <input type="text" class="form-control" id="numeroTarjeta" name="numTarjeta"
-                        placeholder="xxxx-xxxx-xxxx-xxxx" [(ngModel)]="numTarjeta" required>
+                        placeholder="xxxx-xxxx-xxxx-xxxx" [(ngModel)]="numeroTarjeta" required>
                     @if(errorNumTarjeta){
                     <div class="text-danger mt-1">{{errorNumTarjeta}}</div>
                     }
@@ -58,7 +58,7 @@
                         <input type="date" class="form-control" id="fechaExp" name="fechaVenc" [(ngModel)]="fechaVenc"
                             required>
                         @if(fechaVenc){
-                        <div class="text-danger mt-1">{{fechaVenc}}</div>
+                        <div class="text-danger mt-1">{{ fechaVenc | date:'dd/MM/yyyy' }}</div>
                         }
                     </div>
                     <div class="col-md-6 mb-3">

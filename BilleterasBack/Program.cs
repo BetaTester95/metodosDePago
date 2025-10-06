@@ -5,13 +5,17 @@ using BilleterasBack.Wallets.Shared.Strategies.Mp;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using System.Globalization;
 using System.Text;
-using Microsoft.Extensions.DependencyInjection;
 
 
 var builder = WebApplication.CreateBuilder(args);
 
 var key = Encoding.ASCII.GetBytes("estaEsUnaClaveSuperSecreta123333!!");
+
+var cultureInfo = new CultureInfo("es-AR"); // Español Argentina
+CultureInfo.DefaultThreadCurrentCulture = cultureInfo;
+CultureInfo.DefaultThreadCurrentUICulture = cultureInfo;
 
 builder.Services.AddCors(); // <-- Agrega esta línea
 // Agregar servicios de Controllers

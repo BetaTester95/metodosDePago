@@ -29,7 +29,7 @@ export class Validation {
     return /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{6,}$/.test(password ?? '');
   }
 
-  validarFecha(fecha: string): boolean {
+  validarFecha(fecha: Date): boolean {
     if (!fecha) return false;
 
     const hoy = new Date();

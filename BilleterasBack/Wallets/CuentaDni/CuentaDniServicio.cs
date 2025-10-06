@@ -56,7 +56,7 @@ namespace BilleterasBack.Wallets.CuentaDni
                 };
                 _context.Billeteras.Add(billetera);
                 await _context.SaveChangesAsync();
-                return Resultado<Billetera>.Success(billetera);
+                return Resultado<Billetera>.Ok(billetera);
             }
             catch (Exception ex)
             {

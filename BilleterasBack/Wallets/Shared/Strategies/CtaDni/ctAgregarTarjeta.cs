@@ -1,5 +1,4 @@
 ﻿using BilleterasBack.Wallets.Data;
-using BilleterasBack.Wallets.Exceptions;
 using BilleterasBack.Wallets.Models;
 using BilleterasBack.Wallets.Shared.Interfaces;
 using BilleterasBack.Wallets.Validaciones;
@@ -16,6 +15,8 @@ namespace BilleterasBack.Wallets.Shared.Strategies.CtaDni
     {
         private readonly AppDbContext _context;
         private readonly Validador _valiciones;
+        public string Message { get; private set; } = string.Empty;
+
         public ctAgregarTarjeta(AppDbContext context, Validador validador)
         {
             _context = context;
@@ -26,39 +27,69 @@ namespace BilleterasBack.Wallets.Shared.Strategies.CtaDni
                 DateTime ahora = DateTime.Now;
 
             if (!_valiciones.validarNumTarjeta(numTarjeta))
-                throw new ArgumentException("Error al validar el numero de tarjeta. ");
+            {
+                Message = "Error al validar el numero de tarjeta. ";
+                return false;
+            }
 
-            if (_valiciones.validarNombre(nombre))
-                throw new ArgumentException("Error al validar el nombre. ");
+            if (!_valiciones.validarNombre(nombre))
+            {
+                Message = "Error al validar el nombre. ";
+                return false;
+            }
 
             if (!_valiciones.validarApellido(apellido))
-                throw new ArgumentException("Error al validar el apellido. ");
+            {
+                Message = "Error al validar el apellido. ";
+                return false;
+            }
 
             if (!_valiciones.validarDNI(dni))
-                throw new ArgumentException("Error al validar el dni. ");
+            {
+                Message = "Error al validar el dni. ";
+                return false;
+            }
 
-            if (fechaVenc < ahora)
-                throw new ArgumentException("La tarjeta esta vencida, su fecha expiro. ");
-            
+            if (!_valiciones.EsFechaVencimientoValida(fechaVenc))
+            {
+                Message = "La fecha de vencimiento no es valida";
+                return false;
+            }
+
             if (!_valiciones.validarCod(cod))
-                throw new ArgumentException("Error al validar el codigo de la tarjeta. ");
+            {
+                Message = "Error al validar el codigo de la tarjeta. ";
+                return false;
+            }
 
             var billetera = _context.Billeteras
                     .Where(b => b.Tipo == "CuentaDni" && b.Usuario!.Dni == dni)
                     .FirstOrDefault();
 
                 if (billetera == null)
-                        throw new ArgumentException("No se puede agregar una tarjeta si no tiene una billetera Cuenta Dni Asociada o El Dni No existe.");
+                {
+                    Message = "No se puede agregar una tarjeta si no tiene una billetera Cuenta Dni Asociada o El Dni No existe.";
+                    return false;
+                }
 
                 if (billetera.Usuario?.Nombre != nombre)
-                        throw new ArgumentException("El nombre no coincide. ");
-                
+                {
+                    Message = "El nombre no coincide. ";
+                    return false;
+                }
+
                 if (billetera.Usuario.Apellido != apellido)
-                        throw new ArgumentException("El apellido no coincide. ");
+                {
+                    Message = "El apellido no coincide. ";
+                    return false;
+                }
 
                 if (!numTarjeta.StartsWith("5195")) //con startwith comprobamos que la cadena empiece con el dato que pasamos por parametro.
-                    throw new ArgumentException("Las tarjeta debe ser del banco provincia debe iniciar con 5195");
-                
+                {
+                    Message = "Las tarjeta debe ser del banco provincia debe iniciar con 5195";
+                    return false;
+                }
+
                 var tarjeta = new Tarjeta
                 {
                     NumeroTarjeta = numTarjeta,

@@ -102,18 +102,18 @@ export class UsuarioTabla {
     this.UsuarioServicio.createUser(users).subscribe({
       next: (respuesta) => {
         console.log("dentro de next:", respuesta)
-        if(respuesta.isSuccess === true){
-        console.log('next: ', respuesta)
-        this.cargarUsuarios();
-        this.alertSuces("Usuario creado correctamente. ");
-        this.limpiarModal();
-        }else{
-          console.log("respuesta dentro else:", respuesta)
-          if(respuesta.message.includes('dni')){
-            this.errorBackendDni = respuesta.message
-          }else{
-            this.errorBackendEmail = respuesta.message
+        if (respuesta.success === false) {
+          if (respuesta.message.includes('dni')) {
+            this.errorBackendDni = respuesta.message;
+          } else if (respuesta.message.includes('email')) {
+            this.errorBackendEmail = respuesta.message;
           }
+        } else {
+
+          this.alertSuccess("Usuario creado correctamente.");
+          this.cargarUsuarios();
+          this.limpiarModal();
+
         }
       },
       error: (err) => {
@@ -175,23 +175,23 @@ export class UsuarioTabla {
     this.UsuarioServicio.ediUser(users).subscribe({
       next: (respuesta) => {
         console.log('next antes de llegar al if', respuesta)
-      if (respuesta.isSuccess === true) {
+        if (respuesta.success === true) {
           console.log('Usuario actualizado:', respuesta);
-          this.alertSuces("Usuario editado correctamente. ");
+          this.alertSuccess("Usuario editado correctamente. ");
           this.cerrarModalEditar();
           this.cargarUsuarios();
           this.limpiarErrores();
-        }else{
+        } else {
           console.log('Error al actualizar: ', respuesta)
-          if(respuesta.message.includes('dni')){
+          if (respuesta.message.includes('dni')) {
             this.errorBackendDni = respuesta.message
-          }else{
+          } else {
             this.errorBackendEmail = respuesta.message
           }
-        }        
+        }
       },
       error: (err) => {
-        console.error('Ocurrio un error: ', err)       
+        console.error('Ocurrio un error: ', err)
         console.log('eror al actualiar', err)
       }
     });
@@ -204,7 +204,7 @@ export class UsuarioTabla {
       next: () => {
         this.cargarUsuarios();
         this.usuarioSeleccionado = undefined;
-        this.alertSuces("Usuario eliminado correctamente. ")
+        this.alertSuccess("Usuario eliminado correctamente. ")
         // Cerramos modal
         const modalElement = document.getElementById('confirmDeleteModal');
         const modal = bootstrap.Modal.getInstance(modalElement!);
@@ -249,7 +249,7 @@ export class UsuarioTabla {
     this.limpiarErrores();
   }
 
-  alertSuces(titulo: string) { //alerta ok
+  alertSuccess(titulo: string) { //alerta ok
     Swal.fire({
       position: "top-end",
       icon: "success",

@@ -16,11 +16,11 @@ namespace BilleterasBack.Wallets.Servicios
         {
             var emailExiste = await _context.Usuarios.AnyAsync(u => u.Email == nuevoUsuario.Email);
             if (emailExiste)
-                return new { Success = false, Message = $"El email {nuevoUsuario.Email} ya esta en uso" };
+                return new { success = false, message = $"El email {nuevoUsuario.Email} ya esta en uso" };
 
             var dniExiste = await _context.Usuarios.AnyAsync(u => u.Dni == nuevoUsuario.Dni);
             if (dniExiste)
-                return new { Success = false, Message = $"El dni: {nuevoUsuario.Dni} ya esta en uso" };
+                return new { success = false, message = $"El dni: {nuevoUsuario.Dni} ya esta en uso" };
 
             _context.Usuarios.Add(nuevoUsuario);
                 await _context.SaveChangesAsync();

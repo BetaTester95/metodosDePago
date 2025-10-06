@@ -2,12 +2,8 @@
 using BilleterasBack.Wallets.Collector.Cobrador;
 using BilleterasBack.Wallets.CuentaDni;
 using BilleterasBack.Wallets.Data;
-using BilleterasBack.Wallets.Models;
 using BilleterasBack.Wallets.PayPal;
-using BilleterasBack.Wallets.Collector;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 
 namespace BilleterasBack.Wallets.Controllers
@@ -32,42 +28,31 @@ namespace BilleterasBack.Wallets.Controllers
         }
 
         [HttpPost("crear/mercadopago")]
-        public async Task<IActionResult> CrearMercadoPago(int dni)
+        public async Task<object> CrearMercadoPago(int dni)
         {
+            try
+            {
                 var billetera = await _appMp.CrearCuentaMercadoPago(dni);
-                if (!billetera.IsSuccess)
-                {
-                    return Ok(new
-                    {
-                        Success = false,
-                        Message = billetera.ErrorMessage
-                    });
-                }
-               return Ok(new
-                {
-                   Message = "Billetera de MercadoPago creada exitosamente.",
-                   Datos = billetera.Data
-                });               
+                return Ok(billetera);
+            }
+            catch (Exception ex)
+            {
+                return ex.Message;
+            }
         }
 
         [HttpPost("crear/cuentadni")]
-        public async Task<IActionResult> CrearCuentaDNI(int dni)
+        public async Task<object> CrearCuentaDNI(int dni)
         {
-            var billetera = await _cuentaDni.CrearCuentaDni(dni);
-
-                if (!billetera.IsSuccess)
-                {
-                    return Ok(new
-                    {
-                        message = billetera.ErrorMessage,
-                        datos = billetera.Data
-                    });
-                }
-                return Ok(new
-                {
-                    message = "Billetera de CuentaDni creada exitosamente.",
-                    datos = billetera.Data,
-                });
+            try 
+            {
+                var billetera = await _cuentaDni.CrearCuentaDni(dni);
+                return billetera;
+            }
+            catch (Exception ex)
+            {
+                return ex.Message;
+            }
         }
         
 
@@ -89,12 +74,12 @@ namespace BilleterasBack.Wallets.Controllers
         public async Task<IActionResult> CrearCobrador(int dni)
         {
             var usuario = await _cobrador.CrearCuentaCobrador(dni);
-                if(!usuario.IsSuccess)
+                if(!usuario.Success)
                 {
                     return Ok(new
                     {   
                         success = true,
-                        message = usuario.ErrorMessage
+                        message = usuario.Message
                     });
                 }
                 return Ok(new
