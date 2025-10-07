@@ -34,6 +34,8 @@ namespace BilleterasBack.Wallets.Models
 
         // Relación con Tarjetas
         public ICollection<Tarjeta> Tarjetas { get; set; } = new List<Tarjeta>();
+        public ICollection<MovimientoBilletera> Movimientos { get; set; } = new List<MovimientoBilletera>();
+
     }
 }
 

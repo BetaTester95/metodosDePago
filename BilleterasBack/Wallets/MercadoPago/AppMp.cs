@@ -2,14 +2,12 @@
 using BilleterasBack.Wallets.Models;
 using BilleterasBack.Wallets.Validaciones;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Threading.Tasks;
-
 
 public class AppMp
 {
     private readonly AppDbContext _context;
     private readonly Validador _validador = new Validador();
+    public string Message { get; set; } = string.Empty;
     public AppMp(AppDbContext context)
     {
         _context = context;
@@ -17,27 +15,43 @@ public class AppMp
     public async Task<bool> agregarDineroCuentaMp(int dni, decimal monto)
     {
         if(!_validador.validarDNI(dni))
+        {
+            Message = "DNI inválido.";
             return false;
-       
-        if(!_validador.ValidarMonto(monto))
+        }
+
+        if (!_validador.ValidarMonto(monto))
+        {
+            Message = "Monto inválido.";
             return false;
-        
+        }
+
         var tarjetaUsuario = await _context.Tarjetas
-       .Include(t => t.Billetera)
-           .ThenInclude(b => b.Usuario)
-       .FirstOrDefaultAsync(t => t.Billetera.Usuario.Dni == dni && t.Billetera.Tipo == "MercadoPago");
+           .Include(t => t.Billetera)
+               .ThenInclude(b => b.Usuario)
+           .FirstOrDefaultAsync(t => t.Billetera.Usuario.Dni == dni && t.Billetera.Tipo == "MercadoPago");
 
         if (tarjetaUsuario == null)
+        {
+            Message = $"Usted no posee una tarjeta asociada para cargar saldo.";
             return false;
+        }
 
-        if(tarjetaUsuario.Saldo < monto)
+        if (tarjetaUsuario.Saldo < monto)
+        {
+            Message = "Saldo insuficiente.";
             return false;
+        }
 
         var billetera = await _context.Billeteras
-        .Include(b => b.Usuario)
-        .FirstOrDefaultAsync(b => b.Usuario.Dni == dni && b.Tipo == "MercadoPago");
+            .Include(b => b.Usuario)
+            .FirstOrDefaultAsync(b => b.Usuario.Dni == dni && b.Tipo == "MercadoPago");
 
-        if (billetera == null) return false;
+        if (billetera == null)
+        {
+            Message = "Billetera no encontrada.";
+            return false;
+        }
 
         tarjetaUsuario.Saldo -= monto;
         billetera.Saldo += monto;

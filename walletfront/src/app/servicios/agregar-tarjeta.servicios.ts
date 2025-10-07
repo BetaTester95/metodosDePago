@@ -8,7 +8,7 @@ export interface TarjetaRequest {
   nombre: string;
   apellido: string;
   dni: number;
-  fechaVenc: string; 
+  fechaVenc: Date; 
   cod: string;
 }
 

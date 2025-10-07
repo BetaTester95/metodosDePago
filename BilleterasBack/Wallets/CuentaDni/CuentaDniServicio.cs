@@ -1,16 +1,8 @@
-﻿using BilleterasBack.Wallets.Collector.Cobrador;
-using BilleterasBack.Wallets.Data;
+﻿using BilleterasBack.Wallets.Data;
 using BilleterasBack.Wallets.Models;
-using BilleterasBack.Wallets.Shared.Strategies.Pp;
 using BilleterasBack.Wallets.Validaciones;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Globalization;
-using System.Linq;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
+
 
 namespace BilleterasBack.Wallets.CuentaDni
 {
@@ -19,6 +11,8 @@ namespace BilleterasBack.Wallets.CuentaDni
     {
         private readonly AppDbContext _context;
         private readonly Validador _validador = new Validador();
+        public string Message { get; set; } = string.Empty;
+
         public CuentaDniServicio(AppDbContext context)
         {
             _context = context;
@@ -64,6 +58,41 @@ namespace BilleterasBack.Wallets.CuentaDni
 
             }
         }
+
+        public async Task<bool> CargarSaldoCtaDni(int dni, decimal monto)
+        {
+            if (!_validador.validarDNI(dni))
+            {
+                Message = "DNI inválido.";
+                return false;
+            }
+
+            if (!_validador.ValidarMonto(monto))
+            {
+                Message = "Monto inválido.";
+                return false;
+            }
+
+            var usuario = await _context.Usuarios.Include(u => u.Billeteras)
+                                                 .FirstOrDefaultAsync(u => u.Dni == dni);
+            if (usuario == null)
+            {
+                Message = $"Usuario con DNI '{dni}' no encontrado.";
+                return false;
+            }
+
+            var billetera = usuario.Billeteras.FirstOrDefault(b => b.Tipo == "CuentaDni");
+            if (billetera == null)
+            {
+                Message = $"Billetera de tipo 'CuentaDni' no encontrada para el usuario con DNI '{dni}'.";
+                return false;
+            }
+
+            billetera.Saldo += monto;
+            await _context.SaveChangesAsync();
+            return true;
+        }
+
         private string GenerarNumeroCvu()
         {
             Random random = new Random();

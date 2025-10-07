@@ -70,6 +70,13 @@ namespace BilleterasBack.Wallets.Shared.Strategies.Mp
                 return false;
             }
 
+            var identificarNameLastName = identificacionMercadoPago.Usuario.Nombre == nombre && identificacionMercadoPago.Usuario.Apellido == apellido;
+            if (!identificarNameLastName)
+            {
+                this.Message = "El nombre o apellido no coinciden con los datos del usuario asociado a la billetera MercadoPago.";
+                return false;
+            }
+
             var tarjetaExistente = _context.Tarjetas
                     .FirstOrDefault(t => t.NumeroTarjeta == numTarjeta && t.IdBilletera == identificacionMercadoPago.IdBilletera);
 

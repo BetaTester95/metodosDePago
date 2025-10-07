@@ -1,0 +1,87 @@
+<div class="container-saldo">
+        <h2 class="text-center mb-4">Cargar Saldo</h2>
+        
+        <div class="accordion" id="acordeonSaldo">
+            
+            <!-- Mercado Pago -->
+            <div class="accordion-item">
+                <h2 class="accordion-header">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseMercadoPago">
+                        Cargar Saldo MercadoPago
+                    </button>
+                </h2>
+                <div id="collapseMercadoPago" class="accordion-collapse collapse" data-bs-parent="#acordeonSaldo">
+                    <div class="accordion-body">
+                        <form class="form-saldo">
+                            <div class="mb-3">
+                                <label for="dniMercadoPago" class="form-label">DNI</label>
+                                <input type="text" [(ngModel)]="dni" name="dni" class="form-control" id="dniMercadoPago" placeholder="Ingrese su DNI">
+                            </div>
+                            <div class="mb-3">
+                                <label for="montoMercadoPago" class="form-label">Monto</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">$</span>
+                                    <input type="number" [(ngModel)]="monto" name="monto" class="form-control" id="montoMercadoPago" placeholder="0.00">
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-primary btn-cargar" (click)="guardarSaldoMp()">Cargar Saldo</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Cuenta DNI -->
+            <div class="accordion-item">
+                <h2 class="accordion-header">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseCuentaDNI">
+                        Cuenta DNI
+                    </button>
+                </h2>
+                <div id="collapseCuentaDNI" class="accordion-collapse collapse" data-bs-parent="#acordeonSaldo">
+                    <div class="accordion-body">
+                        <form class="form-saldo">
+                            <div class="mb-3">
+                                <label for="dniCuenta" class="form-label">DNI</label>
+                                <input type="number" [(ngModel)]="dni" name="dni" class="form-control" id="dniCuenta" placeholder="Ingrese su DNI">
+                            </div>
+                            <div class="mb-3">
+                                <label for="montoCuenta" class="form-label">Monto</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">$</span>
+                                    <input type="number" [(ngModel)]="monto" name="monto" class="form-control" id="montoCuenta" placeholder="0.00">
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-primary btn-cargar" (click)="cargarSaldoCtaDni()">Cargar Saldo</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- PayPal -->
+            <div class="accordion-item">
+                <h2 class="accordion-header">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapsePayPal">
+                        PayPal
+                    </button>
+                </h2>
+                <div id="collapsePayPal" class="accordion-collapse collapse" data-bs-parent="#acordeonSaldo">
+                    <div class="accordion-body">
+                        <form class="form-saldo">
+                            <div class="mb-3">
+                                <label for="dniPayPal" class="form-label">DNI</label>
+                                <input type="number" [(ngModel)]="dni" name="dni" class="form-control" id="dniPayPal" placeholder="Ingrese su DNI">
+                            </div>
+                            <div class="mb-3">
+                                <label for="montoPayPal" class="form-label">Monto</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">$</span>
+                                    <input type="number" [(ngModel)]="monto" name="monto" class="form-control" id="montoPayPal" placeholder="0.00">
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-primary btn-cargar" (click)="cargarSaldoPayPaL()">Cargar Saldo</button>
+                        </form>
+                    </div>
+                </div>
+            </div>       
+        </div>
+    </div>

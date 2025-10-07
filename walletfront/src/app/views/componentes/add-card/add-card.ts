@@ -75,7 +75,7 @@ export class AddCard {
       nombre: this.nombre,
       apellido: this.apellido,
       dni: this.dni,
-      fechaVenc: this.fechaVenc.toISOString(),
+      fechaVenc: this.fechaVenc,
       cod: this.cod
     }
 

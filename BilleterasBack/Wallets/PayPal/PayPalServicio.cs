@@ -2,6 +2,7 @@
 using BilleterasBack.Wallets.Data;
 using Microsoft.EntityFrameworkCore;
 using BilleterasBack.Wallets.Models;
+using System.Threading.Tasks;
 
 namespace BilleterasBack.Wallets.PayPal
 {
@@ -9,6 +10,7 @@ namespace BilleterasBack.Wallets.PayPal
     {
         private readonly AppDbContext _context;
         private readonly Validador _validador = new Validador();
+        public string Message { get; set; } = string.Empty;
 
         public PayPalServicio(AppDbContext context)
         {
@@ -69,36 +71,39 @@ namespace BilleterasBack.Wallets.PayPal
             return true;
         }
 
-        public bool AgregarSaldoPaypal(decimal saldo)
+        public async Task<bool> AgregarSaldoPaypal(int dni, decimal monto)
         {
-            //if (tarjeta == null)
-            //{
-            //    Console.WriteLine($"no es posible agregar saldo, no tiene tarjeta asociada. ");
-            //    return false;
-            //}
 
-            //if (tarjeta.limiteSaldo == 0)
-            //{
-            //    Console.WriteLine($"Error el limite de su saldo es 0 USD. ");
-
-            //    return false;
-            //}
-
-            if (saldo <= 0)
+            if (!_validador.validarDNI(dni))
             {
-                Console.WriteLine("El saldo a agregar debe ser mayor a cero USD.");
+                Message = "DNI inválido.";
                 return false;
             }
 
-            //if (tarjeta.limiteSaldo < saldo)
-            //{
-            //    Console.WriteLine($"No posee suficiente saldo para esta operacion. ");
-            //    return false;
-            //}
+            if (!_validador.ValidarMonto(monto))
+            {
+                Message = "Monto inválido.";
+                return false;
+            }
+            
+            var usuario = await _context.Usuarios.Include(u => u.Billeteras)
+                .FirstOrDefaultAsync(u => u.Dni == dni);
 
-            //tarjeta.limiteSaldo -= saldo;
-            //saldoPayPal += saldo;
-            //Console.WriteLine($"Saldo agregado correctamente. Nuevo saldo PayPal: ${saldoPayPal} USD");
+            if (usuario == null)
+            {
+                Message = $"Usuario con DNI '{dni}' no encontrado.";
+                return false;
+            }
+
+            var billetera = usuario.Billeteras.FirstOrDefault(b => b.Tipo == "PayPal");
+            if (billetera == null)
+            {
+                Message = $"Billetera de tipo 'PayPal' no encontrada para el usuario con DNI '{dni}'.";
+                return false;
+            }
+
+            billetera.Saldo += monto;
+            await _context.SaveChangesAsync();
             return true;
         }
 

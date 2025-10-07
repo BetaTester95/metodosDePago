@@ -1,0 +1,29 @@
+
+        .container-saldo {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .accordion-button:not(.collapsed) {
+            background-color: #0d6efd;
+            color: white;
+        }
+        
+        .accordion-button:focus {
+            box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+        }
+        
+        .form-saldo {
+            padding: 20px;
+            background-color: white;
+        }
+        
+        .btn-cargar {
+            width: 100%;
+            margin-top: 10px;
+        }
+        
+        .input-group-text {
+            min-width: 80px;
+        }

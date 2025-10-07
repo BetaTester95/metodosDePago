@@ -98,7 +98,7 @@ namespace BilleterasBack.Wallets.Validaciones
         }
         public bool EsFechaVencimientoValida(DateTime fecha)
         {
-            DateTime ahora = DateTime.Now;
+            DateTime ahora = DateTime.Now.Date;
             return fecha > ahora;
         }
 
@@ -159,11 +159,6 @@ namespace BilleterasBack.Wallets.Validaciones
         {
             // 1️⃣ Verificar que sea mayor a 0
             if (monto <= 0)
-                return false;
-
-            // 2️⃣ Verificar que tenga como máximo 2 decimales
-            decimal montoRedondeado = Math.Round(monto, 2);
-            if (monto != montoRedondeado)
                 return false;
 
             // 3️⃣ Opcional: evitar que sea un número "extraño" (muy grande)

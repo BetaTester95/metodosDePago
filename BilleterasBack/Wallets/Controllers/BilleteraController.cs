@@ -88,5 +88,51 @@ namespace BilleterasBack.Wallets.Controllers
                     datos = usuario.Data
                 });       
         }
+
+
+        [HttpPost("cargar/mercadopago")]
+        public async Task<object> cargarSaldoMp(int dni, decimal monto)
+        {
+            try
+            {
+                var resultado = await _appMp.agregarDineroCuentaMp(dni, monto);
+                return Ok(new { Success = resultado ? resultado : false, _appMp.Message });
+            }
+            catch (Exception ex)
+            {
+                return ex.Message;
+
+            }
+        }
+
+        [HttpPost("cargar/ctadni")]
+        public async Task<object> cargarSaldoCtaDni(int dni, decimal monto)
+        {
+              try
+              {
+                  var resultado = await _cuentaDni.CargarSaldoCtaDni(dni, monto);
+                  return Ok(new { Success = resultado ? resultado : false, _cuentaDni.Message });
+              }
+              catch (Exception ex)
+              {
+                  return ex.Message;
+              }
+        }
+
+        [HttpPost("cargar/paypal")]
+        public async Task<object> cargarSaldoPaypal(int dni, decimal monto)
+        {
+            try
+            {
+                var resultado = await _payPal.AgregarSaldoPaypal(dni, monto);
+                return Ok(new { Success = resultado ? resultado : false, _payPal.Message });
+            }
+            catch (Exception ex)
+            {
+                return ex.Message;
+            }
+        }
+
+
     }
 }
